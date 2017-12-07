@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 日报查询</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.css" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/css/applyReport_day_wxpage.css" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/css/mobiscroll.custom-2.5.0.min.css" />
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/js/mobiscroll.custom-2.5.2.min.js"></script>
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div class="message"></div>
+	</div>
+	
+	<div class="mainContent">
+		<div id="searchDiv" class="searchDiv">
+			<form id="search" action="wxpage" method="get">
+				<input type="hidden" name="pageSize" value="">
+				<input type="hidden" name="pageNo" value="">
+				<table class="searchTable">
+					<tr>
+						<td width="60px;"><span>时间</span></td>
+						<td><input type="text" data-role="datebox"   id="startTime" name="startTime" /></td>
+						<td>至</td>
+						<td><input type="text" data-role="datebox"   id="endTime" name="endTime" /></td>
+						<td rowspan="2"><button type="button" class="ui-btn ui-btn-inline ui-btn-corner-all" onclick="search()" data-role="none">搜索</button></td>
+					</tr>
+					<tr>
+						<td colspan="2">审批状态</td>
+						<td colspan="2">
+							<input type="hidden" name="approve" value="" />
+							<div id="approve" class="select sm">
+								<span class="option text">请选择</span><span class="icon"></span>
+								<ul>
+									<li item="">请选择</li>
+									<li item="0">未审阅</li>
+									<li item="1">已阅</li>
+
+								</ul>
+							</div>
+						</td>
+						<td></td>
+					</tr>
+				</table>
+			</form>
+		</div>
+		<ul data-role="listview" data-inset="true">
+		<#if page.result?size gt 0>
+			<#list page.result as e>
+				<li data-role="list-divider">标题: ${e.trueName}写了${e.startDate}的${e.title}</li>
+				<li>
+					<a href="wxadd?reportId=${e.reportId}">
+						<p>提交时间: <#if e.createTime??>${e.createTime?datetime}</#if></p>
+						<p>修改时间: <#if e.modifyTime??>${e.modifyTime?datetime}</#if></p>
+						<p>状态: <#if e.approve == 1>已阅<#else>未审阅</#if></p>
+					</a>
+				</li>
+			</#list>
+		</#if>
+			<li data-role="list-divider"></li>
+		</ul>
+		<#if page.result?size lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+		<@fm.page page=page />
+	</div>
+	
+	<div id="actors_pop" class="pop bind" style="display: none; width: 278px;">
+		<div class="pop_content" style="padding: 0;">
+			<div class="auto_height xl">
+		   		<table class="table">
+		   		</table>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+		
+			jQuery.mobile.ajaxEnabled = false;
+			var opt = {
+		        preset: 'date', //日期
+		        display: 'modal', //显示方式 
+		        dateFormat: 'yy-mm-dd', // 日期格式
+		        setText: '确定', //确认按钮名称
+		        cancelText: '取消',//取消按钮名籍我
+		        dateOrder: 'yymmdd', //面板中日期排列格式
+		        dayText: '日', monthText: '月', yearText: '年', //面板中年月日文字
+		        endYear:2020 //结束年份
+		    };
+    
+    		$('input:jqmData(role="datebox")').mobiscroll(opt);
+				
+			$("#approve").select({ "name": "approve" });
+			$("a.actors").click(function() {
+				close_pop();
+				var id = $(this).attr("item");
+				var _id = "#actors_"+$(this).attr("id");
+				actors(id);
+				open_pop(null,_id,"#actors_pop",false);
+				return false;
+ 			});
+		});
+		function open_del(id) {
+			if (id) {
+				get_checked(id);
+			}
+			open_pop(null,null,"#del_apply",true);
+		}
+		function del() {
+			ajax_checked("请选择需要删除的请假申请", "del?token=${token}");
+			close_pop();
+		}
+		function actors(id) {
+			$.ajax({
+				url: "/adm/salary/leave/approve/actors?leaveId=" + id + "&token=${token}",
+				type: "post",
+				dataType: "json",
+				success: function(data) {
+					if (data.code == 1) {
+						$("#actors_pop .table").empty();
+						var text = "";
+						text += "<tr>";
+						text += "<th>操作人</th><th>操作内容</th><th>审批意见</th><th>操作时间</th>";
+						text += "</tr>";
+						$.each(data.actors, function(idx, obj) {
+							var approve = "";
+							var modifyTime = obj.modifyTime.substring(0, 16);
+							if (obj.approve == 1) {
+								approve = "已批准";
+							} else if (obj.approve == -1) {
+								approve = "未批准";
+							} else {
+								approve = "待批准";
+								modifyTime = "-";
+							}
+							
+							text += "<tr>";
+							text += "<td>" + obj.actorName + "</td>";
+							text += "<td>" + approve + "</td>";
+							text += "<td>" + obj.opinion + "</td>";
+							text += "<td>" + modifyTime + "</td>";
+							text += "</tr>";
+						});
+						$("#actors_pop .table").append(text);
+					} else {
+						danger(1, data.message);
+					}
+				}
+			});
+		}
+	</script>
+</body>
+</html>

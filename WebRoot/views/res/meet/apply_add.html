@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if meet.meetId??>编辑<#else>新建</#if>会议</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit">
+			<div id="form" class="clearfix" style="width: 420px;">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="meetId" value="${meet.meetId}">
+					<table class="table">
+						<tr>
+							<td>会议室：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="roomId" value="${meet.roomId}" />
+								<div id="roomId" class="select xl">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<#list rooms as e>
+										<li item="${e.roomId}">${e.roomName}</li>
+										</#list>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>预订人：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input xl" value="${meet.trueName?default(currentUser.trueName)}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>联系电话：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input xl" name="phone" value="${meet.phone}">
+							</td>
+						</tr>
+						<tr>
+							<td>会议日期：</td>
+							<td class="required">*</td>
+							<td>
+								<#if meet.startTime??><#assign meet_yyyyMMdd = meet.startTime?date /></#if>
+								<input type="text" class="input sm Wdate" name="meet_yyyyMMdd" value="${meet_yyyyMMdd?default('')}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							</td>
+						</tr>
+						<tr>
+							<td>会议时间：</td>
+							<td class="required">*</td>
+							<td>
+								<#if meet.startTime??>
+									<#assign start_HH = meet.startTime?string("HH") />
+									<#assign start_mm = meet.startTime?string("mm") />
+								</#if>
+								<#if meet.endTime??>
+									<#assign end_HH = meet.endTime?string("HH") />
+									<#assign end_mm = meet.endTime?string("mm") />
+								</#if>
+								<@fm.time arr=["start_HH", "start_mm"] hour=start_HH?default("") minute=start_mm?default("") />
+								<span>至</span>
+								<@fm.time arr=["end_HH", "end_mm"] hour=end_HH?default("") minute=end_mm?default("") />
+							</td>
+						</tr>
+						<tr>
+							<td>计划：</td>
+							<td class="required"></td>
+							<td>
+								<#assign arr = meet.cron?default("")?split(" ") />
+								<#if arr?size == 3>
+									<#assign day = arr[0] />
+									<#assign week = arr[1] />
+									<#assign month = arr[2] />
+									<#if day == "*" && week == "*" && month == "*">
+										<#assign plan = "day" />
+									</#if>
+									<#if day == "*" && week != "*" && month == "*">
+										<#assign plan = "week" />
+									</#if>
+									<#if day != "*" && week == "*" && month == "*">
+										<#assign plan = "month" />
+										<#if day?length lt 2><#assign day = "0" + day /></#if>
+									</#if>
+								</#if>
+								<input type="hidden" name="plan" value="${plan?default('')}" />
+								<div id="plan" class="select xs">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<li item="">取消</li>
+										<li item="day">每天</li>
+										<li item="week">每周</li>
+										<li item="month">每月</li>
+									</ul>
+								</div>
+								<@fm.week name="plan_e" week=week?default("") />
+								<@fm.day name="plan_dd" day=day?default("") />
+							</td>
+						</tr>
+						<tr>
+							<td>用途：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input xl" name="content" value="${meet.content}">
+							</td>
+						</tr>
+						<tr>
+							<td>状态：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="status" value="${meet.status?default(1)}" />
+								<div id="status" class="select xl">
+									<span class="option text">预订</span><span class="icon"></span>
+									<ul>
+										<li item="0">取消</li>
+										<li item="1">预订</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#roomId").select({ "name": "roomId" });
+			$("#start_HH").select({ "name": "start_HH" });
+			$("#start_mm").select({ "name": "start_mm" });
+			$("#end_HH").select({ "name": "end_HH" });
+			$("#end_mm").select({ "name": "end_mm" });
+
+			$("#plan").select({ "name": "plan" });
+			$("#plan_e").select({ "name": "plan_e" });
+			$("#plan_dd").select({ "name": "plan_dd" });
+			$("#plan_HH").select({ "name": "plan_HH" });
+			$("#plan_mm").select({ "name": "plan_mm" });
+			$("#status").select({ "name": "status" });
+
+			plan($("input[name=plan]").val());
+			
+			$("#plan ul li").click(function() {
+				var t = $(this).attr("item");
+				plan(t);
+			});
+			
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.roomId, [RQ], "会议室");
+						validate(form.meet_yyyyMMdd, [RQ, RANGE, "{1,20}"], "会议日期");
+						validate(form.start_HH, [RQ], "开始时间");
+						validate(form.start_mm, [RQ], "开始时间");
+						validate(form.end_HH, [RQ], "结束时间");
+						validate(form.end_mm, [RQ], "结束时间");
+						validate(form.phone, [RQ, RANGE, "{1,20}"], "联系电话");
+						if (form.plan != "") {
+							if (form.plan == "week") {
+								validate(form.plan_e, [RQ], "星期");
+							}
+							if (form.plan == "month") {
+								validate(form.plan_dd, [RQ], "日期");
+							}
+						}
+						validate(form.content, [RQ, RANGE, "{1,60}"], "用途");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+		
+		function plan(t) {
+			$("#plan_e").hide();
+			$("#plan_dd").hide();
+			$("#HHmm").hide();
+			if (t == "day") {
+				$("#HHmm").show();
+			} else if (t == "week") {
+				$("#plan_e").show();
+				$("#HHmm").show();
+			} else if (t == "month") {
+				$("#plan_dd").show();
+				$("#HHmm").show();
+			}
+		}
+	</script>
+</body>
+</html>

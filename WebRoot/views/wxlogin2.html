@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Login/Logout animation concept</title>
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+<link rel="stylesheet" href="css/style.css" type="text/css" />
+</head>
+
+<body>
+
+<div class="login">
+ 	<div class="welcome"><img src="./img/welcome.png"></div>
+    <form action="">
+    	<div class="login__form">
+        	<div class="login__row">
+            	<svg class="login__icon name svg-icon" viewBox="0 0 20 20">
+                	<path d="M0,20 a10,8 0 0,1 20,0z M10,0 a4,4 0 0,1 0,8 a4,4 0 0,1 0,-8" />
+            	</svg>
+                <input type="text" class="login__input name" name="username" placeholder="Username"/>
+            </div>
+            <div class="login__row">
+            	<svg class="login__icon pass svg-icon" viewBox="0 0 20 20">
+                	<path d="M0,20 20,20 20,8 0,8z M10,13 10,16z M4,8 a6,8 0 0,1 12,0" />
+                </svg>
+                <input type="password" name="password" class="login__input pass" placeholder="Password"/>
+            </div>
+            <#if error?? && error=='true'>
+				<p class="miss">用户名或者密码错误</p>
+			</#if>
+			<#if error?? && error=='false'>
+				<p class="miss">登陆成功</p>
+			</#if>
+            	<button type="button" class="login__submit">登录</button>
+        </div>
+		<input type="hidden" name="remember_me"  value="true" />
+    </form>
+    <div class="cnm">和德集团移动办公系统</div>
+</div>
+</body>
+<script type="text/javascript" src='js/jquery2.min.js'></script>
+<script>
+$(document).ready(function() {
+  var animating = false,
+      submitPhase1 = 1100,
+      submitPhase2 = 400,
+      logoutPhase1 = 800,
+      $login = $(".login"),
+      $app = $(".app");
+  
+  function ripple(elem, e) {
+    $(".ripple").remove();
+    var elTop = elem.offset().top,
+        elLeft = elem.offset().left,
+        x = e.pageX - elLeft,
+        y = e.pageY - elTop;
+    var $ripple = $("<div class='ripple'></div>");
+    $ripple.css({top: y, left: x});
+    elem.append($ripple);
+  };
+
+$(document).on("touchend", ".login__submit", function(e) {
+    if (animating) return;
+    animating = true;
+    var that = this;
+    ripple($(that), e);
+    $(that).addClass("processing");
+    var timeout = setTimeout(function() {
+      $(that).addClass("success");
+      setTimeout(function() {
+        $app.show();
+        $app.css("top");
+        $app.addClass("active");
+      }, submitPhase2 - 70);
+      setTimeout(function() {
+        $login.hide();
+        $login.addClass("inactive");
+        animating = false;
+        $(that).removeClass("success processing");
+			
+      }, submitPhase2);
+   		
+   		//使用异步请求进行登陆
+	  	var params = $('form').serializeArray();
+		var url = "/wxlogin";
+		var dataType =  "json";
+		$.post(url,params,function(result){
+			//拼接参数，为了能够刷新本页面的时候显示登陆情况，即显示是否登陆成功
+			if (result.code == 1) {
+				if("${url}" == ""){//登陆成功的时候，原本要自动跳转到指定的页面，但没有指定要跳转的页面
+					var locationHref = "";
+					if(location.search == ""){
+						locationHref = location.href + "?error=false";
+					}else{
+						if(location.search.indexOf("error") >= 0){
+							locationHref = location.href.replace(/error=false/g, "error=false");
+							locationHref = locationHref.replace(/error=true/g, "error=false");
+						}else{
+							locationHref = location.href + "&error=false";
+						}	
+					}
+/* 					alert(locationHref); */
+					//刷新本页面
+		 			location.assign(locationHref);
+				}else{
+/* 					alert(locationHref); */
+					//登陆成功的时候，自动跳转到指定的页面
+ 					location.assign("${url}"); 
+				}
+			} else {
+				var locationHref = "";
+				if(location.search == ""){
+					locationHref = location.href + "?error=true";
+				}else{
+					if(location.search.indexOf("error") >= 0){
+						locationHref = location.href.replace(/error=false/g, "error=true");
+						locationHref = locationHref.replace(/error=true/g, "error=true");
+					}else{
+						locationHref = location.href + "&error=true";
+					}
+				}
+	/* 			alert(locationHref); */
+				//刷新本页面
+				location.assign(locationHref);
+			}
+		}, dataType);
+
+		
+    }, submitPhase1);
+    
+  });
+  
+  
+  
+});
+</script>
+</html>

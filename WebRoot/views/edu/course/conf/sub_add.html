@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if subject.id??>编辑<#else>新建</#if>学科</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit">
+			<div id="form" class="clearfix" style="width: 400px;">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="id" value="${subject.id}">
+					<table class="table">
+						<tr>
+							<td>上级资源：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" id="parentName" class="input xl" value="${parent.name?default('')}" readonly="readonly">
+								<input type="hidden" name="parentId" value="${parent.id?default(0)}" />
+							</td>
+						</tr>
+						<tr>
+							<td>名称：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input xl" name="name" value="${subject.name}">
+								<input type="hidden" name="orgSubjectame" value="${subject.name}">
+							</td>
+						</tr>
+
+						<tr>
+							<td>状态：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="status" value="${subject.status?default(1)}" />
+								<div id="status" class="select xl">
+									<span class="option text">启用</span><span class="icon"></span>
+									<ul>
+										<li item="0">禁用</li>
+										<li item="1">启用</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						
+	                    <tr>
+							<td>描述：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" id="describe" name="describe" value="${subject.describe}" />
+								<textarea class="xl" rows="5" name="desc" id="desc"></textarea>
+							</td>
+						</tr>
+						
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<div id="subject_pop" class="pop bind" style="display: none; width: 318px;">
+		<div class="pop_content">
+			<div class="auto_height sm">
+				<ul id="tree" class="ztree"></ul>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		var nodes = [
+		    {id: "0", pId: "", name: "根目录", open: true}<#if nodes?size gt 0>,</#if>
+		<#list nodes as e>
+		    <#if e.type != "学科" && e.type != "课程">
+			    {id: "${e.id}", pId: "${e.parentId}", name: "${e.name}"}<#if e_has_next>,</#if>
+		    </#if>
+		</#list>
+		];
+		
+		var setting = {
+			data: { simpleData: { enable: true } },
+			view: { showIcon: false },
+			callback: { onClick: getNode }
+		};
+		
+		$(document).ready(function(){
+			
+			$("#desc").val($("#describe").val());
+			
+			$.fn.zTree.init($("#tree"), setting, nodes);
+			
+			type($("input[name=type]").val());
+  			
+  			$("#status").select({ "name": "status" });
+ 			$("#type").select({ "name": "type" });
+ 			
+			$("#type.select li").click(function() {
+				var t = $(this).attr("item");
+				type(t);
+			});
+ 			
+ 			$("#parentName").click(function() {
+ 				open_pop(null, "#parentName", "#subject_pop", false);
+ 				return false;
+ 			});
+ 			
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.parentId, [RQ, N], "上级");
+						validate(form.name, [RQ, RANGE, "{1,60}"], "名称");
+						validate(form.status, [RQ, N], "状态");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+		
+		function getNode(event, id, node) {
+			$("input[name=parentId]").val(node.id);
+			$("#parentName").val(node.name);
+			return true;
+		}
+		
+		function type(t) {
+			$(".menu").hide();
+			$(".url").hide();
+			$(".action").hide();
+			if (t == "0") {
+				$(".menu").show();
+				$(".url").show();
+				$(".url .required").text("");
+				$("input[name=action]").val("");
+			} else if (t == "1") {
+				$(".url").show();
+				$(".url .required").text("*");
+				$("input[name=position]").val("");
+				$("input[name=action]").val("");
+			} else if (t == "2") {
+				$(".action").show();
+				$("input[name=position]").val("");
+				$("input[name=url]").val("");
+			}
+		}
+	</script>
+</body>
+</html>

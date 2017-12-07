@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 工资条查询</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<div id="right" class="right">
+				<form id="search" action="page" method="get">
+					<ul>
+						<li class="text">年份</li>
+						<li>
+							<input type="hidden" name="year" value="${mb.year?default(mb.years)}" />
+							<div id="year" class="select" style="width: 68px">
+								<span class="option text">请选择</span><span class="icon"></span>
+								<ul>
+									<#list (mb.years-3)..(mb.years+1) as e>
+										<li item="${e}">${e}年</li>
+									</#list>
+								</ul>
+							</div>
+						</li>
+						<li class="text">月份</li>
+						<li>
+							<input type="hidden" name="month" value="${mb.month?default(mb.months)}" />
+							<div id="month" class="select xs">
+								<span class="option text">请选择</span><span class="icon"></span>
+								<ul>
+									<#list ["01","02","03","04","05","06","07","08","09","10","11","12"] as e>
+										<li item="${e}">${e}月</li>
+									</#list>
+								</ul>
+							</div>
+						</li>
+						<li><button type="submit" class="btn primary xxs">搜索</button></li>
+					</ul>
+				</form>
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrap" style="overflow-x: auto;">
+		<div id="wrapper" class="clearfix" style="width: 1400px;">
+			<div class="content">
+				<div class="table_head">
+					<table class="table">
+						<thead>
+							<tr>
+								<th width="" rowspan="2">工资条年月</th>
+								<th width="80" rowspan="2">姓名</th>
+								<th width="6%" rowspan="2">基本工资</th>
+								<th width="28%" colspan="7">津贴</th>
+								<th width="20%" colspan="4">工资扣除</th>
+								<th width="10%" rowspan="2">应发工资总额</th>
+								<th width="6%" rowspan="2">社保</th>
+								<th width="6%" rowspan="2">公积金</th>
+								<th width="6%" rowspan="2">个人所得税</th>
+								<th width="6%" rowspan="2">实发工资</th>
+							</tr>
+							<tr>
+								<th>通信</th>
+								<th>交通</th>
+								<th>高温</th>
+								<th>节日</th>
+								<th>提成</th>
+								<th>伙食</th>
+								<th>其他</th>
+								<th>考勤</th>
+								<th>事假</th>
+								<th>病假</th>
+								<th>其他</th>
+							</tr>
+						</thead>
+					</table>
+				</div>
+				<div class="table_body auto_height">
+					<table class="table">
+						<tbody>
+							<#if page.result?size gt 0>
+								<#list page.result as e>
+							<tr>
+								<#assign salary = e.standardSalary + e.postSalary + e.floatingSalary />
+								<#assign allowance = e.communicationAllowance + e.trafficAllowance + e.heatingAllowance + e.holidayAllowance + e.percentageAllowance + e.mealAllowance />
+								<#assign deduction = e.lateDeduction + e.earlyDeduction + e.absentDeduction + e.leaveDeduction + e.sickDeduction />
+								<#assign other = e.otherIncrease - e.otherDeduction />
+								<#assign fund = e.socialSecurity + e.accumulationFund + e.tax />
+								<td width="">${e.resultMonth}</td>
+								<td width="66">${e.trueName}</td>
+								<td width="6%">${views.rmb(salary)?string("0.##")}</td>
+								<td width="4%">${views.rmb(e.communicationAllowance)?string("0.##")}</td>
+								<td width="4%">${views.rmb(e.trafficAllowance)?string("0.##")}</td>
+								<td width="4%">${views.rmb(e.heatingAllowance)?string("0.##")}</td>
+								<td width="4%">${views.rmb(e.holidayAllowance)?string("0.##")}</td>
+								<td width="4%">${views.rmb(e.percentageAllowance)?string("0.##")}</td>
+								<td width="4%">${views.rmb(e.mealAllowance)?string("0.##")}</td>
+								<td width="4%">${views.rmb(e.otherIncrease)?string("0.##")}</td>
+								<td width="5%">${views.rmb(e.lateDeduction + e.earlyDeduction + e.absentDeduction)?string("0.##")}</td>
+								<td width="5%">${views.rmb(e.leaveDeduction)?string("0.##")}</td>
+								<td width="5%">${views.rmb(e.sickDeduction)?string("0.##")}</td>
+								<td width="5%">${views.rmb(e.otherDeduction)?string("0.##")}</td>
+								<td width="10%">${views.rmb(salary + allowance - deduction + other)?string("0.##")}</td>
+								<td width="6%">${views.rmb(e.socialSecurity)?string("0.##")}</td>
+								<td width="6%">${views.rmb(e.accumulationFund)?string("0.##")}</td>
+								<td width="6%">${views.rmb(e.tax)?string("0.##")}</td>
+								<td width="6%">${views.rmb(salary + allowance - deduction + other - fund)?string("0.##")}</td>
+							</tr>
+								</#list>
+							</#if>
+						</tbody>
+					</table>
+				</div>
+				<#if page.result?size lt 1>
+				<div class="empty">没有数据</div>
+				</#if>
+				<@fm.page page=page />
+			</div>
+		</div>
+		<div id="footer"></div>
+	</div>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#year").select({ "name": "year" });
+			$("#month").select({ "name": "month" });
+		});		
+		window.onload = window.onresize = function() {
+			var width = $(".table_body table").width();
+			$(".table_head table").css("width", width + "px");
+			var all = $(window).height();
+			var a = $("#header").height();
+			var b = $("#wrapper").height();
+			$("#footer").css("min-height", all - a - b - 56);
+		}
+	</script>
+</body>
+</html>

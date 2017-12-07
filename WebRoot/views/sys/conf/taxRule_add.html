@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    <#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if taxRule.id??>编辑<#else>新建</#if>工资规则</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+
+  </head>
+  
+  <body>
+ 	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit">
+			<div id="form" class="clearfix" style="width: 480px;">
+				<form action="add" method="post">
+
+					<input type="hidden" name="taxRuleId" value="${taxRule.id}">
+					<table class="table">
+						<tr>
+							<td>配置名称：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input xl" name="taxRuleName" value="${taxRule.name}">
+							</td>
+						</tr>
+						
+						<#assign i = 0 />
+						<#list taxRuleItems as tri>
+						<tr class="target" item="${i}">
+							<td>规则名称:</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input xl" name="taxRuleItemName_${i}" value="${tri.name}">
+							</td>
+							<td>
+								<#if i == 0>
+									<button type="button" class="btn default xxxs" onclick="add_target()">+</button>
+									<#else>
+									<button type="button" class="btn default xxxs" onclick="del_target(${i})">-</button>
+								</#if>
+							</td>
+						</tr>
+						<tr class="target" item="${i}">
+							<td>公式:</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input xl" name="taxRuleItemRule_${i}" value="${tri.rule}">
+							</td>
+						</tr>
+						<input type="hidden" class="input xl" name="taxRuleItemId_${i}" value="${tri.id}" item="${i}">
+						<#assign i = i + 1 />
+						</#list>
+					
+						
+					
+						<tr>
+							<td>公司绑定：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="corpId" value="${taxRule.corpId}" />
+								<div id="corpId" class="select xl">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<#list corps as e>
+										<li item="${e.orgId}">${e.orgName}</li>
+										</#list>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>状态：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="status" value="${taxRule.status?default(1)}" />
+								<div id="status" class="select xl">
+									<span class="option text">启用</span><span class="icon"></span>
+									<ul>
+										<li item="0">禁用</li>
+										<li item="1">启用</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+	
+					</table>
+			
+				</form>
+			</div>
+		</div>
+	</div>
+
+
+		
+
+	
+	<script type="text/javascript">
+		
+		var index = ${taxRuleItems?size}-1;
+		
+		$(document).ready(function() {
+			$("#status").select({ "name": "status" });
+			$("#corpId").select({ "name": "corpId" });
+
+			$("#corpNames").click(function() {
+				open_pop(null,"#corpNames","#corp_pop",false);
+ 				return false;
+ 			});
+			
+
+		
+			
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+		
+		function checked_all(obj, $name) {
+			if (obj.checked) {
+				$("input[name=" + $name + "]").each(function() {
+					this.checked = true;
+				});
+			} else {
+				$("input[name=" + $name + "]").each(function() {
+					this.checked = false;
+				});
+			}
+		}
+		
+		function add_target() {
+			index = index + 1;
+			var text = "";
+				text += "<tr class=\"target\" item=\""+index+"\">";
+				text += "<td>规则名称：</td>";
+				text += "<td class=\"required\">*</td>";
+				text += "<td>";
+				text += "<input type=\"text\" class=\"input xl\" name=\"taxRuleItemName_"+index+"\" value=\"\">";
+				text += "</td>";
+				text += "<td>";
+				text += "<button type=\"button\" class=\"btn default xxxs\" onclick=\"del_target("+index+")\">-</button>";
+				text += "</td>";
+				text += "</tr>";
+				text += "<tr class=\"target\" item=\""+index+"\">";
+				text += "<td>公式:</td>";
+				text += "<td class=\"required\">*</td>";
+				text += "<td>";
+				text += "<input type=\"text\" class=\"input xl\" name=\"taxRuleItemRule_"+index+"\" value=\"\">";
+				text += "</td>";
+				text += "</tr>";
+				text += "<input type=\"hidden\" class=\"input xl\" name=\"taxRuleItemId_"+index+"\" value=\"\" item=\""+index+"\">";
+
+			$(".target").last().after(text);
+			auto_height();
+		}
+		
+		function del_target(i) {
+			$("tr[item=" + i + "]").remove();
+			$("input[item=" + i + "]").remove();
+			auto_height();
+		}
+
+	</script>
+  </body>
+</html>
+

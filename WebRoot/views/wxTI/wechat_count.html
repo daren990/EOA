@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>${courseCount.name} - 上课统计</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		
+
+	    <script src="${ctx}/jw_js_css_img/mui/js/mui.min.js"></script>
+		<script src="${ctx}/jw_js_css_img/jquery-1.9.1/jquery.js"></script>
+		<link rel="stylesheet" href="${ctx}/jw_js_css_img/mui/css/mui.min.css">
+        <link rel="stylesheet" href="${ctx}/jw_js_css_img/css/hashira.css" media="screen" type="text/css" />
+	
+		<style>
+			p {
+				text-indent: 22px;
+			}
+			
+			span.mui-icon {
+				font-size: 14px;
+				color: #007aff;
+				margin-left: -15px;
+				padding-right: 10px;
+			}
+			
+			#info {
+				padding: 20px 10px;
+			}
+			/*.des {
+				margin: .5em 0;
+			}
+			.des>li {
+				font-size: 14px;
+				color: #8f8f94;
+			}*/
+		</style>
+	</head>
+
+	<body>
+		<div class="mui-content" style="padding-top: 60px;">
+			<div class="mui-content-padded">
+			<div class="mui-card">
+				<div class="mui-card-header">上课统计</div>
+				<div class="mui-card-content">
+					<div class="mui-card-content-inner">
+					
+						<div class="skillbar clearfix " style="width: 100%;" data-percent="${percentAllAndNow}">
+	                        <div class="skillbar-bar" style="background: #2ecc71;"></div>
+	                            <div class="skill-bar-percent">目前课时进度/应上课时总数</div>
+                        </div> 
+                        
+                        <!-- End Skill Bar -->
+    
+                        <div class="skillbar clearfix " style="width: 100%;" data-percent="${percentNowAndShould}">
+	                        <div class="skillbar-bar" style="background: #42d0d0;"></div>
+	                            <div class="skill-bar-percent">学生已上课时/学生应上课时</div>
+                        </div> <!-- End Skill Bar -->
+
+					</div>
+				</div>
+			</div>
+		
+		
+		
+		    <div class="mui-card">
+				<div class="mui-card-header">数据统计</div>
+				<div class="mui-card-content">
+					<div class="mui-card-content-inner">
+                                        有关课程&nbsp;&nbsp;${courseDetail.name}:<br>
+                                        该课程由&nbsp;&nbsp;${courseDetail.teacherName}&nbsp;&nbsp;老师负责<br>
+             <#if couWeekday == 1>
+                                                     该课程于&nbsp;&nbsp;法定工作日${startTime}&nbsp;-&nbsp;${endTime}&nbsp;&nbsp;<br>              
+             </#if>
+             <#if couWeekday == 2>
+                                                     该课程&nbsp;&nbsp;每天${startTime}&nbsp;-&nbsp;${endTime}&nbsp;&nbsp;<br>              
+             </#if>
+             <#if couWeekday == 3>
+                  <#if startTime1 != null && startTime1 != ''>
+                                                                  周一&nbsp;&nbsp;${startTime1}&nbsp;-&nbsp;${endTime1}&nbsp;&nbsp;<br>
+                  </#if>
+                  <#if startTime2 != null && startTime2 != ''>
+                                                                  周二&nbsp;&nbsp;${startTime2}&nbsp;-&nbsp;${endTime2}&nbsp;&nbsp;<br>
+                  </#if>
+                  <#if startTime3 != null && startTime3 != ''>
+                                                                  周三&nbsp;&nbsp;${startTime3}&nbsp;-&nbsp;${endTime3}&nbsp;&nbsp;<br>
+                  </#if>
+                  <#if startTime4 != null && startTime4 != ''>
+                                                                  周四&nbsp;&nbsp;${startTime4}&nbsp;-&nbsp;${endTime4}&nbsp;&nbsp;<br>
+                  </#if>
+                  <#if startTime5 != null && startTime5 != ''>
+                                                                  周五&nbsp;&nbsp;${startTime5}&nbsp;-&nbsp;${endTime5}&nbsp;&nbsp;<br>
+                  </#if>
+                  <#if startTime6 != null && startTime6 != ''>
+                                                                  周六&nbsp;&nbsp;${startTime6}&nbsp;-&nbsp;${endTime6}&nbsp;&nbsp;<br>
+                  </#if>
+                  <#if startTime7 != null && startTime7 != ''>
+                                                                  周日&nbsp;&nbsp;${startTime7}&nbsp;-&nbsp;${endTime7}&nbsp;&nbsp;<br>
+                  </#if>              
+             </#if>
+                                        在&nbsp;&nbsp;${courseDetail.location}&nbsp;&nbsp;上课。<br>      
+                                        该课程目前开展到第&nbsp;&nbsp;${courseCount.countStart}&nbsp;&nbsp;节。<br>
+                                        距离该课程结束，还有&nbsp;&nbsp;${courseCount.countEnd}&nbsp;&nbsp;节。<br>
+                                        您的孩子出席了&nbsp;&nbsp;${courseDetail.countAppear}&nbsp;&nbsp;节课，缺席&nbsp;&nbsp;${courseCount.countStart-courseDetail.countAppear}&nbsp;&nbsp;节。<br>
+					</div>
+				</div>
+			</div>
+
+		</div>
+    </div>
+
+
+ 
+	</body>
+		
+	<script>
+		
+	jQuery(document).ready(function(){
+		jQuery('.skillbar').each(function(){
+			jQuery(this).find('.skillbar-bar').animate({
+				width:jQuery(this).attr('data-percent')
+			},5000);
+		});
+	});
+	
+		mui.init({
+			swipeBack:true //启用右滑关闭功能
+		});
+		mui('body').on('shown', '.mui-popover', function(e) {
+			//console.log('shown', e.detail.id);//detail为当前popover元素
+		});
+		mui('body').on('hidden', '.mui-popover', function(e) {
+			//console.log('hidden', e.detail.id);//detail为当前popover元素
+		});
+
+	</script>
+
+</html>

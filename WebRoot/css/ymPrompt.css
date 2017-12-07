@@ -1,0 +1,57 @@
+/*�����������*/
+#promptWinContainer{
+	background:#fff;
+	font-size:12px;font-family:'����';
+	filter:progid:DXImageTransform.Microsoft.Shadow(Color=#ff666666, Strength=5, Direction=135);
+}
+/*����*/
+#titleContainer{
+	height:25px;line-height:25px;
+	background:#CFD7EC url(../img/title_bg_left.gif) no-repeat top left;
+}
+#titleText{
+	font-size:12px;font-weight:bold;
+	color:#fff;margin-left:5px;
+}
+#titleCtrl{
+	padding:4px 5px 0px;height:25px;
+	background:#CFD7EC url(../img/title_bg_right.gif) no-repeat right top;
+}
+#promptContentTable{
+	background:#ffffff url(../img/content_bg.gif) repeat-x left top;
+	border:0px;margin:0px;padding:0px
+}
+#winMiddleLeft,#winBtnLineLeft{width:3px;font-size:3px;background:url(../img/win_l.gif) repeat-y;}
+#winMiddleRight,#winBtnLineRight{width:3px;font-size:3px;background:url(../img/win_r.gif) right repeat-y;}
+#winBottomCenter{height:3px;font-size:3px;background:url(../img/win_b.gif) repeat-x;}
+#winBottomLeft{width:3px;font-size:3px;height:3px;background:url(../img/win_lb.gif) repeat-y;}
+#winBottomRight{width:3px;font-size:3px;height:3px;background:url(../img/win_rb.gif) repeat-y;}
+
+#winMiddleCenter{
+	font-size:12px;
+	padding:10px 0px;
+	padding-left:90px;	/*�˴���ֵҪ������ʾͼ��Ĵ�С���������ʾ���ѿ�*/
+}
+.ymPrompt_alert{
+	background:url(../img/info.gif) no-repeat 20px 50%
+}
+.ymPrompt_succeed{
+	background:url(../img/right.gif) no-repeat 20px 50%
+}
+.ymPrompt_error{
+	background:url(../img/err.gif) no-repeat 20px 50%
+}
+.ymPrompt_confirm{
+	background:url(../img/ask.gif) no-repeat 20px 50%
+}
+.ymPrompt_close{
+	cursor:pointer;
+	background:url(../img/close.gif) no-repeat 0 0;
+	width:16px;height:16px;
+}
+/*ȡ��ȷ�ϰ�ť��ʽ*/
+input.btnStyle{
+	background:url(../img/btn_bg.gif) no-repeat;
+	width:80px;height:21px;line-height:21px;
+	font-size:12px;color:#183C94;border:0;
+}

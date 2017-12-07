@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 公司公告查询</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+ 	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<div id="left" class="left">
+				<a href="add"><span class="icons icon_add"></span><span class="icons_text">新建</span></a>
+			</div>
+			<div id="right" class="right">
+				<form id="search" action="page" method="get">
+					<input type="hidden" name="pageSize" value="${page.pageSize}">
+					<input type="hidden" name="pageNo" value="${page.pageNo}">
+					<ul>
+						<li class="text">创建时间</li>
+						<li>
+							<input type="text" class="input sm Wdate" name="startTime" value="${mb.startTime}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							<span>至</span>
+							<input type="text" class="input sm Wdate" name="endTime" value="${mb.endTime?default('')}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">						
+						</li>
+						<li class="text">发布类型</li>
+						<li>
+							<input type="hidden" name="type" value="${mb.type}" />
+							<div id="type" class="select sm">
+								<span class="option text">请选择</span><span class="icon"></span>
+								<ul>
+									<li item="">请选择</li>
+									<li item="0">公告</li>
+									<li item="1">站内信</li>
+								</ul>
+							</div>
+						</li>
+						<li class="text">启用状态</li>
+						<li>
+							<input type="hidden" name="approve" value="${mb.approve}" />
+							<div id="approve" class="select sm">
+								<span class="option text">请选择</span><span class="icon"></span>
+								<ul>
+									<li item="">请选择</li>
+									<li item="0">未生效</li>
+									<li item="1">正在启用</li>
+									<li item="-1">已失效</li>
+								</ul>
+							</div>
+						</li>
+						<li><button type="button" class="btn primary xxs" onclick="search()">搜索</button></li>
+					</ul>
+				</form>
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+			<div class="table_head">
+				<table class="table">
+					<thead>
+						<tr>
+							<!-- <th width="5%"><input type="checkbox" id="checkedIds"></th> -->
+							<th width="49%">公告标题</th>
+							<th width="5%">发布者</th>
+							<th width="5%">总数/已读</th>
+							<th width="7%">创建时间</th>
+							<th width="5%">发布类型</th>
+							<th width="7%">生效时间</th>
+							<th width="7%">失效时间</th>							
+							<th width="5%">状态</th>
+							<th width="5%">操作</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+			<div class="table_body auto_height">
+				<table class="table">
+					<tbody>
+						<#if page.result?size gt 0>
+							<#list page.result as e>
+						<tr>
+							<!-- <td width="5%" style="text-align: center;"><input type="checkbox" name="checkedIds" value="${e.noticeId}"></td> -->
+							<td width="49%">${e.title}</td>
+							<td width="5%">${e.true_name}</td>
+							<td width="5%">${e.read+e.unread}&nbsp;/&nbsp;${e.read}</td>
+							<td width="7%">${e.creatTime?date}</td>
+							<td width="5%"><#if e.type == 1>站内信<#else>公告</#if></td>
+							<td width="7%">${e.startTime?date}</td>
+							<td width="7%">${e.endTime?date}</td>							
+							<td width="5%"><#if e.status == 1><span style="color:#3E74AE"><strong>正在启用</strong></span><#else><#if e.status == -1>已失效<#else><strong>未生效</strong></#if></#if></td>
+							<td width="5%">
+							
+								
+								<a href="add?announcementId=${e.noticeId}" title="编辑"><span class="icons icon_edit"></span></a>
+							</td>
+						</tr>
+							</#list>
+						</#if>
+					</tbody>
+				</table>
+			</div>
+			<#if page.result?size lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<@fm.page page=page />
+		</div>
+	</div>
+	
+		<div id="able_authority" class="pop" style="display: none; width: 280px;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<div class="pop_title">启用公告</div>
+			<div class="pop_content blank">确定要启用所选公告吗？</div>
+			<div class="pop_btn ">
+				<input type="hidden" id="status" value="1" />
+				<input type="hidden" id="versions" />
+				<button type="button" class="btn primary xs" onclick="able()">确定</button>
+				<button type="button" class="btn default xs" onclick="close_pop()">取消</button>
+			</div>
+		</div>				
+	</div>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#approve").select({ "name": "approve" });
+			$("#type").select({ "name": "type" });
+		});
+		function open_able(id, status,versions) {
+			if (id) {
+				get_checked(id);
+			}
+			var before = status == 1 ? "禁用" : "启用";
+			var after = status == 1 ? "启用" : "禁用";
+			$(".pop_title").text($(".pop_title").text().replace(before, after));
+			$(".pop_content").text($(".pop_content").text().replace(before, after));
+			$("#status").val(status);
+			$("#versions").val(versions);
+			open_pop(null,null,"#able_authority",true);
+		}
+		function able() {
+			var status = $("#status").val();
+			var versions = $("#versions").val();
+			ajax_checked("请选择需要" + (status == 1 ? "启用" : "禁用") + "的公告", "able?&status=" + status+"&versions="+versions + "&token=${token}");
+			close_pop();
+		}
+	</script>
+</body>
+</html>

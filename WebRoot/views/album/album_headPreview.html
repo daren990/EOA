@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  	<meta name="viewport" content="width=device-width, initial-scale=1" />
+  	<link rel="stylesheet" type="text/css" href="/jw_js_css_img/webuploader/webuploader.css" />
+  	<script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
+  	<script type="text/javascript" src="/jw_js_css_img/webuploader/webuploader.min.js"></script>
+  	<script type="text/javascript" src="/jw_js_css_img/layer.m/layer.m.js"></script>
+    <title>请选择头像</title>
+    <style type="text/css">
+    *{margin: 0;padding: 0}
+    #uploader-demo{width: 250px;margin: 80px auto;text-align: center;}
+    .tankuang{width: 30%;height: 30px;line-height:30px;border: none;position: fixed;z-index: 2px;left: 36%;background: #a1c5e5;font-size: 12px;text-align: center;color: #EEE;top:200px;}
+    </style>
+  </head>
+  
+  <body>
+  	<div id="uploader-demo">
+	    <!--用来存放item-->
+	    <div id="fileList" class="uploader-list"></div>
+	    <div id="filePicker">选择头像</div>
+	</div>
+	<div class="tankuang">正在上传...</div>
+	<script type="text/javascript">
+	$(document).ready(function(){
+		$(".tankuang").hide();
+		
+		// 初始化Web Uploader
+		var uploader = WebUploader.create({
+	
+	    // 选完文件后，是否自动上传。
+	    auto: true,
+	
+	    // swf文件路径
+	    /* swf: BASE_URL + '/jw_js_css_img/webuploader/Uploader.swf', */
+	   swf:'/jw_js_css_img/webuploader/Uploader.swf',
+	
+	    // 文件接收服务端。
+	    server: 'uploadHeadImg',
+	
+	    // 选择文件的按钮。可选。
+	    // 内部根据当前运行是创建，可能是input元素，也可能是flash.
+	    pick: '#filePicker',
+	
+	    // 只允许选择图片文件。
+	    accept: {
+	        title: 'Images',
+	        extensions: 'gif,jpg,jpeg,bmp,png',
+	        mimeTypes: 'image/*'
+	    }
+	});
+	
+	// 当有文件添加进来的时候
+	uploader.on( 'fileQueued', function( file ) {
+	    var $li = $(
+	            '<div id="' + file.id + '" class="file-item thumbnail">' +
+	                '<img>' +
+	                '<div class="info">' + file.name + '</div>' +
+	            '</div>'
+	            ),
+	        $img = $li.find('img');
+	
+	
+	    // $list为容器jQuery实例
+	    /* $list.append( $li ); */
+	    $("#fileList").append( $li );
+	
+	    // 创建缩略图
+	    // 如果为非图片文件，可以不用调用此方法。
+	    // thumbnailWidth x thumbnailHeight 为 100 x 100
+	    uploader.makeThumb( file, function( error, src ) {
+	        if ( error ) {
+	            $img.replaceWith('<span>不能预览</span>');
+	            return;
+	        }
+	
+	        $img.attr( 'src', src );
+	    }, 200, 200 );
+	});
+	
+	
+	// 文件上传过程中创建进度条实时显示。
+	uploader.on( 'uploadProgress', function( file, percentage ) {
+	    /* $(".tankuang").show(); */
+	    layer.open({
+	    	content:"正在上传..."
+	    });
+	});
+	
+	// 文件上传成功，给item添加成功class, 用样式标记上传成功。
+	uploader.on( 'uploadSuccess', function( file ) {
+	    $( '#'+file.id ).addClass('upload-state-done');
+	});
+	
+	// 文件上传失败，显示上传出错。
+	uploader.on( 'uploadError', function( file ) {
+	    var $li = $( '#'+file.id ),
+	        $error = $li.find('div.error');
+	
+	    // 避免重复创建
+	    if ( !$error.length ) {
+	        $error = $('<div class="error"></div>').appendTo( $li );
+	    }
+	
+	    $error.text('上传失败');
+	});
+	
+	// 完成上传完了，成功或者失败，先删除进度条。
+	uploader.on( 'uploadComplete', function( file ) {
+	    layer.open({
+	    	content:"上传完成，正在跳转，请稍后..."
+	    });
+	});
+	
+	uploader.on( 'uploadSuccess', function( file ) {
+		window.location.href="jumpHeadImg";
+	});
+	
+		
+	});
+	</script>
+  </body>
+</html>

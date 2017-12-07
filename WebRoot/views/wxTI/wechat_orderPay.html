@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>缴费信息</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!--标准mui.css-->
+<link rel="stylesheet" href="${ctx}/jw_js_css_img/mui/css/mui.min.css">
+<script type="text/javascript"src="${ctx}/jw_js_css_img/js/jquery-1.9.1.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<!--App自定义的css-->
+<link rel="stylesheet" type="text/css" href="../css/app.css"/>
+<style>
+	.title{
+		margin: 20px 15px 7px;
+		color: #6d6d72;
+		font-size: 15px;
+	}
+</style>
+
+<script src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript">
+$(function(){
+	//config();
+})
+	var getToPay = function(id) {
+		$.get("/wx/order/prePay?org_id=${org_id}&orderId="+ id,function(data) {
+			if (WeixinJSBridge) {
+				WeixinJSBridge.invoke('getBrandWCPayRequest',data.pay_info,function(res) {
+					switch(res.err_msg) {
+		                case 'get_brand_wcpay_request:cancel':
+		                    //用户取消支付
+		                    break;
+		                case 'get_brand_wcpay_request:fail':
+		                    //支付失败
+		                    break;
+		                case 'get_brand_wcpay_request:ok':
+		                    //支付成功
+		                    alert("购买成功"); 
+							window.location.href = "${basePath}/wx/index/indexPage?org_id=${org_id}";
+		                    break;
+		            }
+				});
+			} else {
+				alert("请使用微信浏览器打开");
+			}
+		}, "json");
+	}
+
+function config() {
+	wx.config({
+		debug : false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+		appId : '${appId}',
+		timestamp : '${timestamp}',
+		nonceStr : '${nonceStr}',
+		signature : '${signature}',
+		// 所有要调用的 API 都要加到这个列表中
+		jsApiList : ["closeWindow"]
+	});
+	wx.ready(function() {
+	});
+	wx.error(function(res){
+		console.log(res);
+	    // config信息验证失败会执行error函数，如签名过期导致验证失败，具体错误信息可以打开config的debug模式查看，也可以在返回的res参数中查看，对于SPA可以在这里更新签名。
+	});
+}
+
+</script>
+</head>
+
+<body>
+	<#if voList?size lt 1>
+		<script type="text/javascript">
+			setTimeout(function(){
+				alert("当前没有需要缴费的记录");
+				wx.closeWindow();
+			},1200);
+		</script>
+	</#if>
+	
+	<#list voList as vo>
+		<div class="title">
+				缴费信息
+		</div>
+		<div class="mui-card" style="margin-bottom: 35px;">
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell">
+					报名时间:${vo.create_time}
+				</li>
+				<li class="mui-table-view-cell">
+					学生姓名:${vo.edu_student_name}
+				</li>
+				<li class="mui-table-view-cell">
+					报名课程:${vo.shop_product_name}
+				</li>
+				<li class="mui-table-view-cell">
+					课程费用:￥${vo.shop_product_price}元
+				</li>
+				<li class="mui-table-view-cell">
+					共：￥${vo.amount}元
+				</li>
+			</ul>
+		</div>
+		<#if vo.payStatus == 0>
+			<div class="mui-content-padded" style="text-align: center;" onclick="getToPay(${vo.id})">
+				<a style="width: 100%;" class="mui-btn mui-btn-success">立即支付</a>
+			</div>
+		</#if>
+	</#list>
+	
+	
+</body>
+</html>

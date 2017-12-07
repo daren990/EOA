@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 资源查询</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<div id="left" class="left">
+				<a href="add"><span class="icons icon_add"></span><span class="icons_text">新建</span></a>
+				<span class="split">|</span>
+				<a href="javascript:open_able(null, '1')"><span class="icons icon_unlock"></span><span class="icons_text">启用</span></a>
+				<span class="split">|</span>
+				<a href="javascript:open_able(null, '0')"><span class="icons icon_lock"></span><span class="icons_text">禁用</span></a>
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+			<div class="table_head">
+				<table class="table">
+					<thead>
+						<tr>
+							<th width="40"><input type="checkbox" id="checkedIds"></th>
+							<th width="40%">资源名称</th>
+							<th width="25%">类型</th>
+							<th width="10%">排序</th>
+							<th width="10%">状态</th>
+							<th width="">操作</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+			<div class="table_body auto_height">
+				<table class="table">
+					<tbody>
+						<#if nodes?size gt 0>
+							<#list nodes as e>
+						<tr>
+							<td width="26"><input type="checkbox" name="checkedIds" value="${e.resourceId}" level="1" ajax="0"></td>
+							<td width="40%"><span class="icons icon_open able" onclick="open_nodes(this)"></span><span class="icons_text">${e.resourceName}</span></td>
+							<td width="25%">
+								<#if e.type == 0>菜单<#elseif e.type == 1>${e.url}<#else>${e.action}</#if>
+							</td>
+							<td width="10%">${e.position}</td>
+							<td width="10%"><#if e.status == 1>启用<#else>禁用</#if></td>
+							<td>
+								<a href="add?resourceId=${e.resourceId}" title="编辑"><span class="icons icon_edit"></span></a>
+								<#assign able = 1 />
+								<#assign title = "启用" />
+								<#assign check = "icon_unlock" />
+								<#if e.status == 1>
+									<#assign able = 0 />
+									<#assign title = "禁用" />
+									<#assign check = "icon_lock" />
+								</#if>
+								<a href="javascript:open_able('${e.resourceId}', '${able}');" title="${title}"><span class="icons ${check}"></span></a>
+							</td>
+						</tr>
+							</#list>
+						</#if>
+					</tbody>
+				</table>
+			</div>
+			<#if nodes?size lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<div id="page" class="clearfix">
+				<div class="left">
+					<span>共${nodes?size}条记录</span>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div id="able_resource" class="pop" style="display: none; width: 280px;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<div class="pop_title">启用资源</div>
+			<div class="pop_content blank">确定要启用所选资源吗？</div>
+			<div class="pop_btn">
+				<input type="hidden" id="status" value="1" />
+				<button type="button" class="btn primary xs" onclick="able()">确定</button>
+				<button type="button" class="btn default xs" onclick="close_pop()">取消</button>
+			</div>
+		</div>				
+	</div>
+	
+	<script type="text/javascript">
+		function open_nodes(e) {
+			var $tr = $(e).parent().parent();
+			var $check = $tr.find("input[type=checkbox]");
+			var ajax = $check.attr("ajax");
+			if (ajax == "1") {
+				return;
+			}
+			$(e).toggleClass("icon_arrow_right");
+			var id = $check.val();
+			var level = $check.attr("level");
+			nodes($tr, level, "nodes?resourceId=" + id + "&token=${token}");
+			$check.attr("ajax", "1");
+		}
+		
+		function nodes(e, level, url) {
+			$.ajax({
+				url: url,
+				type: "post",
+				dataType: "json",
+				success: function(data) {
+					if (data.code == 1) {
+						var left = 18 * int(level);
+						$.each(data.nodes, function(idx, obj) {
+							var type = "菜单";
+							if (obj.type == "1") {
+								type = obj.url;
+							} else if (obj.type == "2") {
+								type = obj.action;
+							}
+							
+							var able = 1;
+							var title = "启用"
+							var check = "icon_unlock";
+							if (obj.status == "1") {
+								able = 0;
+								title = "禁用"
+								check = "icon_lock";
+							}
+							var text = "";
+							text += "<tr>";
+							text += "<td width=\"16\"><input type=\"checkbox\" name=\"checkedIds\" value=\"" + obj.resourceId + "\" level=\"" + (int(level) + 1) + "\" ajax=\"0\"></td>";
+							text += "<td width=\"40%\"><span class=\"icons icon_open able\" style=\"margin-left: " + left + "px\" onclick=\"open_nodes(this)\"></span><span class=\"icons_text\">" + obj.resourceName + "</span></td>";
+							text += "<td width=\"25%\">" + type + "</td>";
+							text += "<td width=\"10%\">" + (obj.position ? obj.position : "") + "</td>";
+							text += "<td width=\"10%\">" + (obj.status == 1 ? "启用" : "禁用") + "</td>";
+							text += "<td>";
+							text += "<a href=\"add?resourceId=" + obj.resourceId + "\" title=\"编辑\"><span class=\"icons icon_edit\"></span></a>";
+							text += "<a href=\"javascript:open_able('" + obj.resourceId + "', '" + able + "');\" title=\"" + title + "\"><span class=\"icons " + check + "\"></span></a>";
+							text += "</td>";
+							text += "</tr>";
+							e.after(text);
+						});
+						
+						var width = $(".table_body table").width();
+						$(".table_head table").css("width", width + "px");
+					} else {
+						danger(1, data.message);
+					}
+				}
+			});
+		}
+		
+		function open_able(id, status) {
+			if (id) {
+				get_unlock(id);
+			}
+			var before = status == 1 ? "禁用" : "启用";
+			var after = status == 1 ? "启用" : "禁用";
+			$(".pop_title").text($(".pop_title").text().replace(before, after));
+			$(".pop_content").text($(".pop_content").text().replace(before, after));
+			$("#status").val(status);
+			open_pop(null,null,"#able_resource",true);
+		}
+		
+		function able() {
+			var status = $("#status").val();
+			ajax_checked("请选择需要" + (status == 1 ? "启用" : "禁用") + "的资源", "able?&status=" + status + "&token=${token}");
+			close_pop();
+		}
+	</script>
+</body>
+</html>

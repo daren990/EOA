@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+
+
+<head>
+
+
+
+
+
+
+
+
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if perform.performId??>编辑<#else>新建</#if>绩效考核</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<#if release.version == 0>
+	<#assign my_score_readonly = "readonly='readonly'" />
+	<#assign my_score_grade_readonly = "readonly='readonly'" />
+</#if>
+<#if release.version == 1>
+	<#assign content_readonly = "readonly='readonly'" />
+	<#assign grade_readonly = "readonly='readonly'" />
+	<#assign weight_readonly = "readonly='readonly'" />
+</#if>
+
+<#assign score_readonly = "readonly='readonly'" />
+<#assign score_grade_readonly = "readonly='readonly'" />
+<#assign manscore_readonly = "readonly='readonly'" />
+<#assign manscore_grade_readonly = "readonly='readonly'" />
+
+<#assign canScore = false />
+<#if release.version == 1>
+	<#assign canScore = true />
+</#if>
+
+
+
+
+
+
+
+
+
+
+
+
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit auto_height">
+			<div id="form" class="clearfix" style="width: 100%;">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="performId" value="${perform.performId}">
+					<table class="table" style="margin-left: 10px;">
+						<tr>
+							<td>考核人：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" value="${release.trueName?default(currentUser.trueName)}" readonly="readonly" style="width:150px;margin-right: 30px;">
+							</td>
+							<td>考核名称：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" value="${release.releaseName}" readonly="readonly" style="width:150px;margin-right: 30px;">
+							</td>
+							<td>考核范围：</td>
+							<td class="required"></td>
+							<td>
+								<#if release.releaseStartDate??><#assign start_yyyyMMdd = release.releaseStartDate?date /></#if>
+								<input type="text" class="input sm" value="${start_yyyyMMdd?default('')}" readonly="readonly" style="width: 140px">
+								<span>至</span>
+								<#if release.releaseEndDate??><#assign end_yyyyMMdd = release.releaseEndDate?date /></#if>
+								<input type="text" class="input sm" value="${end_yyyyMMdd?default('')}" readonly="readonly" style="width: 140px;margin-right: 30px;">
+								<input type="hidden" name="releaseId" value="${release.releaseId}" />
+							</td>
+							<td class="required">*</td>
+							<td>上级审批：</td>
+							<td>
+								<#if release.version == 1>
+								<input type="text" class="input xl" value="${perform.actorName}" style="width:150px" readonly="readonly"/>
+								<input type="hidden" name="actorId" value="${perform.actorId}" />
+								<#else>
+								<input type="hidden" name="actorId" value="${perform.actorId?default(bindId)}" />
+								<div id="actorId" class="select xl" style="width:150px" >
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<#list operators as e>
+										<li item="${e.userId}">${e.trueName}</li>
+										</#list>
+									</ul>
+								</div>
+								</#if>
+	<!-- 绩效考核帮助的超链接 -->
+				<a href="/img/1.pdf" style="color: red">绩效审批标准</a>
+				
+		
+							</td>
+						</tr>
+						</table>
+						<table style="width: 100%;margin-left:10px;margin-top:10px;border-top:1px solid #CCC">
+						<#assign i = 0 />
+						<#list targets as e>
+							<tr>
+							
+							<td style="width: 15%;text-align: center;">考核目标</td>
+							<td style="width: 15%;text-align: center;">评分标准</td>
+							<td style="width: 5%;text-align: center;">权重</td>
+							
+							<td style="width: 5%;text-align: center;">本人评分</td>
+							<td style="width: 15%;text-align: center;">本人评价</td>
+							<td style="width: 5%;text-align: center;">第一审核人评分</td>
+							<td style="width: 15%;text-align: center;">第一审核人评价
+								<#if !canScore>
+								<#if i == 0>
+								<button type="button" class="btn default xxxs" onclick="add_target()">+</button>
+								<#else>
+								<button type="button" class="btn default xxxs" onclick="del_target(${i})">-</button>
+								</#if>
+								</#if>
+							
+							</td>
+							<td style="width: 5%;text-align: center;">第二审核人评分</td>
+						
+								
+								
+								
+								<td style="width: 15%;text-align: center;">第二审核人评价
+								<#if !canScore>
+								<#if i == 0>
+								<button type="button" class="btn default xxxs" onclick="add_target()">+</button>
+								<#else>
+								<button type="button" class="btn default xxxs" onclick="del_target(${i})">-</button>
+								</#if>
+								</#if>
+								</td>
+
+							</tr>
+							<tr class="target" item="${i}">
+								<td><textarea style="width: 95%;height: 110px;" name="content_${i}" ${content_readonly}>${e.content}</textarea></td>
+								<td><textarea style="width: 95%;height: 110px;" name="grade_${i}" ${grade_readonly}>${e.grade}</textarea></td>
+								<td><input type="text" class="input sm" style="width: 30px;" name="weight_${i}" value="${e.weight}" ${weight_readonly}>%</td>
+								<#if canScore>
+									<#assign my_score = e.my_score />
+									<#assign my_score_grade = e.my_score_grade />
+									<#assign score = e.score />
+									<#assign score_grade = e.score_grade />
+									<#assign manscore = e.manscore />
+									<#assign manscore_grade = e.manscore_grade />
+								</#if>
+								<td><input type="text" class="input sm" name="my_score_${i}" value="${my_score?default('0')}" ${my_score_readonly} style="width: 30px;"/></td>
+								<td><textarea style="width: 95%;height: 110px;" name="my_score_grade_${i}" ${my_score_grade_readonly}>${e.my_score_grade}</textarea></td>
+								<td><input type="text" class="input sm" name="score_${i}" value="${score?default('0')}" ${score_readonly} style="width: 30px;"/></td>
+								<td><textarea style="width: 95%;height: 110px;" name="score_grade_${i}" ${score_grade_readonly}>${e.score_grade}</textarea></td>
+								<td><input type="text" class="input sm" name="manscore_${i}" value="${manscore?default('0')}" ${manscore_readonly} style="width: 30px;"/></td>
+								<td><textarea style="width: 95%;height: 110px;" name="manscore_grade_${i}" ${manscore_grade_readonly}>${e.manscore_grade}</textarea></td>
+							</tr>
+						<#assign i = i + 1 />
+						</#list>
+						</table>
+						<button type="submit" class="btn primary xs" style="margin-left: 48%;">提交</button>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#actorId").select({ "name": "actorId" });
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+		
+		var index = ${targets?size};
+		
+		function add_target() {
+			index = index + 1;
+			var text = "";
+		text += "<tr class=\"target\" item=\"" + index + "\">";
+		text += "<td><textarea style=\"width: 95%;height: 110px;\" name=\"content_" + index + "\"></textarea></td>";
+		text += "<td><textarea style=\"width: 95%;height: 110px;\" name=\"grade_" + index + "\"></textarea></td>";
+		text += "<td><input type=\"text\" class=\"input sm\" style=\"width: 30px;\" name=\"weight_"+index+"\" value=\"\">%</td>";
+		text += "<td><input type=\"text\" class=\"input sm\" name=\"my_score_" + index + "\" value=\"0\" readonly=\"readonly\" style=\"width: 30px;\"/></td>";
+		text += "<td><textarea style=\"width: 95%;height: 110px;\" name=\"my_score_grade_" + index + "\" readonly=\"readonly\" \"></textarea></td>";
+		text += "<td><input type=\"text\" class=\"input sm\" name=\"score_" + index + "\" value=\"0\" readonly=\"readonly\" style=\"width: 30px;\"/></td>";
+		text += "<td><textarea style=\"width: 95%;height: 110px;\" name=\"score_grade_" + index + "\" readonly=\"readonly\" \"></textarea></td>";
+		text += "<td><input type=\"text\" class=\"input sm\" name=\"manscore_" + index + "\" value=\"0\" readonly=\"readonly\" style=\"width: 30px;\"/></td>";
+		text += "<td><textarea style=\"width: 95%;height: 110px;\" name=\"manscore_grade_" + index + "\" readonly=\"readonly\" \"></textarea>";
+		text += "<button type=\"button\" class=\"btn default xxxs\" onclick=\"del_target(" + index + ")\">-</button> ";
+		text += "<button type=\"button\" class=\"btn default xxxs\" onclick=\"add_target(" + index + ")\">+</button> ";
+		text += "</td>";
+		text += "</tr>";
+			$(".target").last().after(text);
+			auto_height();
+		}
+		
+		function del_target(i) {
+			$("tr[item=" + i + "]").remove();
+			auto_height();
+		}
+	</script>
+	
+
+<script type="text/javascript" src="scripts/pdfobject/pdfobject.js"></script>
+<script type="text/javascript"> 
+window.onload = function (){
+    var success = new PDFObject({ url: "/img/1.pdf" ,pdfOpenParams: { scrollbars: '0', toolbar: '0', statusbar: '0'}}).embed("pdf1");
+};
+</script> 
+	
+
+	
+</body>
+</html>

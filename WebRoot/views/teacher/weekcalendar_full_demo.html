@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN""http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+
+	<link rel='stylesheet' type='text/css' href='${ctx}/css/reset.css' />
+	<link rel='stylesheet' type='text/css' href='${ctx}/css/jquery-ui.css' />
+	<link rel='stylesheet' type='text/css' href='${ctx}/css/jquery.weekcalendar.css' />
+	<link rel='stylesheet' type='text/css' href='${ctx}/css/schedule.css' />
+	
+	<script type='text/javascript' src='${ctx}/js/jquery.min.js'></script>
+	<script type='text/javascript' src='${ctx}/js/jquery-ui.min.js'></script>
+	<script type='text/javascript' src='${ctx}/js/jquery.weekcalendar.js'></script>
+	<script type='text/javascript' src='${ctx}/js/schedule.js'></script>
+	<script type='text/javascript' >
+		function getEventData() {
+	      var year = new Date().getFullYear();
+	      var month = new Date().getMonth();
+	      var day = new Date().getDate();
+		
+	      return {
+	         events : [
+	         	<#if schedules??>
+	         	<#assign id = 1 />
+	         	<#assign split = "" />
+	         	<#list schedules as schedule>
+	         	${split}
+	            {
+	               "id":${id},
+	               "start": new Date(${schedule.start?string('yyyy')}, ${schedule.minusMonth}, ${schedule.start?string('dd')}, ${schedule.start?string('HH')}, ${schedule.start?string('mm')}),
+	               "end": new Date(${schedule.end?string('yyyy')}, ${schedule.minusMonth}, ${schedule.end?string('dd')}, ${schedule.end?string('HH')}, ${schedule.end?string('mm')}),
+	               "title":"${schedule.course.name}",
+	               readOnly : true
+	            }
+	            <#assign split = "," />
+	            <#assign id = id + 1 />
+	            </#list>
+	            </#if>
+	         ]
+	      };
+	   }
+	</script>
+</head>
+<body> 
+	<h1>${teacher.truename}的课程安排</h1>
+
+	<div id='calendar'></div>
+	<div id="event_edit_container">
+		<form>
+			<input type="hidden" />
+			<ul>
+				<li>
+					<span>日期: </span><span class="date_holder"></span> 
+				</li>
+				<li>
+					<label for="start">开始时间: </label><select name="start"><option value="">Select Start Time</option></select>
+				</li>
+				<li>
+					<label for="end">结束时间: </label><select name="end"><option value="">Select End Time</option></select>
+				</li>
+				<li>
+					<label for="title">Title: </label><input type="text" name="title" />
+				</li>
+				<li>
+					<label for="body">Body: </label><textarea name="body"></textarea>
+				</li>
+			</ul>
+		</form>
+	</div>
+
+	
+</body>
+</html>

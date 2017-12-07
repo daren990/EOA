@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<!-- <script type="text/javascript" src="/js/jquery-1.7.1.js"></script> 
+
+<script type="text/javascript" src="/js/jquery.media.js"></script>
+ -->
+
+
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if perform.performId??>编辑<#else>新建</#if>绩效审批</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	<style type="text/css">
+	.table{margin-left: 130px;}
+	.towTable{margin-left: 100px;}
+	.contentTable{text-align: center;margin-top: 20px;width: 100%;border-top: 1px solid #CCC}
+	</style>
+</head>
+
+
+<#assign canScore = false />
+<#if release.version == 1>
+	<#assign canScore = true />
+</#if>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit auto_height xxl">
+			<div id="form" class="clearfix">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="performId" value="${perform.performId}">
+					<#if ["perform.manager"]?seq_contains(actor.variable)>
+					<input type="hidden" name="refererId" value="${perform.userId}" />
+					</#if>
+					<table class="table">
+						<tr>
+							<td>考核人：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" value="${perform.trueName}" readonly="readonly" style="width: 65px;margin-right: 15px;">
+							</td>
+							
+							<td>考核名称：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" value="${release.releaseName}" readonly="readonly" style="width: 150px;margin-right: 15px;">
+							</td>
+							
+							<td>考核日期：</td>
+							<td class="required"></td>
+							<td>
+								<#if release.releaseStartDate??><#assign start_yyyyMMdd = release.releaseStartDate?date /></#if>
+								<input type="text" class="input sm" value="${start_yyyyMMdd?default('')}" readonly="readonly" style="width: 90px">
+								<span>至</span>
+								<#if release.releaseEndDate??><#assign end_yyyyMMdd = release.releaseEndDate?date /></#if>
+								<input type="text" class="input sm" value="${end_yyyyMMdd?default('')}" readonly="readonly" style="width: 90px;margin-right: 15px;">
+								<input type="hidden" name="releaseId" value="${release.releaseId}" />
+
+
+                     <!--      <a href="http://localhost:8080/img/1.pdf" style="color: red">绩效考核制度</a> -->
+                  
+                  					   <!-- 绩效考核帮助的超链接 -->
+		       		<a href="/img/1.pdf" style="color: red">绩效审批标准</a>
+						
+							</td>
+					
+							</tr>
+				
+							</table>
+							
+							
+					<table class="contentTable">
+					<tr><td>考核目标</td><td>审核标准</td><td>权重</td><td>本人评分</td><td>个人评价</td><td>第一审核人评分</td><td>第一审核人评价</td><td>第二审核人评分</td><td>第二审核人评价</td></tr>
+					<#assign i = 0 />
+					<#list targets as e>
+					<tr>
+						<td><textarea class="xl" rows="7" name="content_${i}" readonly="readonly" style="width: 95%;height: 110px;">${e.content}</textarea></td>
+						<td><textarea class="xl" rows="7" name="grade_${i}" readonly="readonly" style="width: 95%;height: 110px;">${e.grade}</textarea></td>
+
+						<td><input type="text" class="input xl" name="weight_${i}" value="${e.weight}" readonly="readonly" style="width:30px;">%</td>
+						
+							<#if canScore>
+								<#assign my_score = e.my_score />
+								<#assign my_score_grade = e.my_score_grade />
+							</#if>
+						    <td><input type="text" class="input xs" name="my_score_${i}" value="${my_score?default(0)}" readonly="readonly" style="width: 20px"/></td>
+				        	<td><textarea class="xl" rows="7" name="my_score_grade_${i}" readonly="readonly" style="width: 95%;height: 110px;">${e.my_score_grade}</textarea></td>
+
+							<#if !canScore || ["secondApprove","self"]?seq_contains(actor.variable)>
+							 	<#assign readonly = 'readonly="readonly"' /> 
+							</#if>
+							<#if canScore && ["firstApprove", "secondApprove","self"]?seq_contains(actor.variable)>
+								<#assign score = e.score?string />
+								<#assign score_grade = e.score_grade  />
+							</#if>
+						    <td><input type="text" class="input xs" name="score_${i}"  value="${score?default(0)}" ${readonly} style="width: 20px"/></td>
+						    <td><textarea class="xl" rows="7" name="score_grade_${i}" ${readonly} style="width: 95%;height: 110px;">${e.score_grade}</textarea></td>
+
+
+                                   <!--第二审批人  -->
+							<#if !canScore || ["firstApprove", "self"]?seq_contains(actor.variable)>
+						     	<#assign readon = 'readonly="readonly"' />
+							</#if>
+							<#if canScore && ["secondApprove", "firstApprove","self"]?seq_contains(actor.variable)>
+								<#assign manscore = e.manscore?string />
+								<#assign manscore_grade = e.manscore_grade  />
+							</#if>
+							<td><input type="text" class="input xs" name="manscore_${i}" value="${manscore?default(0)}" readonly="readonly" style="width: 20px"/></td>
+						    <td><textarea class="xl" rows="7" name="manscore_grade_${i}" readonly="readonly" style="width: 95%;height: 110px;">${e.manscore_grade}</textarea></td>
+						   
+						
+						</td>
+					</tr>
+					<#assign i = i + 1 />
+					</#list>
+					</table>
+					
+					<table class="towTable">
+							<tr>
+							<td>&nbsp;&nbsp;&nbsp;审批意见：</td>
+							<td class="required"></td>
+							<td rowspan="2">
+								<textarea class="xl" rows="2" name="opinion" id="opinion" style="margin-right: 10px;">${actor.opinion}</textarea>
+							</td>
+							
+							<#list actors as e>
+							<td>${views.role(e.variable)}<#if e.variable == "self">意见<#else>审批</#if>：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input" value="${e.actorName}" readonly="readonly" style="width: 60px;" />
+								<#if e.actorId == actor.actorId && e.variable == actor.variable && (!next?? || (e.refererId == next.actorId && next.approve == 0))>
+									<#if ["-1", "1"]?seq_contains(e.approve?string)>
+										<#assign approve = e.approve?string />
+									</#if>
+									<input type="hidden" name="approve" value="${approve?default('')}" />
+									<div id="approve" class="select sm" style="width: 60px;margin-right: 15px;">
+										<span class="option text">请选择</span><span class="icon"></span>
+										<ul>
+											<li item="">请选择</li>
+											<li item="1"><#if e.variable == "self">同意<#else>已批准</#if></li>
+											<!-- 11.22改 -->
+									    	<li item="-1"><#if e.variable == "self">不同意<#else>未批准</#if></li> 
+									<!-- 	<li item="-1"><#if e.variable == "self">不同意<#else>未批准</#if></li>-->
+										</ul>
+									</div>
+								<#else>
+									<#assign approve = views.approve(e.approve) />
+									<#if e.variable == "self">
+										<#assign approve = approve?replace("已批准", "同意") />
+										<#assign approve = approve?replace("未批准", "不同意") />
+									</#if>
+									<input type="text" class="input sm" value="${approve}" readonly="readonly" style="margin-right: 15px;" />
+								</#if>
+							</td>
+						</#list>
+						<td>
+						<#if required == true>
+							<table class="shenghe">
+								<tr class="next hide">
+										<td>审核人员：</td>
+										<td class="required"></td>
+										<td>
+											<input type="hidden" name="refererId" value="${bindId}" />
+											<div id="refererId" class="select xl" style="width:60px;">
+												<span class="option text">请选择</span><span class="icon"></span>
+												<ul>
+													<#list operators as o>
+													<li item="${o.userId}">${o.trueName}</li>
+													</#list>
+												</ul>
+											</div>
+										</td>
+								</tr>
+							</table>
+							</#if>
+						</td>
+					</tr>
+					</table>
+					<div style="float: right;margin-right: 200px;margin-bottom: 20px;"><button type="submit" class="btn primary xs">提交</button></div>
+					
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+	
+	
+	
+	
+	
+		$(document).ready(function() {
+			$("#approve").select({ "name": "approve" });
+			$("#refererId").select({ "name": "refererId" });
+			
+			$("#approve.select li").click(function() {
+				var t = $(this).attr("item");
+				$(".next").hide();
+				if (t == "1") {
+					$(".next").show();
+				} else {
+					<#if actor.variable == "manager" && (!next?? || next.approve == 0)>
+					$("input[name=refererId]").val("");
+					</#if>
+				}
+			});
+			
+			<#if next?? && next.approve != 0>
+			$("tr#submit").remove();
+			</#if>
+			
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.approve, [RQ, RANGE, "{1,20}"], "审批状态");
+						<#if actor.variable == "manager" && (next?? && next.approve == 0)>
+						if ($("input[name=approve]").val() == "1") {
+							validate(form.refererId, [RQ, RANGE, "{1,20}"], "审批人员");							
+						}
+						</#if>
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+						<#if actor.variable == "self">
+ 						success_callback(data, "/adm/examine/perform/apply/page");
+ 						<#else>
+						success_callback(data, "page");
+ 						</#if>
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+		
+		
+	  
+
+		
+		
+	</script>
+	<script type="text/javascript" src="scripts/pdfobject/pdfobject.js"></script>
+<script type="text/javascript"> 
+window.onload = function (){
+    var success = new PDFObject({ url: "/img/1.pdf" ,pdfOpenParams: { scrollbars: '0', toolbar: '0', statusbar: '0'}}).embed("pdf1");
+};
+</script> 
+	
+	
+	
+	
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if warn.warnId??>编辑<#else>新建</#if>报障审批</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+
+<#assign isWRR = false />
+<#if ["warn.operator"]?seq_contains(actor.variable)>
+<#assign isWRR = true />
+</#if>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit auto_height xxl">
+			<div id="form" class="clearfix" style="width: 520px;">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="warnId" value="${warn.warnId}">
+					<#if isWRR>
+					<input type="hidden" name="refererId" value="${warn.userId}" />
+					<input type="hidden" name="approve" value="1" />
+					</#if>
+					<table class="table">
+						<tr>
+							<td>申请人：</td>
+							<td></td>
+							<td><input type="text" class="input xl" value="${warn.trueName}" readonly="readonly"></td>
+						</tr>
+						<tr>
+							<td>申请时间：</td>
+							<td></td>
+							<td>
+								<#assign createTime = now?date />
+								<#if warn.createTime??><#assign createTime = warn.createTime?date /></#if>
+								<input type="text" class="input xl" value="${createTime}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>故障类型：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" value="${warn.faultName}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">故障说明：</td>
+							<td class="pos required"></td>
+							<td>
+								<textarea class="xl" rows="3" readonly="readonly">${warn.content}</textarea>
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">处理结果：</td>
+							<td class="pos required"><#if isWRR>*</#if></td>
+							<td>
+								<#if isWRR>
+								<textarea class="xl" rows="3" name="result">${warn.result}</textarea>
+								<#else>
+								<textarea class="xl" rows="3" readonly="readonly">${warn.result}</textarea>
+								</#if>
+							</td>
+						</tr>
+						<#list actors as e>
+						<tr>
+							<td>${views.role(e.variable)}<#if e.variable == "self">意见</#if>：</td>
+							<td class="required"></td>
+							<td>
+								<#if e.variable == "self">
+									<input type="text" class="input" value="${e.actorName}" readonly="readonly" />
+									<#if e.actorId == actor.actorId && e.variable == actor.variable && (!next?? || (e.refererId == next.actorId && next.approve == 0))>
+										<#if ["-1", "1"]?seq_contains(e.approve?string)>
+											<#assign approve = e.approve?string />
+										</#if>
+										<input type="hidden" name="approve" value="${approve?default('')}" />
+										<div id="approve" class="select sm">
+											<span class="option text">请选择</span><span class="icon"></span>
+											<ul>
+												<li item="">请选择</li>
+												<li item="1">同意</li>
+												<li item="-1">拒绝</li>
+											</ul>
+										</div>
+									<#else>
+										<#assign approve = views.approve(e.approve) />
+										<#if e.variable == "self">
+											<#assign approve = approve?replace("已批准", "同意") />
+											<#assign approve = approve?replace("未批准", "拒绝") />
+										</#if>
+										<input type="text" class="input sm" value="${approve}" readonly="readonly" />
+									</#if>
+								<#elseif e.variable == "warn.operator">
+									<input type="text" class="input xl" value="${e.actorName}" readonly="readonly" />
+								</#if>
+							</td>
+						</tr>
+						</#list>
+						<tr>
+							<td class="pos">审批意见：</td>
+							<td class="pos required">*</td>
+							<td>
+								<textarea class="xl" rows="4" name="opinion" id="opinion">${actor.opinion}</textarea>
+							</td>
+						</tr>
+						<tr id="submit">
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#approve").select({ "name": "approve" });
+			$("#refererId").select({ "name": "refererId" });
+			
+			<#if next?? && next.approve != 0>
+			$("tr#submit").remove();
+			</#if>
+			
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.opinion, [RQ], "审批意见");
+						if ($("textarea[name=result]").length > 0) {
+							validate(form.result, [RQ, RANGE, "{1,60}"], "处理结果");
+						}
+						if ($("input[name=approve]").length > 0) {
+							validate(form.approve, [RQ], "审批状态");							
+						}
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+						<#if actor.variable == "self">
+ 						success_callback(data, "/res/warn/apply/page");
+ 						<#else>
+						success_callback(data, "page");
+ 						</#if>
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+	</script>
+</body>
+</html>

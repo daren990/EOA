@@ -1,0 +1,42 @@
+@CHARSET "UTF-8";
+*{margin: 0;padding: 0}
+.headDiv{width: 1300px;height: 40px;line-height: 40px;background: #e9e9e9;margin: 20px auto;border: 1px solid #CCC;border-radius:5px;}
+.companyTitle{width: 1300px;height: 40px;line-height: 40px;margin:auto;font-size: 16px;font-weight: bold;}
+.timeH3{width: 370px;text-align: center;float: left;}
+.condition{width: 480px;float: right;}
+.condition ul li{list-style-type: none;float: left;}
+.startEdit{display: block;width: 80px;line-height:30px; height: 30px;margin-top: 4px;border-radius:5px;cursor: pointer;text-align: center;margin-left: 5px;background: #B4D6DA}
+.endEdit{display: none;width: 80px;line-height:30px; height: 30px;margin-top: 4px;border-radius:5px;cursor: pointer;text-align: center;margin-left: 5px;background: #C00;color: #FFF;}
+.startEdit:hover{background:#a1c5e5}
+.endEdit:hover{background: #F00}
+.searchSpan{display: block;width: 80px;height: 30px;line-height: 30px;border-radius:5px;background: #B4D6DA;cursor: pointer;text-align: center;margin-top: 4px;margin-left: 15px;}
+.searchSpan:hover{background:#a1c5e5}
+.liBg{background: #f3f1fd}
+
+.dateDiv{width: 1300px;margin-left: auto;margin-right: auto;}
+.dateDiv ul li{list-style-type: none;float: left;width: 160px;text-align: center;height: 35px;line-height: 35px;border-right: 1px solid #B4D6DA;}
+
+.day li{border-top: 1px solid #B4D6DA;border-bottom: 1px solid #B4D6DA;font-weight: bolder;color: #a1c5e5}
+.week li{border-bottom: 1px solid #B4D6DA;font-weight: bolder;}
+
+.schedul{width: 1300px;margin-left: auto;margin-right: auto;}
+.schedul ul li{list-style-type: none;float: left;width: 160px;text-align: center;height: 35px;line-height: 35px;border-bottom: 1px solid #B4D6DA;border-right: 1px solid #B4D6DA;cursor: pointer;position: relative;}
+.schedul ul li:hover{background: #B4D6DA}
+
+.appendDiv{height: 45px;background: #999;position: relative;display: none;z-index: 5;border-radius:5px;}
+
+.statusSpan{display: block;float: left;min-width:80px;width: auto; border: 1px solid #a1c5e5;margin: 4px 2px;border-radius:5px;background: #a1c5e5;z-index: 10;}
+
+.rotatiomImg{transition:1s;-ms-transition:1s;-webkit-transition:1s;-o-transition:1s;-moz-transition:1s}
+.rotatiomImg:hover{transform:rotate(360deg);-ms-transform:rotate(360deg);-webkit-transform: rotate(360deg);-o-transform: rotate(360deg);-moz-transform: rotate(360deg);}
+
+.personalpage ul li{list-style-type: none;float: left;width: 430px;text-align: center;height: 35px;line-height: 35px;border-bottom: 1px solid #b4d6da;}
+.workListUl li{font-weight: bold;border-top: 1px solid #b4d6da;}
+.personalpage{width: 1300px;margin: auto;}
+
+.lastLi{border-right: none !important}
+
+.workColorInfo{width: 1300px;height: 25px;line-height: 25px;margin: 20px auto;}
+.contantColorInfo{float: left;padding:1px 5px;background: #FFF;margin: auto 10px;}
+.Explain{width: 10px;height: 10px;display: inline-block;margin-right: 3px;vertical-align: middle;}
+

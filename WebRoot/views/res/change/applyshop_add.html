@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if assetShop.shopId??>编辑<#else>新建</#if>购买申请</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit">
+			<div id="form" class="clearfix" style="width:460px;">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="shopId" value="${assetShop.shopId}">
+					
+					<table class="table">
+						<tr>
+							<td>申请人：</td>
+							<td class="required"></td>
+							<td colspan="5">
+								<input type="text" class="input xl" value="${currentUser.trueName}" readonly="readonly" >
+							</td>
+						</tr>
+						<tr>
+							<td>申请时间：</td>
+							<td class="required"></td>
+							<td colspan="5">
+								<#assign createTime = now?date />
+								<#if assetShop.createTime??><#assign createTime = assetShop.createTime?date /></#if>
+								<input type="text" class="input xl" value="${createTime}" readonly="readonly" >
+							</td>
+						</tr>
+						<#assign i = 0 />
+						<#list assetItem as e>
+						<tr class="target" item="${i}">
+						<td>物品名称：</td>
+						<td class="required">*</td>
+							<td>
+								<input type="text"  name="itemName_${i}" class="input sm" value="${e.itemName}" style="width: 120px">
+							</td>	
+						<td>类别：</td>
+						<td class="required">*</td>
+						<td>
+							<input type="hidden" name="item_${i}" value="${e.item}">
+							<div name="type" class="select sm">
+								<span class="option text">请选择</span><span class="icon"></span>
+								<ul class="auto_height sm">
+									<#list assetMap?keys as a>
+									<li item="${a}" >${assetMap[a]}</li>
+									</#list>
+								</ul>
+							</div>
+						</td>
+						<td>
+							<#if i == 0>
+								<button type="button" class="btn default xxxs" onclick="add_assetItem()">+</button></td>
+								<#else>
+								<button type="button" class="btn default xxxs" onclick="del_target(${i})">-</button>
+							</#if>
+						</td>
+						</tr>
+						<tr class="target" item="${i}">
+							<td>单位：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" name="unit_${i}" class="input sm" value="${e.unit}" style="width: 120px">
+							</td>
+							
+							<td>数量：</td>
+							<td class="required">*</td>
+							<td colspan="2">
+								<input type="text" name="amount_${i}"class="input sm" value="${e.amount}">
+							</td>
+						</tr>
+						<tr class="target" item="${i}">
+							<td>设拟使用/存放地点：</td>
+							<td class="required">*</td>
+							<td colspan="5">
+								<input type="text" name="storagePlace_${i}" class="input xl" value="${e.storagePlace}">
+							</td>
+						</tr>
+						<tr class="target" item="${i}">
+							<td>特殊说明：</td>
+							<td class="required">*</td>
+							<td colspan="5">
+								<input type="text" name="remark_${i}" class="input xl" value="${e.remark}" >
+							</td>
+						</tr>
+						<#assign i = i + 1 />
+						</#list>
+						
+						<tr>
+							<td class="pos">购买原因：</td>
+							<td class="pos required">*</td>
+							<td colspan="5">
+								<textarea class="xl" name=reason rows="4" >${assetShop.reason}</textarea>
+							</td>
+						</tr>
+						<tr>
+							<td>审批人员：</td>
+							<td class="required">*</td>
+							<td colspan="5">
+								<input type="hidden" name="actorId" value="${assetShop.actorId}">
+								<div id="actorId" class="select xl">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul class="auto_height sm">
+										<#list operators as o>
+										<li item="${o.userId}">${o.trueName}</li>
+										</#list>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+			$(document).ready(function() {
+			$("div[name='type']").each(function(index){
+				$(this).select({ "name": "item_"+index });
+			});
+			
+			$("#actorId").select({ "name": "actorId" });
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.reason, [RQ], "购买原因");
+						validate(form.actorId, [RQ], "审批人员");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+	
+		var index = ${assetItem?size};
+		
+		function add_assetItem() {
+			index = index + 1;
+				var text = "";
+			text += "<tr class=\"target\" item=\"" + index + "\">";
+			text += "<td>物品名称：</td>";
+			text += "<td class=\"required\">*</td>";
+			text += "<td>";
+			text += "<input type=\"text\" class=\"input sm\" name=\"itemName_" + index + "\"value=\"\" style=\"width: 120px\">\n";
+			text +="</td>";
+			text += "<td>类别：</td>";
+			text += "<td class=\"required\">*</td>";
+			text += "<td>";
+			text += "<input type=\"hidden\" name=\"item_" + index + "\"value=\"\">\n";
+			text +="<div name='type' id=\"item_" + index + "\" class=\"select sm\">";
+			text +="<span class=\"option text\">请选择</span><span class=\"icon\"></span>";
+			text +="<ul>";
+			text +="<#list assetMap?keys as a>";
+			text +="<li item=\"${a}\">${assetMap[a]}</li>";
+			text +="</#list>";
+			text +="</ul>";
+			text +="</div>";
+			text +="</td>";
+			text +="<td>";
+			text +="<button type=\"button\" class=\"btn default xxxs\" onclick=\"del_target(" + index + ")\">-</button>";
+			text +="</td>";
+			text +="</tr>";
+			text += "<tr class=\"target\" item=\"" + index + "\">";
+			text += "<td>单位：</td>";
+			text += "<td class=\"required\">*</td>";
+			text +="<td>";
+			text +="<input type=\"text\" name=\"unit_" + index + "\" class=\"input sm\" value=\"\" style=\"width: 120px\">";
+			text +="</td>";
+			text += "<td>数量：</td>";
+			text += "<td class=\"required\">*</td>";
+			text +="<td colspan=\"2\">";
+			text +="<input type=\"text\" name=\"amount_" + index +"\" class=\"input sm\" value=\"\">";
+			text +="</td>";
+			text +="</tr>";
+			text += "<tr class=\"target\" item=\"" + index + "\">";
+			text += "<td>设拟使用/存放地点：</td>";
+			text += "<td class=\"required\">*</td>";
+			text +="<td colspan=\"5\">";
+			text +="<input type=\"text\" name=\"storagePlace_" + index + "\" class=\"input xl\" value=\"\" >";
+			text +="</td>";
+			text +="</tr>";
+			text += "<tr class=\"target\" item=\"" + index + "\">";
+			text += "<td>特殊说明：</td>";
+			text += "<td class=\"required\">*</td>";
+			text +="<td colspan=\"5\">";
+			text +="<input type=\"text\" name=\"remark_" + index + "\" class=\"input xl\" value=\"\" >";
+			text +="</td>";
+			text +="</tr>";
+			
+			$(".target").last().after(text);
+			$("#item_" + index).select({ "name": "item_"+index });
+			auto_height();
+		}
+		
+		function del_target(i) {
+			$("tr[item=" + i + "]").remove();
+			auto_height();
+		}
+	
+	</script>
+</body>
+</html>

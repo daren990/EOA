@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 结算明细 </title>
+	<#include "/views/js.html" />
+	<link rel="stylesheet" href="${ctx}/jw_js_css_img/bootstrap-3.3.4/css/bootstrap.min.css">
+	<#include "/views/css.html" />
+	<script src="${ctx}/jw_js_css_img/jquery-1.9.1/jquery.js"></script>
+	<script src="${ctx}/jw_js_css_img/bootstrap-3.3.4/js/bootstrap.min.js"></script>
+</head>
+<body>
+	<div id="path"></div>
+	<div class="container" style="margin: 10px;">
+		<div class="row clearfix">
+			<div class="col-md-12 column">
+				<div class="row clearfix" >
+					<div class="col-md-3 column">
+						<ul class="list-group">
+						    <li class="list-group-item">商品名称:${vo.shop_product_name}</li>
+						    <li class="list-group-item">商品类型:
+						    						<#if vo.type == 1>
+						    							组合
+						    							<#elseif vo.type == 0>
+						    							单品
+						    						</#if>		
+						    </li>
+						    <li class="list-group-item">操作人名:${vo.operatorName}</li>
+						    <!-- <li class="list-group-item">第${vo.times}次结算</li> -->
+						    <li class="list-group-item">结算总金额:￥${vo.amount}元</li>
+						    <li class="list-group-item">结算退款金额:￥${vo.unsubscribe}元</li>
+						    <li class="list-group-item">结算支出金额:￥${vo.expenditure}元</li>
+						</ul>
+					</div>
+					<div class="col-md-9 column" style="border-radius: 6px; border: 1px solid #ddd; background-color: white;">
+						<div class="row clearfix" style="margin: 10px;">
+							
+							<table class="table table-striped">
+								<caption><h3>本次结算支出数据</h3></caption>
+								<thead>
+									<tr>
+										<th>支出对象</th>
+										<th>对象类型</th>
+										<th>课程名</th>
+										<th>金额</th>
+										<th>结余金额</th>
+										<th>创建时间</th>
+									</tr>
+								</thead>
+								<tbody>
+									<#if targetList?size gt 0>
+										<#list targetList as target>
+											<tr>
+												<td>${target.targername}</td>
+												<td>
+													<#if target.type == 0>
+						    							合作机构
+						    							<#elseif target.type == 1>
+						    							兼职老师
+						    						</#if>	
+												</td>
+												<td>${target.shop_goods_name}</td>
+												<td>￥${target.amount}元</td>
+												<td>￥${target.lastBalance}元</td>
+												<td>${target.createTime}</td>
+											</tr>
+										</#list>
+									</#if>
+								</tbody>
+							</table>
+						
+							<table class="table table-striped">
+								<caption><h3>本次结算退订数据</h3></caption>
+								<thead>
+									<tr>
+										<th>操作人名</th>
+										<th>是否全款</th>
+										<th>退款类型</th>
+										<th>退款金额</th>
+										<th>操作时间</th>
+									</tr>
+								</thead>
+								<tbody>
+									<#if uvoList?size gt 0>
+										<#list uvoList as uvo>
+											<tr>
+												<td>${uvo.operatorName}</td>
+												<td>
+													<#if uvo.isAll ==  null || uvo.isAll == 0>
+														否
+														<#elseif uvo.isAll == 1>
+														是
+													</#if>
+												</td>
+												<td>
+													<#if uvo.unsubscribeType == 1>
+														协商退订
+														<#elseif uvo.unsubscribeType == 2>
+														商家退订
+														<#elseif uvo.unsubscribeType == 0>
+														其他原因
+													</#if>
+												</td>
+												<td>￥${uvo.amount}元</td>
+												<td>${uvo.createTime}</td>
+											</tr>
+										</#list>
+									</#if>
+								</tbody>
+							</table>
+							
+							<table class="table table-striped">
+								<caption><h3>本次结算订单数据</h3></caption>
+								<thead>
+									<tr>
+										<th>消费者名</th>
+										<th>使用者名</th>
+										<th>订单时间</th>
+										<th>金额</th>
+										<th>状态</th>
+									</tr>
+								</thead>
+								<tbody>
+									<#if ovoList?size gt 0>
+										<#list ovoList as ovo>
+											<tr>
+												<td>${ovo.shop_client_name}</td>
+												<td>${ovo.edu_student_name}</td>
+												<td>${ovo.create_time}</td>
+												<td>￥${ovo.amount}元</td>
+												<td>
+													<#if ovo.payStatus == 0>
+						    							未支付
+						    							<#elseif ovo.payStatus == 1>
+						    							已支付
+						    						</#if>	
+												</td>
+											</tr>
+										</#list>
+									</#if>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

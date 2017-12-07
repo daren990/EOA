@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 已办事项</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<#assign isPerform = "false" />
+<#if views.hasAnyRole("perform.manager", roleNames)><#assign isPerform = "true" /></#if>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<div id="right" class="right">
+				<form id="search" action="page" method="get">
+					<ul>
+						<li class="text">标题</li>
+						<li>
+							<input type="text" class="input xl" name="subject" value="${mb.subject}" />
+						</li>
+						<li class="text">发起时间</li>
+						<li>
+							<input type="text" class="input sm Wdate" name="startTime" value="${mb.startTime}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							<span>至</span>
+							<input type="text" class="input sm Wdate" name="endTime" value="${mb.endTime?default('')}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+						</li>
+						<li><button type="submit" class="btn primary xxs">搜索</button></li>
+					</ul>
+				</form>
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+			<div class="table_head">			
+				<table class="table">
+					<thead>
+						<tr>
+							<th width="40"><input type="checkbox" id="checkedIds"></th>
+							<th width="">标题</th>
+							<th width="15%">发起人</th>
+							<th width="15%">发起时间</th>
+							<th width="15%">流程日志</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+			<#assign len = 0 />
+			<#assign i = 0 />
+			<div class="table_body auto_height">
+				<table class="table">
+					<tbody>
+						<#if leaves?size gt 0>
+							<#assign len = len + leaves?size />
+							<#list leaves as e>
+						<tr>
+							<td width="26">
+							<#if e.approve == 0>
+							<input type="checkbox" name="checkedIds" value="leave_${e.leaveId}">
+							<#else>
+							<input type="checkbox" disabled="disabled">
+							</#if>
+							</td>
+							<td width=""><a href="/adm/salary/leave/approve/add?leaveId=${e.leaveId}">${e.subject}</a></td>
+							<td width="15%">${e.trueName}</td>
+							<td width="15%"><#if e.createTime??>${e.createTime?datetime}</#if></td>
+							<td width="15%">
+							<a href="javascript: ajax_actors('/adm/salary/leave/approve/actors?leaveId=${e.leaveId}', 'leave', '${i}')" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a>
+							</td>
+						</tr>
+							<#assign i = i + 1 />
+							</#list>
+						</#if>
+						
+						<#if resign?size gt 0>
+							<#assign len = len + resign?size />
+							<#list resign as e>
+						<tr>
+							<td width="26">
+							<#if e.approve == 0>
+							<input type="checkbox" name="checkedIds" value="resign_${e.resignId}">
+							<#else>
+							<input type="checkbox" disabled="disabled">
+							</#if>
+							</td>
+							<td width=""><a href="/hrm/resign/approve/add?resignId=${e.resignId}">${e.subject}</a></td>
+							<td width="15%">${e.trueName}</td>
+							<td width="15%"><#if e.createTime??>${e.createTime?datetime}</#if></td>
+							<td width="15%">
+							<a href="javascript: ajax_actors('/hrm/resign/approve/actors?resignId=${e.resignId}', 'regign', '${i}')" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a>
+							</td>
+						</tr>
+							<#assign i = i + 1 />
+							</#list>
+						</#if>
+						
+						<#if regular?size gt 0>
+							<#assign len = len + regular?size />
+							<#list regular as e>
+						<tr>
+							<td width="26">
+							<#if e.approve == 0>
+							<input type="checkbox" name="checkedIds" value="regular_${e.resignId}">
+							<#else>
+							<input type="checkbox" disabled="disabled">
+							</#if>
+							</td>
+							<td width=""><a href="/hrm/regular/approve/add?resignId=${e.resignId}">${e.subject}</a></td>
+							<td width="15%">${e.trueName}</td>
+							<td width="15%"><#if e.createTime??>${e.createTime?datetime}</#if></td>
+							<td width="15%">
+							<a href="javascript: ajax_actors('/hrm/regular/approve/actors?resignId=${e.resignId}', 'regign', '${i}')" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a>
+							</td>
+						</tr>
+							<#assign i = i + 1 />
+							</#list>
+						</#if>
+						
+						<#if warn?size gt 0>
+							<#assign len = len + warn?size />
+							<#list warn as e>
+						<tr>
+							<td width="26">
+							<#if e.approve == 0>
+							<input type="checkbox" name="checkedIds" value="warn_${e.warnId}">
+							<#else>
+							<input type="checkbox" disabled="disabled">
+							</#if>
+							</td>
+							<td width=""><a href="/res/warn/approve/add?warnId=${e.warnId}">${e.subject}</a></td>
+							<td width="15%">${e.trueName}</td>
+							<td width="15%"><#if e.createTime??>${e.createTime?datetime}</#if></td>
+							<td width="15%">
+							<a href="javascript: ajax_actors('/res/warn/approve/actors?warnId=${e.warnId}', 'warn', '${i}')" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a>
+							</td>
+						</tr>
+							<#assign i = i + 1 />
+							</#list>
+						</#if>
+						
+						<#if change?size gt 0>
+							<#assign len = len + change?size />
+							<#list change as e>
+						<tr>
+							<td width="26">
+							<#if e.approve == 0>
+							<input type="checkbox" name="checkedIds" value="change_${e.changeId}">
+							<#else>
+							<input type="checkbox" disabled="disabled">
+							</#if>
+							</td>
+							<td width=""><a href="/res/change/approve/add?changeId=${e.changeId}">${e.subject}</a></td>
+							<td width="15%">${e.trueName}</td>
+							<td width="15%"><#if e.createTime??>${e.createTime?datetime}</#if></td>
+							<td width="15%">
+							<a href="javascript: ajax_actors('/res/change/approve/actors?changeId=${e.changeId}', 'change', '${i}')" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a>
+							</td>
+						</tr>
+							<#assign i = i + 1 />
+							</#list>
+						</#if>
+						
+						<#if errands?size gt 0>
+							<#assign len = len + errands?size />
+							<#list errands as e>
+						<tr>
+							<td width="26">
+							<#if e.approve == 0>
+							<input type="checkbox" name="checkedIds" value="errand_${e.errandId}">
+							<#else>
+							<input type="checkbox" disabled="disabled">
+							</#if>
+							</td>
+							<td width=""><a href="/adm/salary/errand/approve/add?errandId=${e.errandId}">${e.subject}</a></td>
+							<td width="15%">${e.trueName}</td>
+							<td width="15%"><#if e.createTime??>${e.createTime?datetime}</#if></td>
+							<td width="15%">
+							<a href="javascript: actors('${e.opinion}','${e.operator}','${views.approve(e.approve)}','${e.modifyTime?datetime}', '${i}')" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a>
+							</td>
+						</tr>
+							<#assign i = i + 1 />
+							</#list>
+						</#if>
+						<#if outworks?size gt 0>
+							<#assign len = len + outworks?size />
+							<#list outworks as e>
+						<tr>
+							<td width="26">
+							<#if e.approve == 0>
+							<input type="checkbox" name="checkedIds" value="outwork_${e.outworkId}">
+							<#else>
+							<input type="checkbox" disabled="disabled">
+							</#if>
+							</td>
+							<td width=""><a href="/adm/salary/outwork/approve/add?outworkId=${e.outworkId}">${e.subject}</a></td>
+							<td width="15%">${e.trueName}</td>
+							<td width="15%"><#if e.createTime??>${e.createTime?datetime}</#if></td>
+							<td width="15%">
+							<a href="javascript: actors('${e.opinion}','${e.operator}','${views.approve(e.approve)}','${e.modifyTime?datetime}', '${i}')" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a>
+							</td>
+						</tr>
+							<#assign i = i + 1 />
+							</#list>
+						</#if>
+						
+						<#if overtimes?size gt 0>
+							<#assign len = len + overtimes?size />
+							<#list overtimes as e>
+						<#if att!=null>
+						<script>attentime("${e.startTime?datetime}","${att.endDate?datetime}");</script>
+						<#else>
+						<tr>
+						</#if>
+							<td width="26">
+							<#if e.approve == 0>
+							<input type="checkbox" name="checkedIds" value="overtime_${e.overtimeId}">
+							<#else>
+							<input type="checkbox" disabled="disabled">
+							</#if>
+							</td>
+							<td width=""><a href="/adm/salary/overtime/approve/add?overtimeId=${e.overtimeId}">${e.subject}</a></td>
+							<td width="15%">${e.trueName}</td>
+							<td width="15%"><#if e.createTime??>${e.createTime?datetime}</#if></td>
+							<td width="15%">
+							<a href="javascript: ajax_actors('/adm/salary/overtime/approve/actors?overtimeId=${e.overtimeId}', 'overtime', '${i}')" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a>
+							</td>
+						</tr>
+							<#assign i = i + 1 />
+							</#list>
+						</#if>
+						
+						<#if performs?size gt 0>
+							<#assign len = len + performs?size />
+							<#list performs as e>
+						<tr>
+							<td width="26">
+							<#if e.approve == 0>
+							<input type="checkbox" name="checkedIds" value="perform_${e.performId}">
+							<#else>
+							<input type="checkbox" disabled="disabled">
+							</#if>
+							</td>
+							<td width="">
+								<a href="/adm/examine/perform/approve/add?performId=${e.performId}">${e.subject}</a>
+								&nbsp;
+								<a href="javascript: ajax_nodes('/adm/examine/perform/apply/nodes?performId=${e.performId}', 'perform', '${i}')" title="考核目标"><img id="nodes_${i}" src="${ctx}/img/icons/many.png" style="vertical-align: middle;"></a>
+							</td>
+							<td width="15%">${e.trueName}</td>
+							<td width="15%"><#if e.createTime??>${e.createTime?datetime}</#if></td>
+							<td width="15%">
+							<a href="javascript: ajax_actors('/adm/examine/perform/approve/actors?performId=${e.performId}', 'perform', '${i}')" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a>
+							</td>
+						</tr>
+							<#assign i = i + 1 />
+							</#list>
+						</#if>
+						<#if reimburses?size gt 0>
+							<#assign len = len + reimburses?size />
+							<#list reimburses as e>
+						<tr>
+							<td width="26">
+							<#if e.approve == 0>
+							<input type="checkbox" name="checkedIds" value="reimburse_${e.reimburseId}">
+							<#else>
+							<input type="checkbox" disabled="disabled">
+							</#if>
+							</td>
+							<td width="">
+							<a href="/adm/expense/reimburse/approve/add?reimburseId=${e.reimburseId}">${e.subject}</a>
+							</td>
+							<td width="15%">${e.trueName}</td>
+							<td width="15%"><#if e.createTime??>${e.createTime?datetime}</#if></td>
+							<td width="15%">
+							<a href="javascript: ajax_actors('/adm/expense/reimburse/approve/actors?reimburseId=${e.reimburseId}', 'reimburse', '${i}')" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a>
+							</td>
+						</tr>
+							<#assign i = i + 1 />
+							</#list>
+						</#if>
+						<#if borrows?size gt 0>
+							<#assign len = len + borrows?size />
+							<#list borrows as e>
+						<tr>
+							<td width="26">
+							<#if e.approve == 0>
+							<input type="checkbox" name="checkedIds" value="borrow_${e.borrowId}">
+							<#else>
+							<input type="checkbox" disabled="disabled">
+							</#if>
+							</td>
+							<td width="">
+							<a href="/adm/expense/borrow/approve/add?borrowId=${e.borrowId}">${e.subject}</a>
+							</td>
+							<td width="15%">${e.trueName}</td>
+							<td width="15%"><#if e.createTime??>${e.createTime?datetime}</#if></td>
+							<td width="15%">
+							<a href="javascript: ajax_actors('/adm/expense/borrow/approve/actors?borrowId=${e.borrowId}', 'borrow', '${i}')" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a>
+							</td>
+						</tr>
+							<#assign i = i + 1 />
+							</#list>
+						</#if>
+						<#if tickets?size gt 0>
+							<#assign len = len + tickets?size />
+							<#list tickets as e>
+						<tr>
+							<td width="26">
+							<#if e.approve == 0>
+							<input type="checkbox" name="checkedIds" value="ticket_${e.ticketId}">
+							<#else>
+							<input type="checkbox" disabled="disabled">
+							</#if>
+							</td>
+							<td width="">
+							<a href="/res/ticket/approve/add?ticketId=${e.ticketId}">${e.subject}</a>
+							</td>
+							<td width="15%">${e.trueName}</td>
+							<td width="15%"><#if e.createTime??>${e.createTime?datetime}</#if></td>
+							<td width="15%">
+							<a href="javascript: ajax_actors('/res/ticket/approve/actors?ticketId=${e.ticketId}', 'ticket', '${i}')" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a>
+							</td>
+						</tr>
+							<#assign i = i + 1 />
+							</#list>
+						</#if>
+						<#if works?size gt 0>
+							<#assign len = len + works?size />
+							<#list works as e>
+						<tr>
+							<td width="26"><input type="checkbox" name="checkedIds" value="order_${e.id}"></td>
+							<td width="">
+								<a href="${ctx}/flow/form/all?processId=${e.processId}&orderId=${e.orderId}&type=send">${e.processName}_${e.orderNo}</a>
+								&nbsp;&nbsp;
+								<a href="javascript:open_flow('${e.orderId}')" title="流程图"><img src="${ctx}/img/icons/wf_view.png" style="vertical-align: middle;"></a>
+							</td>
+							<td width="15%">${userMap[e.creator]}</td>
+							<td width="15%">${e.orderCreateTime?substring(0,16)}</td>
+							<td width="15%">
+							<a href="javascript: flow_actors('${e.orderId}', '${i}')" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a>
+							</td>
+						</tr>
+							<#assign i = i + 1 />
+							</#list>
+						</#if>
+					</tbody>
+				</table>
+			</div>
+			<#if len lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<div id="page" class="clearfix">
+				<div class="left">
+					<span>共${len}条记录</span>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div id="actors_pop" class="pop bind" style="display: none; width: 278px;">
+		<div class="pop_content" style="padding: 0;">
+			<div class="auto_height xl">
+		   		<table class="table">
+		   		</table>
+			</div>
+		</div>
+	</div>
+	
+	<div id="nodes_pop" class="pop bind" style="display: none; width: 378px;">
+		<div class="pop_content" style="padding: 0;">
+			<div class="auto_height xl">
+		   		<table class="table">
+		   		</table>
+			</div>
+		</div>
+	</div>
+	
+	<div id="flow_pop" class="pop" style="display: none; width: 918px;"></div>
+	
+	<script type="text/javascript">
+		function actors(opinion, actorName, approve, modifyTime, _id) {
+			close_pop();
+			$("#actors_pop .table").empty();
+			var text = "";
+			text += "<tr>";
+			text += "<th>操作人</th><th>操作内容</th><th>审批意见</th><th>操作时间</th>";
+			text += "</tr>";
+			text += "<tr>";
+			text += "<td>" + actorName + "</td>";
+			text += "<td>" + approve + "</td>";
+			text += "<td>" + opinion + "</td>";
+			text += "<td>" + modifyTime + "</td>";
+			text += "</tr>";
+			$("#actors_pop .table").append(text);
+			open_pop(null,"#actors_"+_id,"#actors_pop",false);
+		}
+		
+		function ajax_actors(url, t, _id) {
+			close_pop();
+			$.ajax({
+				url: url + "&token=${token}",
+				type: "post",
+				dataType: "json",
+				success: function(data) {
+					if (data.code == 1) {
+						$("#actors_pop .table").empty();
+						var text = "";
+						text += "<tr>";
+						text += "<th>操作人</th><th>操作内容</th><th>审批意见</th><th>操作时间</th>";
+						text += "</tr>";
+						if (data.actors.length == 0) {
+							text += "<tr>";
+							text += "<td colspan=\"3\">-</td>";
+							text += "</tr>";
+						} else {
+							$.each(data.actors, function(idx, obj) {
+								var approve = "";
+								var modifyTime = obj.modifyTime.substring(0, 16);
+								if (obj.approve == 1) {
+									if (t == "perform" && obj.variable == "self") approve = "同意";
+									else approve = "已批准";
+								} else if (obj.approve == -1) {
+									if (t == "perform" && obj.variable == "self") approve = "不同意";
+									else approve = "未批准";
+								} else {
+									if (t == "perform" && obj.variable == "self") approve = "待处理";
+									else approve = "待审批";
+									modifyTime = "-";
+								}
+								
+								text += "<tr>";
+								text += "<td>" + obj.actorName + "</td>";
+								text += "<td>" + approve + "</td>";
+								text += "<td>" + obj.opinion + "</td>";
+								text += "<td>" + modifyTime + "</td>";
+								text += "</tr>";
+							});
+						}
+						$("#actors_pop .table").append(text);
+					} else {
+						danger(1, data.message);
+					}
+				}
+			});
+			open_pop(null,"#actors_"+_id,"#actors_pop",false);
+		}
+		
+		function ajax_nodes(url, t, _id) {
+			close_pop();
+			$.ajax({
+				url: url + "&token=${token}",
+				type: "post",
+				dataType: "json",
+				success: function(data) {
+					if (data.code == 1) {
+						$("#nodes_pop .table").empty();
+						var userId = "${currentUser.userId}";
+						var text = "";
+						text += "<tr>";
+						text += "<th width=\"\">目标</th><th width=\"20%\">权重</th><th width=\"20%\">本人评分</th><th width=\"20%\">上级评分</th>";
+						text += "</tr>";
+						$.each(data.nodes, function(idx, obj) {
+							var myScore = "-";
+							var score = "-";
+							if (obj.version == "1" && obj.approved != "0")
+								myScore = obj.myScore;
+							if (obj.version == "1" && obj.approved != "0" && (userId == obj.userId || "${isPerform}" == "false"))
+								score = obj.score;
+							text += "<tr>";
+							text += "<td style=\"text-align: left; padding-left: 6px;\">" + obj.content + "</td>";
+							text += "<td>" + obj.weight + "</td>";
+							text += "<td>" + myScore + "</td>";
+							text += "<td>" + score + "</td>";
+							text += "</tr>";
+						});
+						$("#nodes_pop .table").append(text);
+					} else {
+						danger(1, data.message);
+					}
+				}
+			});
+			open_pop(null,"#nodes_"+_id,"#nodes_pop",false);
+		}
+		
+		function flow_actors(id, _id) {
+			close_pop();
+			$("#actors_pop .table").empty();
+			
+			$.ajax({
+				url: "/flow/task/actors?orderId=" + id + "&token=${token}",
+				type: "post",
+				dataType: "json",
+				success: function(data) {
+					if (data.code == 1) {
+						$("#actors_pop .table").empty();
+						var text = "";
+						text += "<tr>";
+						text += "<th>操作人</th><th>操作内容</th><th>操作时间</th>";
+						text += "</tr>";
+						
+						$.each(data.actors, function(idx, obj) {
+							text += "<tr>";
+							text += "<td>" + obj.operator + "</td>";
+							text += "<td>" + obj.content + "</td>";
+							text += "<td>" + obj.modifyTime.substring(0,16) + "</td>";
+							text += "</tr>";
+						});
+						$("#actors_pop .table").append(text);
+					} else {
+						danger(1, data.message);
+					}
+				}
+			});
+			
+			open_pop(null,"#actors_"+_id,"#actors_pop",false);
+		};
+		
+		function open_flow(id) {
+			open_pop("${ctx}/flow/process/view?orderId=" + id,null,"#flow_pop",true);
+		}
+	</script>
+</body>
+</html>

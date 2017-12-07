@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 通讯录</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.css" />
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/layer.m/layer.m.js"></script>
+	<style type="text/css">
+	.headImg{width: 100x;float: right;margin-right: 15%;}
+	.groupName{width: 70%;}
+	.groupName div{margin-top: 10px;}
+	.nonessary{width: 95%}
+	.nonessary ul li{list-style-type: none}
+	</style>
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+			<div id="form" class="clearfix" style="width:95%;margin: auto;">
+				<form action="useradd" method="post">
+				<input type="hidden" name="token" value="${token}">
+				<input type="hidden" name="uuserid" value="${addressUser.u_userid}">
+				
+				<div class="ui-grid-a">
+					<div class="ui-block-a">
+						<div class="headImg">
+							<img src="${ctx}/img/head.jpg" width="100px" height="100px;" style="float: right;" />
+						</div>
+					</div>
+					<div class="ui-block-b">
+						<div class="groupName">
+							<div class="group">
+								<input type="hidden" name="groupId" value="${group.groupid}">
+								<div id="groupId" class="select xl" style="width: 120px;border-radius:5px;position: absolute;">
+									<span class="option text">
+									请选择
+									</span><span class="icon"></span>
+									<ul class="auto_height sm">
+										<#list groups as e>
+										<li item="${e.groupid}">${e.name}</li>										
+										</#list>
+									</ul>
+								</div>
+							</div>
+							<div class="name" style="padding-top: 45px;">
+								<input type="text" class="input xl" style="width: 110px;border-radius:5px;" name="username" value="${addressUser.username}" placeholder="成员名字" data-role="none">
+								<input type="hidden" name="orgResourceName" value="">
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="nonessary">
+					<ul>
+						<li>
+							<input type="text" class="input xl" name="relation" value="${addressUser.relation}" placeholder="成员关系">
+							<input type="hidden" name="orgResourceName" value="">
+						</li>
+						<li>
+							<input type="text" class="input xl" name="position" value="${addressUser.position}" placeholder="成员职务">
+							<input type="hidden" name="orgResourceName" value="">
+						</li>
+						<li>
+							<input type="text" class="input xl" name="phone" value="${addressUser.phone}" placeholder="成员电话">
+							<input type="hidden" name="orgResourceName" value="">
+						</li>
+						<li>
+							<input type="text" class="input xl" name="qq" value="${addressUser.qq}" placeholder="成员QQ">
+							<input type="hidden" name="orgResourceName" value="">
+						</li>
+						<li>
+							<input type="text" class="input xl" name="email" value="${addressUser.email}" placeholder="成员Email">
+							<input type="hidden" name="orgResourceName" value="">
+						</li>
+						<li>
+							<input type="text" class="input xl" name="exigency_phone" value="${addressUser.exigencyphone}" placeholder="紧急联系人">
+							<input type="hidden" name="orgResourceName" value="">
+						</li>
+						<li><button type="submit" class="ui-btn ui-corner-all">提交</button></li>
+					</ul>
+				</div>
+				
+				</form>
+			</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+		
+			jQuery.mobile.ajaxEnabled = false;
+		
+			$("#groupId").select({ "name": "groupId" });
+			$("form").ajaxForm({
+				url: "useradd",
+				type: "post",
+				resetForm: false,
+				dataType: "json",				
+				success: function(data) {
+					if (data.code == 1) {
+ 						layer.open({
+ 							content:data.message,
+ 							btns:1,
+ 							shaeClose:false,
+ 							btn:["确定"],
+ 							yes:function(){
+ 								window.location.href="wxpage";
+ 							}
+ 						});
+					} else {
+						layer.open({
+ 							content:data.message,
+ 							time:2
+ 						});
+					}
+				}
+			});
+		});
+	</script>
+</body>
+</html>

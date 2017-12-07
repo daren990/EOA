@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if asset.assetId??>编辑<#else>新建</#if>资产</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit">
+			<div id="form" class="clearfix" style="width: 460px;">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="assetId" value="${asset.assetId}">
+					<table class="table">
+						<tr>
+							<td>资产名称：</td>
+							<td class="required">*</td>
+							<td colspan="4">
+								<input type="text" class="input xl" name="assetName" value="${asset.assetName}">
+							</td>
+						</tr>
+						<tr>
+							<td>资产型号：</td>
+							<td class="required"></td>
+							<td colspan="4">
+								<input type="text" class="input xl" name="model" value="${asset.model}">
+							</td>
+						</tr>
+						<tr>
+							<td>资产类型：</td>
+							<td class="required">*</td>
+							<td colspan="4">
+								<input type="hidden" name="typeId" value="${asset.typeId}">
+								<div id="typeId" class="select xl">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<#list assetMap?keys as e>
+										<li item="${e}">${assetMap[e]}</li>
+										</#list>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						
+						<tr>
+							<td>保管人：</td>
+							<td class="required"></td>
+							<td colspan="4">
+								<input type="text" class="input xl" name="custodian" value="${asset.custodian}">
+							</td>
+						</tr>
+						<tr>
+							<td>数量：</td>
+							<td class="required">*</td>
+							<td colspan="4">
+								<input type="text" class="input xl" name="amount" value="${asset.amount}">
+							</td>
+						</tr>
+						<tr>
+							<td>单位：</td>
+							<td class="required">*</td>
+							<td colspan="4">
+								<input type="text" class="input xl" name="unit" value="${asset.unit}">
+							</td>
+						</tr>
+						<tr>
+							<td>单价（<span class="required">元</span>）：</td>
+							<td class="required">*</td>
+							<td colspan="4">
+								<input type="text"  class="input xl price" name="price" value="${asset.price}">
+							</td>
+						</tr>
+						<tr>
+							<td>存放地点：</td>
+							<td class="required">*</td>
+							<td colspan="4">
+								<input type="text" class="input xl" name="storagePlace" value="${asset.storagePlace}">
+							</td>
+						</tr>
+						<tr>
+							<td>购买时间：</td>
+							<td class="required">*</td>
+							<td >
+								<#if asset.shopTime??><#assign shopTime_yyyyMMdd = asset.shopTime?date /></#if>
+								<input type="text" class="input sm Wdate" name="shopTime_yyyyMMdd" value="${shopTime_yyyyMMdd?default('')}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							</td>
+							
+							<td>使用年限：</td>
+							<td class="required">*</td>
+							<td>
+								<#if asset.planAge??><#assign planage_yyyyMMdd = asset.planAge?date /></#if>
+								<input type="text" class="input sm Wdate" name="planAge_yyyyMMdd" value="${planage_yyyyMMdd?default('')}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							</td>
+						
+						</tr>
+						<tr>
+							<td>状态：</td>
+							<td class="required">*</td>
+							<td colspan="4">
+								<input type="hidden" name="status" value="${asset.status?default(1)}" />
+								<div id="status" class="select xl">
+									<span class="option text">启用</span><span class="icon"></span>
+									<ul>
+										<li item="0">禁用</li>
+										<li item="1">启用</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			/* 资产单价显示小数 */
+			$(".price").each(function(){
+				var pr = $(this).val();
+				var point = pr.length-2;
+				var smallpart = pr.substr(point);
+				var intpart = pr.substr(0,point);
+				$(this).val(intpart+"."+smallpart);
+			});
+  			$("#typeId").select({ "name": "typeId" });
+  			$("#status").select({ "name": "status" });
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.planAge_yyyyMMdd, [RQ], "计划使用年限");
+						validate(form.storagePlace, [RQ], "存放地点");
+						validate(form.shopTime_yyyyMMdd, [RQ], "购买时间");
+						validate(form.assetName, [RQ], "资产名称");
+						validate(form.typeId, [RQ], "资产类型");
+						validate(form.amount, [RQ], "数量");
+						validate(form.unit, [RQ], "单位");
+						validate(form.price, [RQ], "单价");
+						validate(form.status, [RQ], "状态");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+	</script>
+</body>
+</html>

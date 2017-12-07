@@ -1,0 +1,46 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>404</title>
+<style>
+	* {
+		margin: 0;
+		padding: 0;
+	}
+	body {
+		position: relative;
+		font: 12px Arial, Helvetica, sans-serif;
+		color: #333;
+	}
+	#error_404 {
+		margin-top: 16%;
+		padding: 60px 0 30px 0;
+		border-top: 2px solid #000;
+		border-bottom: 2px solid #000;
+		text-align: center;
+		line-height: 24px;
+		background: url(/img/logo.png) no-repeat center 20px;
+	}
+	#error_404 h2 {
+		font-size: 12px;
+		font-weight: bolder;
+	}
+</style>
+</head>
+
+<body>
+	<div id="error_404">
+		<h2>您访问的页面没有找到</h2>
+		对不起，您访问的记录可能已经删除或者已失效。<br />
+		<a href="javascript:void(0);" onclick="javascript:history.go(-1);">返回上页</a>
+		&nbsp;
+		<a href="/">返回首页</a><br />
+	</div>
+	<script type="text/javascript">
+		if (window.top != window.self) {
+			window.top.location.assign("/404");
+		}
+	</script>
+</body>
+</html>

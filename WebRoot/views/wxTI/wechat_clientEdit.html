@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>详细信息</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+		<!--标准mui.css-->
+		<link rel="stylesheet" href="${ctx}/jw_js_css_img/mui/css/mui.min.css">
+		<link rel="stylesheet" href="${ctx}/jw_js_css_img/mui/css/mui.poppicker.css">
+		<link rel="stylesheet" href="${ctx}/jw_js_css_img/mui/css/mui.picker.min.css">
+		<script src="${ctx}/jw_js_css_img/mui/js/mui.min.js"></script>
+		<script src="${ctx}/jw_js_css_img/mui/js/mui.picker.min.js"></script>
+		<script src="${ctx}/jw_js_css_img/mui/js/mui.poppicker.js"></script>
+		<!--App自定义的css-->
+		<!-- <link rel="stylesheet" type="text/css" href="../css/app.css" /> -->
+		<style>
+			h5 {
+				margin: 5px 7px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">资料编辑</h1>
+		</header>
+		<div class="mui-content">
+			<div class="mui-content-padded" style="margin: 5px;">
+				<form class="mui-input-group" id="userForm">
+					<input type="hidden" value="${org_id}" name="org_id"></input>
+					<div class="mui-input-row">
+						<label>姓名</label>
+						<input type="text" class="mui-input-clear" name="truename" value="${sc.truename}" placeholder="">
+					</div>
+					<div class="mui-input-row">
+						<label>性别</label>
+						<#if sc.sex??>
+							<#if sc.sex == 1>
+								<#assign sex = "男" />
+							</#if>
+							<#if sc.sex == 0>
+								<#assign sex = "女" />
+							</#if>
+						</#if>
+						<input type="text" id="pickSexInput" class="mui-input-clear" name="xxx" value="${sex?default('请选择')}" readonly="readonly" placeholder="">
+						<input type="hidden" id="pickSexInputHidden" class="mui-input-clear" name="sex" value="${sc.sex}" placeholder="">
+					</div>
+
+					<div class="mui-input-row">
+						<label>生日</label>
+						<#if sc.birthday??>
+						<#assign birthday_yyyyMMdd = sc.birthday?date />
+						</#if>
+						<input type="text" id='pickDateInput' class="mui-input-clear" readonly="readonly" name="birthday_yyyyMMdd" value="${birthday_yyyyMMdd?default('请选择')}" placeholder="">
+					</div>
+
+					<div class="mui-input-row">
+						<label>电话</label>
+						<input type="text" class="mui-input-clear" name="telephone" value="${sc.telephone}" placeholder="">
+					</div>
+					<div class="mui-input-row">
+						<label>地址</label>
+						<input type="text" class="mui-input-clear" name="address" value="${sc.address}" placeholder="">
+					</div>
+
+					<div class="mui-button-row">
+						&nbsp;&nbsp;<button type="button" class="mui-btn mui-btn-primary" onclick="send()">提交</button>&nbsp;&nbsp;
+					</div>
+				</form>
+			</div>
+		</div>
+		
+		<script>
+			mui.init({
+				swipeBack: true //启用右滑关闭功能
+			});
+
+			var nativeWebview, imm, InputMethodManager;	
+			var initNativeObjects = function() {
+				if (mui.os.android) {
+					var main = plus.android.runtimeMainActivity();
+					var Context = plus.android.importClass("android.content.Context");
+					InputMethodManager = plus.android.importClass("android.view.inputmethod.InputMethodManager");
+					imm = main.getSystemService(Context.INPUT_METHOD_SERVICE);
+				} else {
+					nativeWebview = plus.webview.currentWebview().nativeInstanceObject();
+				}
+ 			};
+			mui.plusReady(function() {
+				initNativeObjects();
+			});
+			
+			//发送ajax请求
+			function send() {
+				var elements = getElements("userForm");
+				str = "{";
+				split = "";
+				for (var i = 0; i < elements.length; i++) {  
+					str = str + split  + elements[i].name + ":"+ "\'" + elements[i].value + "\'";
+					split = ",";
+				} 
+ 				str = str + "}"
+				
+				var data = eval('(' + str + ')'); 
+  				console.log(str);  
+				
+				//成功响应的回调函数
+				var success = function(dataObj,textStatus,xhr) {
+/* 					var dataObj = eval('(' + data2 + ')'); */
+					if(dataObj.status == 1){
+						//提示编辑成功，并且跳转到首页		
+						mui.toast('编辑成功');
+						window.location.href = '${ctx}/wx/index/indexPage?org_id=${org_id}';
+					}else{
+						window.location.href = '${ctx}/wx/client/editPage?org_id=${org_id}';
+						mui.toast('编辑失败');
+					}
+				};
+
+				//利用RunJS的Echo Ajax功能测试
+				var url = '';
+				//请求方式，默认为Get；
+				var type = 'post';
+				//预期服务器范围的数据类型
+				var dataType = 'json';
+				//发送数据
+				mui.ajax('${ctx}/wx/client/edit', {
+					data:data,
+					dataType:'json',//服务器返回json格式数据
+					type:'post',//HTTP请求类型
+					timeout:20000,//超时时间设置为10秒；
+					success:success,
+					error:function(xhr,type,errorThrown){
+						//异常处理；
+						window.location.href = '${ctx}/wx/client/editPage?org_id=${org_id}';
+						mui.toast('编辑失败');
+					}
+				});
+			};
+		
+			//获取指定form中的所有的<input>对象  
+			function getElements(formId) {  
+			  	var form = document.getElementById(formId);  
+			  	var elements = new Array();  
+			 	var tagElements = form.getElementsByTagName('input');  
+			 	for (var j = 0; j < tagElements.length; j++){ 
+			 	   elements.push(tagElements[j]); 
+			 	} 
+				return elements;  
+			}
+			
+			document.getElementById("pickDateInput").addEventListener('tap', function() {
+				var dtPicker = new mui.DtPicker({ 
+				    "type": "date",
+				    "beginDate" : new Date(1949, 04, 25),
+				    "endDate" : new Date()
+				}); 
+			    dtPicker.show(function (selectItems) {
+			    	document.getElementById("pickDateInput").value = selectItems.y.value + "-" + selectItems.m.value + "-" + selectItems.d.value;
+			    })
+			});
+			
+			document.getElementById("pickSexInput").addEventListener('tap', function() {
+				var picker = new mui.PopPicker();
+			 	picker.setData([{value:'1',text:'男'}, {value:'0',text:'女'}]);
+				picker.show(function (selectItems) {
+					document.getElementById("pickSexInputHidden").value = selectItems[0].value;
+					document.getElementById("pickSexInput").value = selectItems[0].text;
+			  	})
+			});
+
+
+			
+			//验证input中的内容
+/* 			function input(element) {  
+  switch (element.type.toLowerCase()) {  
+   case 'submit':  
+   case 'hidden':  
+   case 'password':  
+   case 'text':  
+    return [element.name, element.value];  
+   case 'checkbox':  
+   case 'radio':  
+    return inputSelector(element);  
+  }  
+  return false;  
+}   */
+
+		</script>
+	</body>
+
+</html>

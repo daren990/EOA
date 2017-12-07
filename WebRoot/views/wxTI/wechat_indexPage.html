@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="zh-cn">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>首页</title>
+<!--标准mui.css-->
+<link rel="stylesheet" href="${ctx}/jw_js_css_img/mui/css/mui.min.css">
+<link rel="stylesheet" href="${ctx}/jw_js_css_img/mui/css/app.css">
+<link href="${ctx}/jw_js_css_img/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body>							
+	<input type="hidden" value="${org_id}" id="org_id" />
+	<nav class="mui-bar mui-bar-tab">
+		<a class="mui-tab-item" href="#index_div" id="index_div_click">
+			<span class="fa fa-cubes"></span>
+			<span class="mui-tab-label">功能</span>
+		</a>
+		<a class="mui-tab-item" href="#mine_div" id="mine_div_click">
+			<span class="fa fa-gears"></span>
+			<span class="mui-tab-label">信息</span>
+		</a>
+	</nav>
+	<div class="mui-content">
+		<div id="index_div" class="mui-control-content">
+			<div id="slider" class="mui-slider">
+				<div class="mui-slider-group mui-slider-loop">
+					<!-- 额外增加的一个节点(循环轮播：第一个节点是最后一张轮播) -->
+					<div class="mui-slider-item mui-slider-item-duplicate">
+						<img src="${ctx}/jw_js_css_img/img/wechatImg/${last.imgPath}" height="200px">
+					</div>
+					<#list nodes as img>
+						<div class="mui-slider-item">
+						<img src="${ctx}/jw_js_css_img/img/wechatImg/${img.imgPath}" height="200px">
+						</div>
+					</#list>
+					<!-- 额外增加的一个节点(循环轮播：最后一个节点是第一张轮播) -->
+					<div class="mui-slider-item mui-slider-item-duplicate">
+						<img src="${ctx}/jw_js_css_img/img/wechatImg/${first.imgPath}" height="200px">
+					</div>
+				</div>
+				<div class="mui-slider-indicator">
+					<#list nodes as img>
+						<#if img_index = 0>
+							<div class="mui-indicator mui-active"></div>
+							<#else>
+							<div class="mui-indicator"></div>
+						</#if>
+					</#list>
+				</div>
+			</div>
+			<div class="mui-content">
+				<ul class="mui-table-view mui-grid-view mui-grid-9" style="margin-top: 0px;">
+					<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3">
+						<a href="/wx/student/page?org_id=${org_id}&flag=schedule">
+							<span class="fa fa-calendar fa-2x extend-mui-text-primary"></span>
+							<div class="mui-media-body">查看课表</div>
+						</a>
+					</li>
+					<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3">
+						<a href="/wx/product/list?org_id=${org_id}">
+							<span class="fa fa-braille fa-2x extend-mui-btn-danger"></span>
+							<div class="mui-media-body">购买课程</div>
+						</a>
+					</li>
+					<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3">
+						<a href="/wx/order/list?org_id=${org_id}">
+							<span class="fa fa-credit-card fa-2x extend-mui-text-blackgray"></span>
+							<div class="mui-media-body">缴费信息</div>
+						</a>
+					</li>
+					<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3">
+						<a href="/wx/student/page?org_id=${org_id}&flag=rateSign">
+							<span class="fa fa-star-half-empty fa-2x extend-mui-btn-success"></span>
+							<div class="mui-media-body">课堂评价</div>
+						</a>
+					</li>
+					<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3">
+						<a href="/wx/student/page?org_id=${org_id}&flag=course">
+							<span class="fa fa-building fa-2x extend-mui-btn-warning"></span>
+							<div class="mui-media-body">上课统计</div>
+						</a>
+					</li>
+					<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3">
+						<a href="#">
+							<span class="fa fa-bell-o fa-2x extend-mui-btn-royal"></span>
+							<div class="mui-media-body">老师通知</div>
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<div id="mine_div" class="mui-control-content">
+				
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell mui-media">
+					<a href="${ctx}/wx/client/editPage?org_id=${org_id}">
+			 			<img class="mui-media-object mui-pull-left head-img" id="head-img" src="${ctx}/img/logo1.png">
+						<div class="mui-media-body">
+							${sc.truename}
+							<p class='mui-ellipsis'>联系方式:${sc.telephone}</p>
+						</div>
+					</a>
+				</li>
+				<li class="mui-table-view-cell">
+					<a href="${ctx}/wx/client/editPage?org_id=${org_id}">
+						详细信息
+					</a>
+				</li>
+			</ul>
+			
+<!-- 			<ul class="mui-table-view" style="margin-top: 25px;">
+	
+				<li class="mui-table-view-cell">
+					<a class="mui-navigate-right" href="/wx/student/page?org_id=${org_id}&flag=course">
+						上课统计
+					</a>
+				</li>
+	
+
+			</ul> -->
+			
+<!--  			<ul class="mui-table-view" style="margin-top: 25px;">
+				<li class="mui-table-view-cell">
+					<a class="mui-navigate-right">
+						关于mui
+					</a>
+				</li>
+			</ul> --> 
+		</div>
+	</div>
+</body>
+<script src="${ctx}/jw_js_css_img/mui/js/mui.min.js"></script>
+<script type="text/javascript" charset="utf-8">
+	
+	mui.init({
+		swipeBack:true //启用右滑关闭功能
+	});
+	var slider = mui("#slider");
+	slider.slider({
+		interval: 3000
+	});
+	
+	//让后台记录页面的位置
+	function ajax(div) {
+		
+		//成功响应的回调函数
+		var success = function(response) {};
+		
+		//利用RunJS的Echo Ajax功能测试
+		var url = '';
+		//请求方式，默认为Get；
+		var type = 'get';
+		//预期服务器范围的数据类型
+		var dataType = 'json';
+		//发送数据
+		var data = {
+			div:div
+		};
+		mui.getJSON('${ctx}/wx/index/divMark', data, success);
+	};
+
+	
+	//切换页面的点击事件，记录将会显示哪个页面
+	document.getElementById("mine_div_click").addEventListener('tap', function() {	
+		ajax("mine_div");
+	});
+	document.getElementById("index_div_click").addEventListener('tap', function() {
+		ajax("index_div");
+	});
+	
+	//决定显示哪个区域
+	function divShow(){
+		<#if divMark??>
+		<#if divMark == "mine_div">
+			var obj = document.getElementById("mine_div");
+   			obj.setAttribute("class", "mui-control-content mui-active");
+   			var obj = document.getElementById("mine_div_click");
+   			obj.setAttribute("class", "mui-tab-item mui-active");
+		</#if>
+		<#if divMark == "index_div">
+			var obj = document.getElementById("index_div");
+   			obj.setAttribute("class", "mui-control-content mui-active");
+   			var obj = document.getElementById("index_div_click");
+   			obj.setAttribute("class", "mui-tab-item mui-active");
+		</#if>
+		<#else>
+			var obj = document.getElementById("index_div");
+   			obj.setAttribute("class", "mui-control-content mui-active");
+   			var obj = document.getElementById("index_div_click");
+   			obj.setAttribute("class", "mui-tab-item mui-active");
+		</#if>
+	}
+	
+	divShow();
+	
+	
+</script>
+</html>

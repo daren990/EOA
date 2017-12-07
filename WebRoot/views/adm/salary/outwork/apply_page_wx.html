@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<#include "${ctx}/views/meta.html" />
+	<title>${pageTitle} :: 外勤申请查询</title>
+	<#include "${ctx}/views/css.html" />
+	<#include "${ctx}/views/js.html" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.css" />
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.js"></script>
+	<style type="text/css">
+	.go{display: none}
+	</style>
+</head>
+  <body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<div id="left" class="left">
+				<a href="wxadd" class="apply"><span class="icons icon_add"></span><span class="icons_text">申请</span></a>
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+		<div class="contantdata">
+		<#if page.result?size gt 0>
+			<#list page.result as e>
+				<ul data-role="listview" data-inset="true">
+					<li data-role="list-divider"><input type="hidden" name="checkedIds" value="${e.outworkId}"><#if e.createTime??>${e.createTime?datetime}</#if><span class="ui-li-count" style="background: #EEE"><a href="javascript:open_del('${e.outworkId}');" title="删除"><span class="icons icon_del"></span></a></span></li>
+					<li>
+						<a href="wxadd?outworkId=${e.outworkId}" class="tiao">
+							<h2>${e.subject}</h2>
+							<p><strong>上级审批:${e.operator}</strong></p>
+							<p><strong>审批状态:${views.approve(e.approve)}</strong></p>
+						</a><input type="hidden" value="${e.outworkId}" />
+					</li>
+				</ul>
+			</#list>
+		</#if>
+		</div>
+			<#if page.result?size lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<@fm.page page=page />
+		</div>
+	</div>
+	
+	<div id="del_apply" class="pop" style="display: none; width: 280px;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<div class="pop_title">删除外勤申请</div>
+			<div class="pop_content blank">确定要删除所选外勤申请吗？</div>
+			<div class="pop_btn ">
+				<button type="button" class="ui-btn ui-btn-inline" onclick="del()">确定</button>
+				<button type="button" class="ui-btn ui-btn-inline" onclick="close_pop()">取消</button>
+			</div>
+		</div>				 
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#approve").select({ "name": "approve" });
+		});
+		$(".apply").click(function(){
+			window.location.href="wxadd";
+		});
+		$(".tiao").click(function(){
+			var outworkId = $(this).next().val();
+			window.location.href="wxadd?outworkId="+outworkId;
+		});
+		
+		function open_del(id) {
+			if (id) {
+				get_checked(id);
+			}
+			open_pop(null,null,"#del_apply",true);
+		}
+		function del() {
+			ajax_checked("请选择需要删除的外勤申请", "del?token=${token}","wxpage");
+			close_pop();
+		}
+	</script>
+</body>
+</html>

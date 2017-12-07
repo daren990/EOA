@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ehcache>
+	<diskStore path="java.io.tmpdir" />
+
+	<defaultCache
+		memoryStoreEvictionPolicy="LRU" 
+		eternal="false"
+		maxElementsInMemory="10000" 
+		timeToIdleSeconds="300"
+		timeToLiveSeconds="300" 
+		overflowToDisk="false" 
+		diskPersistent="false" />
+
+	<cache name="resources" 
+		memoryStoreEvictionPolicy="LRU" 
+		eternal="false"
+		maxElementsInMemory="2000" 
+		timeToIdleSeconds="3600"
+		timeToLiveSeconds="3600" 
+		overflowToDisk="false" 
+		diskPersistent="false" />
+		
+	<cache name="roles" 
+		memoryStoreEvictionPolicy="LRU" 
+		eternal="false"
+		maxElementsInMemory="2000" 
+		timeToIdleSeconds="3600"
+		timeToLiveSeconds="3600" 
+		overflowToDisk="false" 
+		diskPersistent="false" />
+		
+	<cache name="works" 
+		memoryStoreEvictionPolicy="LRU" 
+		eternal="false"
+		maxElementsInMemory="2000" 
+		timeToIdleSeconds="3600"
+		timeToLiveSeconds="3600" 
+		overflowToDisk="true" 
+		diskPersistent="false" />
+		
+</ehcache>

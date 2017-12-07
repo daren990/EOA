@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if threshold.thresholdId??>新建<#else>编辑</#if>考勤阀值</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit">
+			<div id="form" class="clearfix" style="width: 500px;">
+				<form action="add" method="post">
+				<input type="hidden" name="thresholdId" value="${threshold.thresholdId}">
+					<input type="hidden" name="token" value="${token}">
+					<table class="table">
+						<tr>
+							<td>配置名称：</td>
+							<td class="required">*</td>
+		       				<td colspan="3">
+		       				<input type="text" name="thresholdName" class="input xl" value="${threshold.thresholdName}" style="width: 350px"/>
+		       				</td>
+						</tr>
+						
+						<!-- 迟到早退 -->
+						<#assign i = 100 />
+						<#list lateItem as l>
+						<tr class="target" item="${i}">
+							<td>类型：</td>
+							<td class="required">*</td>
+		       				<td colspan="3">
+		       				<input type="text" name="type_${i}" class="input xl" value="迟到/早退" style="width: 350px" readonly="readonly"/>
+		       				</td>
+		       				<td>
+							<#if i == 100>
+								<button type="button" class="btn default xxxs" onclick="add_late()">+</button>
+								<#else>
+								<button type="button" class="btn default xxxs" onclick="del_late(${i})">-</button>
+							</#if>
+							</td>
+						</tr>
+						<tr class="target" item="${i}">
+							<td>分钟区间：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input sm" name="minuteStart_${i}" value="${l.minuteStart}">
+							</td>
+							<td>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp-</td>
+							<td>
+								<input type="text" class="input sm" name="minuteEnd_${i}" value="${l.minuteEnd}">
+							</td>
+						</tr>
+						<tr class="target" item="${i}">
+							<td>次数区间：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input sm" name="amountStart_${i}" value="${l.amountStart}">
+							</td>
+							<td>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp-</td>
+							<td>
+								<input type="text" class="input sm" name="amountEnd_${i}" value="${l.amountEnd}">
+							</td>
+						</tr>
+						<tr class="target" item="${i}">
+							<td>扣款方式：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="way_${i}" value="${l.way}" />
+								<div id="way_${i}" class="select sm" name="way">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<li item="0">总额</li>
+										<li item="1">每次</li>
+									</ul>
+								</div>
+							</td>
+							<td><input type="text" class="input sm" name="deduct_${i}" value="${l.deduct}"></td>
+							<td>
+								<input type="hidden" name="unit_${i}" value="${l.unit}" />
+								<div id="unit_${i}" class="select sm" name="unit">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<li item="0" onclick="addwageTr(${i},0)">元</li>
+										<li item="1" onclick="addwageTr(${i},1)">天</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<#if l.unit == 1 || (l.unit == null && l.itemId == null)>
+						<tr class="target" item="${i}" id="wageTr_${i}">
+							<td>结算方式：</td>
+							<td class="required">*</td>
+							<td colspan="3">
+								<input type="hidden" name="wageType_${i}" value="${l.wageType}" />
+								<div id="wageType_${i}" name="wageType" class="select xl" style="width: 365px">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<li item="0">基本工资</li>
+										<li item="1">全额工资</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						</#if>
+						<#assign i = i + 1 />
+						</#list>
+						
+						<!-- 未打卡 -->
+						<#assign e = 0 />
+						<#list forgetItem as f>
+						<tr class="forget" item="${e}">
+							<td>类型：</td>
+							<td class="required">*</td>
+		       				<td colspan="3">
+		       				<input type="text" name="forget_${e}" class="input xl" value="未打卡" style="width: 350px" readonly="readonly"/>
+		       				</td>
+		       				<td>
+							<#if e == 0>
+								<button type="button" class="btn default xxxs" onclick="add_forget()">+</button>
+								<#else>
+								<button type="button" class="btn default xxxs" onclick="del_forget(${e})">-</button>
+							</#if>
+							</td>
+						</tr>
+						<tr class="forget" item="${e}">
+							<td>次数区间：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input sm" name="forgetAmountStart_${e}" value="${f.amountStart}">
+							</td>
+							<td>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp-</td>
+							<td>
+								<input type="text" class="input sm" name="forgetAmountEnd_${e}" value="${f.amountEnd}">
+							</td>
+						</tr>
+						<tr class="forget" item="${e}">
+							<td>扣款方式：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="forgetway_${e}" value="${f.way}" />
+								<div id="forgetway_${e}" class="select sm" name="forgetway">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<li item="0">总额</li>
+										<li item="1">每次</li>
+									</ul>
+								</div>
+							</td>
+							<td><input type="text" class="input sm" name="forgetdeduct_${e}" value="${f.deduct}"></td>
+							<td>
+								<input type="hidden" name="forgetunit_${e}" value="${f.unit}" />
+								<div id="forgetunit_${e}" class="select sm" name="forgetunit">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<li item="0" onclick="addwageTr(${e},0)">元</li>
+										<li item="1" onclick="addwageTr(${e},1)">天</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<#if f.unit == 1 || (f.unit == null && f.itemId == null)>
+						<tr class="forget" item="${e}" id="wageTr_${e}">
+							<td>结算方式：</td>
+							<td class="required">*</td>
+							<td colspan="3">
+								<input type="hidden" name="forgetwageType_${e}" value="${f.wageType}" />
+								<div id="forgetwageType_${e}" name="forgetwageType" class="select xl" style="width: 365px">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<li item="0">基本工资</li>
+										<li item="1">全额工资</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						</#if>
+						<#assign e = e + 1 />
+						</#list>
+						
+						<!-- 旷工 -->
+						<#assign a = 200 />
+						<#list absentItem as s>
+						<tr class="absent" item="${a}">
+							<td>类型：</td>
+							<td class="required">*</td>
+		       				<td colspan="3">
+		       				<input type="text" name="absent_${a}" class="input xl" value="旷工（半天）" style="width: 350px" readonly="readonly"/>
+		       				</td>
+		       				<td>
+							<#if a == 200>
+								<button type="button" class="btn default xxxs" onclick="add_absent()">+</button>
+								<#else>
+								<button type="button" class="btn default xxxs" onclick="del_forget(${a})">-</button>
+							</#if>
+							</td>
+						</tr>
+						<tr class="absent" item="${a}">
+							<td>次数区间：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input sm" name="absentAmountStart_${a}" value="${s.amountStart}">
+							</td>
+							<td>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp-</td>
+							<td>
+								<input type="text" class="input sm" name="absentAmountEnd_${a}" value="${s.amountEnd}">
+							</td>
+						</tr>
+						<tr class="absent" item="${a}">
+							<td>扣款方式：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="absentway_${a}" value="${s.way}" />
+								<div id="absentway_${a}" class="select sm" name="absentway">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<li item="0">总额</li>
+										<li item="1">每次</li>
+									</ul>
+								</div>
+							</td>
+							<td><input type="text" class="input sm" name="absentdeduct_${a}" value="${s.deduct}"></td>
+							<td>
+								<input type="hidden" name="absentunit_${a}" value="${s.unit}" />
+								<div id="absentunit_${a}" class="select sm" name="absentunit">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<li item="0" onclick="addwageTr(${a},0)">元</li>
+										<li item="1" onclick="addwageTr(${a},1)">天</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<#if s.unit == 1 || (s.unit == null && s.itemId == null)>
+						<tr class="absent" item="${a}" id="wageTr_${a}">
+							<td>结算方式：</td>
+							<td class="required">*</td>
+							<td colspan="3">
+								<input type="hidden" name="absentwageType_${a}" value="${s.wageType}" />
+								<div id="absentwageType_${a}" name="absentwageType" class="select xl" style="width: 365px">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<li item="0">基本工资</li>
+										<li item="1">全额工资</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						</#if>
+						<#assign a = a + 1 />
+						</#list>
+						
+						<!-- 迟到、早退或未经批准的缺打卡累积 -->
+						<#list accumulateItem as accumulate>
+						<tr class="absent" item="${a}">
+							<td>类型：</td>
+							<td class="required">*</td>
+		       				<td colspan="3">
+		       					<input type="text" name="accumulate_${a}" class="input xl" value="迟到+早退+未经批准的缺打卡累积" style="width: 350px" readonly="readonly"/>
+		       				</td>
+		       				<td>
+							</td>
+						</tr>
+						<tr class="absent" item="${a}">
+							<td>次数区间：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input sm" name="accumulateAmountStart_${a}" value="${accumulate.amountStart}">
+							</td>
+							<td>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp-</td>
+							<td>
+								<input type="text" class="input sm" name="accumulateAmountEnd_${a}" value="${accumulate.amountEnd}">
+							</td>
+						</tr>
+						<tr class="absent" item="${a}">
+							<td>扣款方式：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="accumulateway_${a}" value="${accumulate.way}" />
+								<div id="accumulateway_${a}" class="select sm" name="accumulateway">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<li item="0">总额</li>
+										<li item="1">每次</li>
+										<li item="2">每2次</li>
+										<li item="3">每3次</li>
+										<li item="4">每4次</li>
+										<li item="5">每5次</li>
+									</ul>
+								</div>
+							</td>
+							<td><input type="text" class="input sm" name="accumulatededuct_${a}" value="${accumulate.deduct}"></td>
+							<td>
+								<input type="hidden" name="accumulateunit_${a}" value="${accumulate.unit}" />
+								<div id="accumulateunit_${a}" class="select sm" name="accumulateunit">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<li item="0" onclick="addwageTr(${a},0)">元</li>
+										<li item="1" onclick="addwageTr(${a},1)">天</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr class="absent" item="${a}" id="wageTr_${a}" style="display: <#if accumulate.itemId == null || accumulate.unit == 0>none;</#if>">
+							<td>结算方式：</td>
+							<td class="required">*</td>
+							<td colspan="3">
+								<input type="hidden" name="accumulatewageType_${a}" value="${accumulate.wageType}" />
+								<div id="accumulatewageType_${a}" name="accumulatewageType" class="select xl" style="width: 365px">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<li item="0">基本工资</li>
+										<li item="1">全额工资</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						</#list>
+						
+						<tr>
+							<td class="pos">公司绑定：</td>
+							<td class="pos required"></td>
+							<td colspan="3">
+								<textarea class="xl" id="corpNames" rows="4" readonly="readonly" style="width: 350px">${threshold.corpNames}</textarea>
+								<input type="hidden" name="corpIds" value="${threshold.orgIds}">
+							</td>
+						</tr>
+						<tr>
+							<td colspan="3"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<div id="corp_pop" class="pop bind" style="display: none; width: 318px;">
+		<div class="pop_content" style="padding: 0;">
+			<div class="auto_height sm">
+		   		<ul class="checked">
+		   			<#assign arr = threshold.corpIds?default("")?split(",") />
+				<#list corps as e>
+					<#assign checked = arr?seq_contains(e.orgId?html)?string("checked='checked'", "") />
+					<li><input type="checkbox" name="checkedIds" value="${e.orgId}" title="${e.orgName}" ${checked}><span>${e.orgName}</span></li>
+		   		</#list>
+		   		</ul>
+			</div>
+		</div>
+		<div class="pop_btn">
+			<input type="checkbox" id="checkedIds">
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+	
+		var index = '${lateItem?size}'+99;
+		var forget = '${forgetItem?size}'-1;
+		var absent = '${absentItem?size}'+199;
+	
+		$(document).ready(function() {
+
+			$("div[name='absentway']").each(function(absent){
+				absent = absent + 200;
+				$(this).select({ "name": "absentway_"+absent });
+			});
+			$("div[name='absentunit']").each(function(absent){
+				absent = absent + 200;
+				$(this).select({ "name": "absentunit_"+absent });
+			});
+			$("div[name='absentwageType']").each(function(absent){
+				var i = $(this).attr("id");
+				$(this).select({ "name": i });
+				$(this).select({ "name": i });
+			});
+			
+			$("div[name='way']").each(function(index){
+				index = index + 100;
+				$(this).select({ "name": "way_"+index });
+			});
+			$("div[name='unit']").each(function(index){
+				index = index + 100;
+				$(this).select({ "name": "unit_"+index });
+			});
+			$("div[name='wageType']").each(function(index){
+				var i = $(this).attr("id");
+				$(this).select({ "name": i });
+			});
+			
+			$("div[name='forgetway']").each(function(forget){
+				$(this).select({ "name": "forgetway_"+forget });
+			});
+			$("div[name='forgetunit']").each(function(forget){
+				$(this).select({ "name": "forgetunit_"+forget });
+			});
+			$("div[name='forgetwageType']").each(function(forget){
+				$(this).select({ "name": "forgetwageType_"+forget });
+			});
+			
+			
+			$("div[name='accumulateway']").each(function(index){
+
+				$(this).select({ "name": "accumulateway_"+'${a}' });
+			});
+			$("div[name='accumulateunit']").each(function(index){
+				$(this).select({ "name": "accumulateunit_"+'${a}' });
+			});
+			$("div[name='accumulatewageType']").each(function(index){
+				$(this).select({ "name": "accumulatewageType_"+'${a}' });
+			});
+			
+			$("#corpNames").click(function() {
+ 				open_pop(null,"#corpNames","#corp_pop",false);
+ 				return false;
+ 			});
+	 			
+			$("#checkedIds").click(function() { checkedIds(); });
+			$("input[name=checkedIds]").click(function() {
+				checkedIds();
+			});
+			
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.thresholdName, [RQ], "配置名称");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+		
+		function checkedIds() {
+			var ids = "";
+			var names = "";
+			$("input[name='checkedIds']").each(function() {
+				if ($(this).prop("checked") == true) {
+					ids += $(this).val() + ",";
+					names += $(this).attr("title") + ",";
+				}
+			});
+			$("input[name=corpIds]").val(ids);
+			$("#corpNames").val(names);
+		}
+		function add_late(){
+			index = parseFloat(index) + parseFloat(1);
+			var text="";
+			text += "<tr class=\"target\" item=\"" + index + "\">";
+			text += "<td>类型：</td>";
+			text += "<td class=\"required\">*</td>";
+			text += "<td colspan=\"3\">";
+			text += "<input type=\"text\" name=\"type_" + index + "\" value=\"迟到/早退\" class=\"input xl\" style=\"width: 350px\">\n";
+			text += "</td>";
+			text +="<td>";
+			text +="<button type=\"button\" class=\"btn default xxxs\" onclick=\"del_late(" + index + ")\">-</button>";
+			text +="</td>";
+			text +="</tr>";
+			text += "<tr class=\"target\" item=\"" + index + "\">";
+			text += "<td>分钟区间：</td>";
+			text += "<td class=\"required\">*</td>";
+			text += "<td>";
+			text += "<input type=\"text\" name=\"minuteStart_" + index + "\" value=\"\" class=\"input sm\">\n";
+			text += "</td>";
+			text +="<td>";
+			text +="&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp-"
+			text +="</td>";
+			text += "<td>";
+			text += "<input type=\"text\" name=\"minuteEnd_" + index + "\" value=\"\" class=\"input sm\">\n";
+			text += "</td>";
+			text += "</tr>";
+			
+			text += "<tr class=\"target\" item=\"" + index + "\">";
+			text += "<td>次数区间：</td>";
+			text += "<td class=\"required\">*</td>";
+			text += "<td>";
+			text += "<input type=\"text\" name=\"amountStart_" + index + "\" value=\"\" class=\"input sm\">\n";
+			text += "</td>";
+			text +="<td>";
+			text +="&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp-"
+			text +="</td>";
+			text += "<td>";
+			text += "<input type=\"text\" name=\"amountEnd_" + index + "\" value=\"\" class=\"input sm\">\n";
+			text += "</td>";
+			text += "</tr>";
+			
+			text += "<tr class=\"target\" item=\"" + index + "\">";
+			text += "<td>扣款方式：</td>";
+			text += "<td class=\"required\">*</td>";
+			text += "<td>";
+			text += "<input type=\"hidden\" name=\"way_" + index + "\" value=\"\">\n";
+			text +="<div name='way' id=\"way_" + index + "\" class=\"select sm\">";
+			text +="<span class=\"option text\">请选择</span><span class=\"icon\"></span>";
+			text +="<ul>";
+			text +="<li item=\"0\">总额</li>";
+			text +="<li item=\"1\">每次</li>";
+			text +="</ul>";
+			text +="</div>";
+			text +="</td>";
+			text +="<td>";
+			text += "<input type=\"text\" name=\"deduct_" + index + "\" value=\"\" class=\"input sm\">\n";
+			text +="</td>"
+			text += "<td>";
+			text += "<input type=\"hidden\" name=\"unit_" + index + "\" value=\"\">\n";
+			text +="<div name='unit' id=\"unit_" + index + "\" class=\"select sm\">";
+			text +="<span class=\"option text\">请选择</span><span class=\"icon\"></span>";
+			text +="<ul>";
+			text +="<li item=\"0\" onclick=\"addwageTr("+ "index,0)\">元</li>";
+			text +="<li item=\"1\" onclick=\"addwageTr("+ "index,1)\">天</li>";
+			text +="</ul>";
+			text +="</div>";
+			text +="</td>";
+			text += "</tr>";
+			text += "<tr class=\"target\" item=\"" + index + "\"  id=\"wageTr_" + index + "\">";
+			text += "<td>结算方式：</td>";
+			text += "<td class=\"required\">*</td>";
+			text += "<td colspan=\"3\">";
+			text += "<input type=\"hidden\" name=\"wageType_" + index + "\" value=\"\">\n";
+			text +="<div name='wageType' id=\"wageType_" + index + "\" class=\"select xl\" style=\"width: 365px\">";
+			text +="<span class=\"option text\">请选择</span><span class=\"icon\"></span>";
+			text +="<ul>";
+			text +="<li item=\"0\">基本工资</li>";
+			text +="<li item=\"1\">全额工资</li>";
+			text +="</ul>";
+			text +="</div>";
+			text +="</td>";
+			text +="</tr>";
+			$(".target").last().after(text);
+			$("#way_" + index).select({ "name": "way_"+index });
+			$("#wageType_" + index).select({ "name": "wageType_"+index });
+			$("#unit_" + index).select({ "name": "unit_"+index });
+			auto_height();
+		}
+		
+		function add_forget(){
+			forget = parseFloat(forget) + parseFloat(1);
+			var text="";
+			text += "<tr class=\"forget\" item=\"" + forget + "\">";
+			text += "<td>类型：</td>";
+			text += "<td class=\"required\">*</td>";
+			text += "<td colspan=\"3\">";
+			text += "<input type=\"text\" name=\"forget_" + forget + "\" value=\"未打卡\" class=\"input xl\" style=\"width: 350px\">\n";
+			text += "</td>";
+			text +="<td>";
+			text +="<button type=\"button\" class=\"btn default xxxs\" onclick=\"del_late(" + forget + ")\">-</button>";
+			text +="</td>";
+			text +="</tr>";
+			
+			text += "<tr class=\"forget\" item=\"" + forget + "\">";
+			text += "<td>次数区间：</td>";
+			text += "<td class=\"required\">*</td>";
+			text += "<td>";
+			text += "<input type=\"text\" name=\"forgetAmountStart_" + forget + "\" value=\"\" class=\"input sm\">\n";
+			text += "</td>";
+			text +="<td>";
+			text +="&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp-"
+			text +="</td>";
+			text += "<td>";
+			text += "<input type=\"text\" name=\"forgetAmountEnd_" + forget + "\" value=\"\" class=\"input sm\">\n";
+			text += "</td>";
+			text += "</tr>";
+			
+			text += "<tr class=\"forget\" item=\"" + forget + "\">";
+			text += "<td>扣款方式：</td>";
+			text += "<td class=\"required\">*</td>";
+			text += "<td>";
+			text += "<input type=\"hidden\" name=\"forgetway_" + forget + "\" value=\"\">\n";
+			text +="<div name='forgetway' id=\"forgetway_" + forget + "\" class=\"select sm\">";
+			text +="<span class=\"option text\">请选择</span><span class=\"icon\"></span>";
+			text +="<ul>";
+			text +="<li item=\"0\">总额</li>";
+			text +="<li item=\"1\">每次</li>";
+			text +="</ul>";
+			text +="</div>";
+			text +="</td>";
+			text +="<td>";
+			text += "<input type=\"text\" name=\"forgetdeduct_" + forget + "\" value=\"\" class=\"input sm\">\n";
+			text +="</td>"
+			text += "<td>";
+			text += "<input type=\"hidden\" name=\"forgetunit_" + forget + "\" value=\"\">\n";
+			text +="<div name=\"forgetunit\" id=\"forgetunit_" + forget + "\" class=\"select sm\">";
+			text +="<span class=\"option text\">请选择</span><span class=\"icon\"></span>";
+			text +="<ul>";
+			text +="<li item=\"0\" onclick=\"addwageTr("+ "forget,0)\">元</li>";
+			text +="<li item=\"1\" onclick=\"addwageTr("+ "forget,1)\">天</li>";
+			text +="</ul>";
+			text +="</div>";
+			text +="</td>";
+			text += "</tr>";
+			text += "<tr class=\"forget\" item=\"" + forget + "\"  id=\"wageTr_" + forget + "\">";
+			text += "<td>结算方式：</td>";
+			text += "<td class=\"required\">*</td>";
+			text += "<td colspan=\"3\">";
+			text += "<input type=\"hidden\" name=\"forgetwageType_" + forget + "\" value=\"\">\n";
+			text +="<div name='forgetwageType' id=\"forgetwageType_" + forget + "\" class=\"select xl\" style=\"width: 365px\">";
+			text +="<span class=\"option text\">请选择</span><span class=\"icon\"></span>";
+			text +="<ul>";
+			text +="<li item=\"0\">基本工资</li>";
+			text +="<li item=\"1\">全额工资</li>";
+			text +="</ul>";
+			text +="</div>";
+			text +="</td>";
+			text +="</tr>";
+			$(".forget").last().after(text);
+			$("#forgetway_" + forget).select({ "name": "forgetway_"+forget });
+			$("#forgetwageType_" + forget).select({ "name": "forgetwageType_"+forget });
+			$("#forgetunit_" + forget).select({ "name": "forgetunit_"+forget });
+			auto_height();
+		}
+		
+		function add_absent(){
+			absent = parseFloat(absent) + parseFloat(1);
+			var text="";
+			text += "<tr class=\"absent\" item=\"" + absent + "\">";
+			text += "<td>类型：</td>";
+			text += "<td class=\"required\">*</td>";
+			text += "<td colspan=\"3\">";
+			text += "<input type=\"text\" name=\"absent_" + absent + "\" value=\"旷工\" class=\"input xl\" style=\"width: 350px\">\n";
+			text += "</td>";
+			text +="<td>";
+			text +="<button type=\"button\" class=\"btn default xxxs\" onclick=\"del_late(" + absent + ")\">-</button>";
+			text +="</td>";
+			text +="</tr>";
+			
+			text += "<tr class=\"absent\" item=\"" + absent + "\">";
+			text += "<td>次数区间：</td>";
+			text += "<td class=\"required\">*</td>";
+			text += "<td>";
+			text += "<input type=\"text\" name=\"absentAmountStart_" + absent + "\" value=\"\" class=\"input sm\">\n";
+			text += "</td>";
+			text +="<td>";
+			text +="&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp-"
+			text +="</td>";
+			text += "<td>";
+			text += "<input type=\"text\" name=\"absentAmountEnd_" + absent + "\" value=\"\" class=\"input sm\">\n";
+			text += "</td>";
+			text += "</tr>";
+			
+			text += "<tr class=\"absent\" item=\"" + absent + "\">";
+			text += "<td>扣款方式：</td>";
+			text += "<td class=\"required\">*</td>";
+			text += "<td>";
+			text += "<input type=\"hidden\" name=\"absentway_" + absent + "\" value=\"\">\n";
+			text +="<div name='absentway' id=\"absentway_" + absent + "\" class=\"select sm\">";
+			text +="<span class=\"option text\">请选择</span><span class=\"icon\"></span>";
+			text +="<ul>";
+			text +="<li item=\"0\">总额</li>";
+			text +="<li item=\"1\">每次</li>";
+			text +="</ul>";
+			text +="</div>";
+			text +="</td>";
+			text +="<td>";
+			text += "<input type=\"text\" name=\"absentdeduct_" + absent + "\" value=\"\" class=\"input sm\">\n";
+			text +="</td>"
+			text += "<td>";
+			text += "<input type=\"hidden\" name=\"absentunit_" + absent + "\" value=\"\">\n";
+			text +="<div name=\"absentunit\" id=\"absentunit_" + absent + "\" class=\"select sm\">";
+			text +="<span class=\"option text\">请选择</span><span class=\"icon\"></span>";
+			text +="<ul>";
+			text +="<li item=\"0\" onclick=\"addwageTr("+ "absent,0)\">元</li>";
+			text +="<li item=\"1\" onclick=\"addwageTr("+ "absent,1)\">天</li>";
+			text +="</ul>";
+			text +="</div>";
+			text +="</td>";
+			text += "</tr>";
+			text += "<tr class=\"absent\" item=\"" + absent + "\"  id=\"wageTr_" + absent + "\">";
+			text += "<td>结算方式：</td>";
+			text += "<td class=\"required\">*</td>";
+			text += "<td colspan=\"3\">";
+			text += "<input type=\"hidden\" name=\"absentwageType_" + absent + "\" value=\"\">\n";
+			text +="<div name='absentwageType' id=\"absentwageType_" + absent + "\" class=\"select xl\" style=\"width: 365px\">";
+			text +="<span class=\"option text\">请选择</span><span class=\"icon\"></span>";
+			text +="<ul>";
+			text +="<li item=\"0\">基本工资</li>";
+			text +="<li item=\"1\">全额工资</li>";
+			text +="</ul>";
+			text +="</div>";
+			text +="</td>";
+			text +="</tr>";
+			$(".absent").last().after(text);
+			$("#absentway_" + absent).select({ "name": "absentway_"+absent });
+			$("#absentwageType_" + absent).select({ "name": "absentwageType_"+absent });
+			$("#absentunit_" + absent).select({ "name": "absentunit_"+absent });
+			auto_height();
+		}
+		
+		function del_late(i){
+			$("tr[item=" + i + "]").remove();
+			auto_height();
+			index = parseFloat(index) - parseFloat(1);
+		}
+		
+		function addwageTr(i,t){
+			$("#wageTr_"+i).hide();
+			if (t == "1") {
+				$("#wageTr_"+i).show();
+			}
+		}
+	</script>
+</body>
+</html>

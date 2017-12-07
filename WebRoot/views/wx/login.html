@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="${ctx}/jw_js_css_img/css/jquery.mobile-1.4.3.min.css">
+<script src="${ctx}/jw_js_css_img/js/jquery-1.9.1.js"></script>
+<script src="${ctx}/jw_js_css_img/js/jquery.mobile-1.4.3.min.js"></script>
+<script src="${ctx}/jw_js_css_img/js/login.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+
+<div data-role="page">
+  <div data-role="header" style="background: #9FC" data-position="fixed">
+  	  <a href="#" data-icon="home">首页</a>
+      <h1>和德科技</h1>
+      <a href="#" data-icon="info">信息</a>
+  </div>
+  <div data-role="content">
+    <form action="/bingding" method="post">
+	      <div>
+	         <label for="telephone">手机号码</label>
+	         <input type="text" name="telephone" id="telephone" placeholder="请输入手机号码"/>
+	         <label for="username">用户名</label>
+	         <input type="text" name="userName" id="userName" placeholder="请输入用户名" />
+	         <label for="password">密码</label>
+	         <input type="password" name="password" id="password" placeholder="请输入密码" />
+	         <br/>
+	         <div><input value="立刻绑定" data-theme="b" type="submit"></div>
+	      </div>
+      </form>
+  </div>
+  <div data-role="footer" style="background: #9FC" data-position="fixed"><h1>解释权归和德科技所有</h1></div>
+</div>
+
+</body>
+</html>

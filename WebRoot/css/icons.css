@@ -1,0 +1,128 @@
+.icons {
+	margin-right: 4px;
+	width: 17px;
+	height: 18px;
+	float: left;
+}
+
+.icons_text {
+	height: 16px;
+	line-height: 17px;
+	float: left;
+}
+
+.icon_add {
+	background: url(/img/icons/add.png) 0px 1px no-repeat;
+}
+
+.icon_del {
+	background: url(/img/icons/del.png) 0px 0px no-repeat;
+}
+
+.icon_edit {
+	background: url(/img/icons/edit.png) 0px 0px no-repeat;
+}
+
+.icon_view {
+	background: url(/img/icons/view.png) 0px 0px no-repeat;
+}
+
+.icon_store {
+	background: url(/img/icons/store.png) 0px 2px no-repeat;
+}
+
+.icon_lock {
+	background: url(/img/icons/lock.png) 0px 0px no-repeat;
+}
+
+.icon_unlock {
+	background: url(/img/icons/unlock.png) 0px 0px no-repeat;
+}
+
+.icon_approve {
+	background: url(/img/icons/approve.png) 0px 0px no-repeat;
+}
+
+.icon_pass {
+	background: url(/img/icons/pass.png) 0px 0px no-repeat;
+}
+
+.icon_unpass {
+	background: url(/img/icons/unpass.png) 0px 0px no-repeat;
+}
+
+.icon_many {
+	background: url(/img/icons/many.png) 0px 0px no-repeat;
+}
+
+.icon_danger {
+	background: url(/img/icons/danger.png) 0px 0px no-repeat;
+}
+
+.icon_success {
+	background: url(/img/icons/success.png) 0px 0px no-repeat;
+}
+
+.icon_log {
+	background: url(/img/icons/log.png) 0px 0px no-repeat;
+}
+
+.icon_open {
+	background: url(/img/icons/open.gif) 0px 2px no-repeat;
+}
+
+.icon_close {
+	background: url(/img/icons/close.gif) 0px 2px no-repeat;
+}
+
+.icon_arrow_right {
+	background: url(/img/icons/arrow_right.gif) 0px 4px no-repeat;
+}
+
+.icon_arrow_down {
+	background: url(/img/icons/arrow_down.gif) 0px 0px no-repeat;
+}
+
+.icon_coll {
+	background: url(/img/icons/coll.png) 0px 0px no-repeat;
+}
+
+.icon_wage {
+	background: url(/img/icons/wage.png) 3px 1px no-repeat;
+}
+
+.icon_archive {
+	background: url(/img/icons/archive.png) 0px 1px no-repeat;
+}
+
+.icon_photo {
+	background: url(/img/icons/photo.png) 0px 4px no-repeat;
+}
+
+.icon_completed {
+	background: url(/img/icons/completed.png) 0px 0px no-repeat;
+}
+
+.icon_returned {
+	background: url(/img/icons/returned.png) 0px 0px no-repeat;
+}
+
+.icon_attach {
+	background: url(/img/icons/attach.png) 0px 0px no-repeat;
+}
+
+.icon_upload {
+	background: url(/img/icons/upload.png) 0px 1px no-repeat;
+}
+
+.icon_enter {
+	background: url(/img/icons/enter.png) 0px 1px no-repeat;
+}
+
+.icon_wf_start {
+	background: url(/img/icons/wf_start.png) 0px 0px no-repeat;
+}
+
+.icon_wf_design {
+	background: url(/img/icons/wf_design.png) 0px 0px no-repeat;
+}

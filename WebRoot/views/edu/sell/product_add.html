@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if product.id??>编辑<#else>新建</#if>商品</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+<script type="text/javascript" src="${ctx}/js/jquery-ui.min.js"></script>
+
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">	
+	</div>
+	
+	
+		<div class="edit">
+			<div id="form" class="clearfix" style="width: 500px;">
+				<form id="submitForm" action="add" method="post">
+				<table class="table">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" id="id" name="id" value="${product.id}">
+					<input type="hidden" id="flag" name="flag" value="${flag}">
+                    <input type="hidden" id="flag2" name="flag2" value="${flag2}">
+					<input type="hidden" id="flag3" name="flag3" value="${flag3}">
+					<input type="hidden" id="flagOrg" name="flagOrg" value="${flagOrg}">
+					
+						<tr>
+							<td>商品类型：</td>
+							<td class="required">*</td>
+							<td>
+							    <input type="hidden" id="goodType" name="goodId" value="${product.type?default('单个商品')}" />
+								<#if flag>
+								
+								<div id="goodId" class="select xl">
+									<center><span class="option text">启用</span><span class="icon"></span></center>
+									<ul>
+										<li item="单个商品">单个商品</li>
+										<li item="商品套餐">商品套餐</li>
+										<li item="年卡">年卡</li>
+									</ul>
+								</div>
+								<#else>
+								<#if product.type == "单个商品">
+								    <input type="text" style=" width : 308px" class="input xl"  value="单个课程" />
+								</#if>
+								<#if product.type == "商品套餐">
+								    <input type="text" style=" width : 308px" class="input xl"  value="课程套餐" />
+								</#if>
+								<#if product.type == "年卡">
+								    <input type="text" style=" width : 308px" class="input xl"  value="年卡" />
+								</#if>
+								</#if>
+							</td>
+						</tr>						
+
+                        <tr>
+							<td>包含货品：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" id="parentName" name="parentName" class="input xl" value="${include}" readonly="readonly">	
+								<input type="hidden" id="parentId" name="parentId" class="input xl" value="${includeId}">					
+							</td>
+						</tr>
+
+						<tr id="after">
+							<td>商品名称：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input xl" id="shopName" name="shopName" value="${product.name}">
+							</td>
+						</tr>
+
+                        <#if childList?size gt 0>
+						    <#list childList as e>
+						        <tr class="asrc">
+							        <td>${e.name}:</td>
+							        <td class="required">*</td>
+							        <td>
+								        <input type="text" class="input xl" id="price_${e_index}" name="price_${e_index}" value="${e.price}">
+							        </td>
+						        </tr>      
+							</#list>
+					    </#if>
+
+
+                        <tr>
+							<td>总价：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" style="width: 95px" class="input xl" id="price" name="price" value="${product.price}">元
+							</td>
+						</tr>
+						
+
+						
+						<tr>
+							<td>最大数量：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" style="width: 95px" class="input xl" name="max" value="${product.max}">个
+							</td>
+						</tr>
+												
+						<tr>
+							<td>收货/上课地点：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" id="location" name="location" value="${product.location}" />
+								<#if flag>
+								<div id="locationType" class="select xl" >
+									<center><span class="option text">选择上课地点</span><span class="icon"></span></center>
+									<ul>
+							<#if location?size gt 0>
+							    <#list location as e>
+										<li item="${e.location}">${e.location}</li>
+								</#list>
+							</#if>
+									</ul>
+								</div>	
+								<#else>
+								<input type="text" style=" width : 308px" class="input xl" value="${product.location}">
+								</#if>						
+							</td>
+						</tr>
+						
+                        <#if flag>
+						<tr>
+							<td>状态：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="status" value="${product.status?default(1)}" />
+								<div id="status" class="select xl">
+									<center><span class="option text">启用</span><span class="icon"></span></center>
+									<ul>
+										<li item="0">禁用</li>
+										<li item="1">启用</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						</#if>
+						
+	                    <tr>
+							<td>详情：</td>
+							<td class="required"></td>
+							<td>
+								<input type="hidden" id="detailVal" name="detailVal" value="${product.detail}" />
+								<textarea class="xl" rows="5" name="detail" id="detail"></textarea>
+							</td>
+						</tr>
+						
+						<tr>
+							<td colspan="2"></td>
+							<td><button id="submitButton" type="button" onclick="firm()" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<div id="subject_pop" class="pop bind" style="display: none; width: 318px;">
+		<div class="pop_content">
+			<div class="auto_height sm">
+				<ul id="tree" class="ztree"></ul>
+			</div>
+		</div>
+	</div>    
+
+	<script type="text/javascript">
+	
+	var nodes = [
+		<#list nodes as e>
+			{id: "${e.id}", name: "${e.name}",couType:"${e.type}"}<#if e_has_next>,</#if>
+	    </#list>
+		];
+		
+		var setting = {
+			data: { simpleData: { enable: true } },
+			view: { showIcon: false },
+			check: { enable: true, chkboxType: { "Y" : "ps", "N" : "ps" } },
+			callback: {onCheck: checkedIds }
+		};				
+	
+		function firm() {  
+	        //利用对话框返回的值 （true 或者 false）  
+	        if (confirm("一旦提交商品将无法再次修改!请确认数据无误以后再点击确定!")) {  
+	            $("#submitForm").submit();
+	        }  
+	        else {  
+	            
+	        }  
+	  
+	    }  
+		
+	$(document).ready(function(){
+				
+		    var flag = $("#flag").val();
+		    var flag2 = $("#flag2").val();
+		    var flag3 = $("#flag3").val();
+		    
+		    if($("#id").val() != null && $("#id").val() != '')
+		    {
+				    var form = document.forms[0]; 
+				    for (var i = 0; i < form.length; i++) 
+				    { 
+					    var element = form.elements[i]; 
+					    element.disabled = "true"; 
+				    }
+			    	$("#submitButton").hide();
+		    }
+		
+		    $.fn.zTree.init($("#tree"), setting, nodes);
+		    
+		    $("#parentName").click(function() {
+ 				open_pop(null, "#parentName", "#subject_pop", false);
+ 				return false;
+ 			});
+		    
+		    function getNode(event, id, node) {
+				$("input[name=parentId]").val(node.id);
+				$("#parentName").val(node.name);
+				$("#parentType").val(node.couType);
+				return true;
+			}
+		    var arr = $("input[name=parentId]").val().split(",");
+			for (var i = 0; i < arr.length; i++) {
+				$("input[name=checkedIds][value=" + arr[i] + "]").prop("checked", true);
+			}
+
+		
+		
+			$("#detail").val($("#detailVal").val());
+								
+  			$("#status").select({ "name": "status" });
+  			$("#goodId").select({ "name": "goodId" });
+ 			$("#locationType").select({ "name": "location" });
+
+ 			$("#type").select({ "name": "type" });
+ 			
+			
+ 			
+			type($("input[name=type]").val());
+ 			
+			$("#locationType.select li").click(function() {
+				var t = $(this).attr("item");
+			});
+			
+ 			$("#type.select li").click(function() {
+				var t = $(this).attr("item");
+			});
+ 				
+ 			$("#goodId.select li").click(function() {
+				var t = $(this).attr("item");
+				judgeGoodsType(t);
+			});
+ 			
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.shopName, [RQ, RANGE, "{1,60}"], "商品名称");
+						validate(form.price, [RQ, N], "标准价格");
+						validate(form.location, [RQ, RANGE, "{1,60}"], "收货/上课地点");
+						validate(form.status, [RQ, N], "状态");
+						validate(form.max, [RQ, N], "最大人数");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+				
+		function type(t) {
+			$(".menu").hide();
+			$(".url").hide();
+			$(".action").hide();
+			if (t == "0") {
+				$(".menu").show();
+				$(".url").show();
+				$(".url .required").text("");
+				$("input[name=action]").val("");
+			} else if (t == "1") {
+				$(".url").show();
+				$(".url .required").text("*");
+				$("input[name=position]").val("");
+				$("input[name=action]").val("");
+			} else if (t == "2") {
+				$(".action").show();
+				$("input[name=position]").val("");
+				$("input[name=url]").val("");
+			}
+		}
+		
+		function checkedIds(e, id, node) {
+			var ztree = $.fn.zTree.getZTreeObj("tree");
+			var nodes = ztree.getCheckedNodes(true);
+			var ids = "";
+			var names = "";
+			var text = "";
+			var type = $("#goodType").val();
+			for (var i = 0; i < nodes.length; i++) {
+				ids += nodes[i].id + ",";
+				names += nodes[i].name + ",";
+				text += "<tr class=\"asrc\" id=\"after_" + i + "\">";
+				text += "<td>" + nodes[i].name + "价格:</td>";
+				text += "<td class=\"required\">*</td>";
+				text += "<td>";
+				text += "<input type=\"text\" oninput=\"changePrice(" + nodes.length + ")\" style=\"width: 95px\" class=\"input xl\" id=\"price_" + i + "\" name=\"price_" + i + "\" value=\"0\" onkeyup=\"if(isNaN(value))execCommand('undo')\" onafterpaste=\"if(isNaN(value))execCommand('undo')\" />元";
+				text += "</td>";
+				text += "</tr>";
+				$("#turn").val(i);
+			}
+			$("input[name=parentId]").val(ids);
+			$("#parentName").val(names);
+			$(".asrc").remove();
+		    $("#after").after(text);
+			if(type == "单个商品")
+			{
+				$(".asrc").hide();
+			}
+		}
+				
+		function judgeGoodsType(t)
+		{
+			if(t == "单个商品")
+			{
+				$(".asrc").hide();
+				$("#isSingle").val(0);
+				$("#price").attr("readonly",false);
+			}
+			else
+			{
+				$(".asrc").show();
+				$("#isSingle").val(1);
+				$("#price").attr("readonly",true);
+			}	
+		}
+		
+		function changePrice(t)
+		{
+			var i = 0;
+			$("#price").val(0);
+			var oldPrice = $("#price").val();
+			var finalPrice = 0;
+            for(i=0;i<t;i++)
+            {
+            	var thisPrice = $("#price_" + i).val();
+            	finalPrice = eval(Number(thisPrice) + Number(finalPrice));
+           	}
+        	$("#price").val(finalPrice);
+		}
+		
+	
+	</script>
+</body>
+</html>

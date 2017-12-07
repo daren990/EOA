@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 考勤核对</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<div id="left" class="left">
+				<a href="javascript:open_coll()"><span class="icons icon_coll"></span><span class="icons_text">生成汇总</span></a>
+				<span class="split">|</span>
+				<a href="javascript:download()"><span class="icons icon_upload"></span><span class="icons_text">导出</span></a>
+
+			</div>
+			<div id="right" class="right">
+				<form id="search" action="page2" method="get">
+					<ul>
+						<li class="text">考勤日期</li>
+						<li>
+							<input type="text" class="input sm Wdate" name="startTime" value="${mb.startTime}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							<span>至</span>
+							<input type="text" class="input sm Wdate" name="endTime" value="${mb.endTime?default('')}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+						</li>
+						<li class="text orgIds">所属公司</li>
+						<li>
+							<input type="hidden" name="corpId" value="${mb.corpId}" />
+							<div id="corpId" class="select sm" style="width: 200px">
+								<span class="option text">请选择</span><span class="icon"></span>
+								<ul class="auto_height sm">
+									<li item="">请选择</li>
+									<#list corps as e>
+									<li item="${e.orgId}" onclick="ajax_nodes('${e.orgId}')">${e.orgName}</li>
+									</#list>
+								</ul>
+							</div>
+						</li>
+						<li class="text">姓名</li>
+						<li>
+							<input type="hidden" name="userId" value="${mb.userId}" />
+							<div id="userId" class="select sm" style="width: 100px">
+								<span class="option text">请选择</span><span class="icon"></span>
+								<ul class="auto_height sm">
+									<li item=""></li>
+								</ul>
+							</div>
+						</li>
+						
+						<!-- <li class="text">上班</li>
+						<li>
+							<input type="hidden" name="remarkIn" value="${mb.remarkIn}" />
+							<div id="remarkIn" class="select xs">
+								<span class="option text">请选择</span><span class="icon"></span>
+								<ul>
+									<li item="">请选择</li>
+									<li item="未打卡">未打卡</li>
+									<li item="迟到">迟到</li>
+									<li item="早退">早退</li>
+									<li item="旷工">旷工</li>
+									<li item="异常">异常</li>
+									<li item="正常">正常</li>
+								</ul>
+							</div>
+						</li>
+						<li class="text">下班</li>
+						<li>
+							<input type="hidden" name="remarkOut" value="${mb.remarkOut}" />
+							<div id="remarkOut" class="select xs">
+								<span class="option text">请选择</span><span class="icon"></span>
+								<ul>
+									<li item="">请选择</li>
+									<li item="未打卡">未打卡</li>
+									<li item="迟到">迟到</li>
+									<li item="早退">早退</li>
+									<li item="旷工">旷工</li>
+									<li item="异常">异常</li>
+									<li item="正常">正常</li>
+								</ul>
+							</div>
+						</li> -->
+						<li><button type="submit" class="btn primary xxs">搜索</button></li>
+					</ul>
+				</form>
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+			<div class="table_head">
+				<table class="table">
+					<thead>
+						<tr>
+							<th width="120">姓名</th>
+							<th width="20%">日期</th>
+							 <th width="10%">上班打卡时间</th>
+							<th width="10%">下班打卡时间</th> 
+							<th width="25%">上班状态</th>
+							<th width="25%">下班状态</th>
+							<th width="10%">时长</th>
+							<th width="">操作</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+			<div class="table_body auto_height">
+				<table class="table">
+					<tbody>
+						<#if attendances?? && attendances?size gt 0>
+							<#list attendances as e>
+								<tr style="text-align:center">
+									<td width="106"  style="text-align:center">${e.trueName}</td>
+									<td width="20%"  style="text-align:center">${views.fmt(e.workDate, "yyyy-MM-dd（E）")}</td>
+									 <td width="10%"  style="text-align:center">${e.checkedIn}</td>
+									<td width="10%"  style="text-align:center">${e.checkedOut}</td> 
+									<td width="25%"  style="text-align:center">
+										<#if e.remarkedIn??>
+											<#if e.remarkIn??>
+												<span <#if e.remarkIn != "正常" && e.remarkIn != "公休">style="color:red;"</#if>>${e.remarkIn}</span>,
+											</#if>
+											${e.remarkedIn}
+										<#else>
+											<span <#if e.remarkIn != "正常" && e.remarkIn != "公休">style="color:red;"</#if>>${e.remarkIn}</span>
+										</#if>
+									</td>
+									<td width="25%"  style="text-align:center">
+										<#if e.remarkedOut??>
+											<#if e.remarkOut??>
+												<span <#if e.remarkOut != "正常" && e.remarkOut != "公休">style="color:red;"</#if>>${e.remarkOut}</span>,
+											</#if>
+											${e.remarkedOut}
+										<#else>
+											<span <#if e.remarkOut != "正常" && e.remarkOut != "公休">style="color:red;"</#if>>${e.remarkOut}</span>
+										</#if>
+									</td>
+									<td width="10%"  style="text-align:center"><#if e.minute gt 0>${views.hour(e.minute)}&nbsp;小时<#else>-</#if></td>
+									<td style="text-align:center">
+										<a href="javascript:open_pop('add?userId=${e.userId}&workDate=${e.workDate?date}',null,'#atendance_pop',true)" title="编辑"><span class="icons icon_edit"></span></a>
+									</td>
+								</tr>
+							</#list>
+						</#if>
+					</tbody>
+				</table>
+			</div>
+			<#if !attendances?? || attendances?size lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<div id="page" class="clearfix">
+				<div class="left">
+					<span>共<#if attendances?? && attendances?size gt 0>${attendances?size}<#else>0</#if>条记录</span>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div id="coll_pop" class="pop" style="display: none; width: 318px;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<div class="pop_title">生成汇总</div>
+			<div class="pop_content blank"></div>
+			<div class="pop_btn">
+				<span class="loading hide"><img src="/img/loading.gif" /></span>
+				<button type="button" class="btn primary xs" onclick="coll()">确定</button>
+				<button type="button" class="btn default xs" onclick="close_pop()">取消</button>
+			</div>
+		</div>				
+	</div>
+
+	<div id="atendance_pop" class="pop" style="display: none; width: 318px;"></div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#corpId").select({ "name": "corpId" });
+			$("#userId").select({ "name": "userId" });
+			$("#remarkIn").select({ "name": "remarkIn" });
+			$("#remarkOut").select({ "name": "remarkOut" });
+			
+			ajax_nodes($("input[name=corpId]").val());
+			$("#userId").unbind();
+		});
+		
+		function ajax_nodes(id) {
+			$("#userId").unbind();
+			$.ajax({
+				url: "/sys/user/nodes?checkedIds=" + id + "&token=${token}",
+				type: "post",
+				dataType: "json",
+				success: function(data) {
+					$("#userId ul").empty();
+					$("#userId ul").append("<li item=\"\">请选择</li>");
+					if (data.code == 1) {
+						$.each(data.nodes, function(idx, obj) {
+							var text = "<li item=\"" + obj.userId + "\">" + obj.trueName + "</li>";
+							$("#userId ul").append(text);
+						});
+						$("#userId").select({ "name": "userId" });
+					} else {
+						danger(1, data.message);
+					}
+				}
+			});
+			close_pop();
+		}
+		
+		function open_coll() {
+			var start = $("input[name=startTime]").val();
+			var end = $("input[name=endTime]").val();
+			var corp = "";
+			var trueName = "";
+			
+			if ($("input[name=corpId]").val() != "") {
+				corp = $("#corpId .option").text();
+			}
+			if ($("input[name=userId]").val() != "") {
+				trueName = $("#userId .option").text();
+			}
+			if (!start) {
+				danger(1, "请选择考勤开始日期");
+				return;
+			}
+			if (!end) {
+				danger(1, "请选择考勤结束日期");
+				return;
+			}
+			if (!corp) {
+				danger(1, "请选择所属公司");
+				return;
+			}
+			
+			var text = "";
+			text += "确定要汇总<font color='#8ebe00'>" + corp + trueName + "</font>";
+			text += "&nbsp;<font color='#8ebe00'>" + start + "</font>";
+			text += "&nbsp;至&nbsp;<font color='#8ebe00'>" + end + "</font>&nbsp;的考勤吗？";
+		
+			$("#coll_pop .pop_content").empty();
+			$("#coll_pop .pop_content").prepend(text);
+			open_pop(null,null,"#coll_pop",true);
+		}
+		
+		function coll() {
+			var corpId = $("input[name=corpId]").val();
+			var userId = $("input[name=userId]").val();
+			var start = $("input[name=startTime]").val();
+			var end = $("input[name=endTime]").val();
+			$.ajax({
+				url: "coll?corpId=" + corpId + "&userId=" + userId + "&startTime=" + start + "&endTime=" + end + "&token=${token}",
+				type: "post",
+				dataType: "json",
+				beforeSend: function() {
+					$(".loading").show();					
+				},
+				success: function(data) {
+					$(".loading").hide();
+					if (data.code == 1) {
+						close_pop();
+						success_callback(data, "/hrm/result/attendance/page");
+						auto_width();
+					} else {
+						close_pop();
+						danger(1, data.message);
+					}
+				}
+			});
+		}
+		
+		function download() {
+			var start = $("input[name=startTime]").val();
+			var end = $("input[name=endTime]").val();
+			var corp = "";
+			var trueName = "";
+			
+			if ($("input[name=corpId]").val() != "") {
+				corp = $("#corpId .option").text();
+			}
+			if ($("input[name=userId]").val() != "") {
+				trueName = $("#userId .option").text();
+			}
+			if (!start) {
+				danger(1, "请选择考勤开始日期");
+				return;
+			}
+			if (!end) {
+				danger(1, "请选择考勤结束日期");
+				return;
+			}
+			if (!corp) {
+				danger(1, "请选择所属公司");
+				return;
+			}
+			
+			var param = "";
+			param += "corpId=" + $("input[name=corpId]").val();
+			param += "&userId=" + $("input[name=userId]").val();
+			param += "&startTime=" + start;
+			param += "&endTime=" + end;
+			param += "&remarkIn=" + $("input[name=remarkIn]").val();
+			param += "&remarkOut=" + $("input[name=remarkOut]").val();
+			location.assign("download?" + param);
+		}
+		function batch(){
+			var start = $("input[name=startTime]").val();
+			var end = $("input[name=endTime]").val();
+			var corp = "";
+			var trueName = "";
+			
+			if ($("input[name=corpId]").val() != "") {
+				corp = $("#corpId .option").text();
+			}
+			if ($("input[name=userId]").val() != "") {
+				trueName = $("#userId .option").text();
+			}
+			var param = "";
+			param += "corpId=" + $("input[name=corpId]").val();
+			param += "&userId=" + $("input[name=userId]").val();
+			param += "&startTime=" + start;
+			param += "&endTime=" + end;
+			param += "&remarkIn=" + $("input[name=remarkIn]").val();
+			param += "&remarkOut=" + $("input[name=remarkOut]").val();
+			location.href="batchRecord?"+ param;
+		}
+	</script>
+</body>
+</html>

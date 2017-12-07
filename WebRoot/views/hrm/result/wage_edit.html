@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 工资条查询</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<style type="text/css">
+ .gongzi{background:#ccc;margin-left:13px;width:99%;margin:auto;}
+ .gongzi td{padding:8px;width:167px;font-size:14px;background:#fff;text-align:left;}
+ .gongzi td.gtitle{background:#eee;width:20%;text-align:right;font-weight:600;}
+</style>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<div id="left" class="left">
+			</div>
+			<div id="right" class="right">
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrap" style="overflow-x: auto;">
+		
+
+		<#if page.result?size gt 0>
+			<#list page.result as e>
+		<div style="height:40px;width:99%;">
+			<div style="float:left;width:160px;padding:8px;background:##716B7A;border:1px solid #ccc;border-bottom:none;margin-left:13px;">
+				<strong>工资条年月&nbsp;:&nbsp;${e.resultMonth?substring(0,4)}年${e.resultMonth?substring(4,6)}月</strong>
+			</div>
+			<div style="float:left;width:89%;height:31px;background:##716B7A;border-bottom:1px solid #ccc;"></div>
+		</div>
+		<form action="" id="form">
+		<table class="gongzi" border="0" cellpadding="3" cellspacing="1" width="100%" align="center">
+		<#assign salary = e.standardSalary+e.postSalary+e.performSalary+e.rewardSalary+e.serviceAward />
+								<#if e.workDay==0>
+								<#assign shouldSalary = 0/>
+								<#else>
+								<#assign shouldSalary = (salary/e.workDay) *  e.shouldWorkDay/>
+								</#if>
+								<#assign allowance = e.housingSubsidies+e.communicationAllowance+e.oilAllowance+e.overtimeAllowance+e.mealAllowance+e.heatingAllowance />
+								<#assign deduction = e.lateDeduction+e.forgetDeduction+e.absentDeduction+e.maternityInsurance+e.tax+e.socialSecurityDeduction+e.leaveDeduction />
+								<#assign leaveMinute = e.unpaidLeaveMinute+e.sickLeaveMinute+e.funeralLeaveMinute+e.maritalLeaveMinute+e.annualLeaveMinute+e.injuryLeaveMinute+e.deferredLeaveMinute+e.paternityLeaveMinute+e.paidLeaveMinute />
+							
+			<tr>
+				<td class="gtitle">姓名:</td><td colspan="6">${e.trueName}
+					<input type="hidden" name="userId" value="${e.userId}"/>
+					<input type="hidden" name="month" value="${e.resultMonth}"/>
+				</td>
+			</tr>
+			<tr>
+				<td class="gtitle">工号:</td><td>${e.jobNumber}</td><td class="gtitle">职务:</td><td>${e.position}</td><td class="gtitle">应出勤(天):</td><td>${e.shouldWorkDay}</td>
+			</tr>
+			
+			<tr>
+				<td class="gtitle">入职日期:</td><td>${e.entryDate?date}</td><td class="gtitle">离职日期:</td><td width="4%">${views.date(e.quitDate)}</td><td class="gtitle">实际出勤(天):</td><td>${views.day(e.shouldWorkDay*e.workMinute-(e.absentAmount*e.workMinute+leaveMinute), e.workMinute)?string("0.#")}</td>
+			</tr>
+			<tr>
+				<td class="gtitle">基本工资:</td><td>${views.rmb(e.standardSalary)?string("0.##")}</td><td class="gtitle">岗位工资:</td><td>${views.rmb(e.postSalary)?string("0.##")}</td><td class="gtitle">绩效工资:</td><td>${views.rmb(e.performSalary)?string("0.##")}</td>
+			</tr>
+			<tr>
+				<td class="gtitle">奖励工资:</td><td>${views.rmb(e.rewardSalary)?string("0.##")}</td><td class="gtitle">工龄奖:</td><td>${views.rmb(e.serviceAward)?string("0.##")}</td><td class="gtitle">生育险:</td><td>${views.rmb(e.maternityInsurance)?string("0.##")}</td>
+			</tr>
+			<tr>
+				<td class="gtitle">住房补贴:</td><td>${views.rmb(e.housingSubsidies)?string("0.##")}</td><td class="gtitle">通信补贴:</td><td>${views.rmb(e.communicationAllowance)?string("0.##")}</td><td class="gtitle">伙食补贴:</td><td>${views.rmb(e.mealAllowance)?string("0.##")}</td>
+			</tr>
+			<tr>
+				<td class="gtitle">加班补贴:</td><td>${views.rmb(e.overtimeAllowance)?string("0.##")}</td><td class="gtitle">高温补贴:</td><td>${views.rmb(e.heatingAllowance)?string("0.##")}</td><td class="gtitle">社保补贴:</td><td>${views.rmb(e.socialSecurity)?string("0.##")}</td>
+			</tr>
+			<tr>
+				<td class="gtitle">油费补贴:</td><td>${views.rmb(e.oilAllowance)?string("0.##")}</td><td class="gtitle">加班(小时):</td><td>${views.hour(e.overtimeMinute)?string("0.#")}</td><td class="gtitle">请假(天):</td><td>${views.day(leaveMinute, e.workMinute)?string("0.#")}</td>
+			</tr>
+			<tr>
+				<td class="gtitle">缺勤扣除:</td><td>${views.rmb(e.absentDeduction)?string("0.##")}</td><td class="gtitle">迟到早退扣除:</td><td>${views.rmb(e.lateDeduction)?string("0.##")}</td><td class="gtitle">未打卡扣除:</td><td>${views.rmb(e.forgetDeduction)?string("0.##")}</td>
+			</tr>
+			<tr>
+				<td class="gtitle">事假扣除:</td><td>${views.rmb(e.leaveDeduction)?string("0.##")}<input type="text" name=""/></td><td class="gtitle">病假扣除:</td><td>${views.rmb(e.sickDeduction)?string("0.##")}</td><td class="gtitle">社保扣除:</td><td>${views.rmb(e.socialSecurityDeduction)?string("0.##")}</td>
+			</tr>
+			<tr>
+				<td class="gtitle">增账补贴:</td><td>${views.rmb(e.subsidies)?string('0.##')}</td>
+				<td class="gtitle">提成:</td><td><input  type="text" name="commission" style="width: 100%;border: 1px solid #CCCCCC;" value="${views.rmb(e.commission)?string('0.##')}" /></td>
+				<td class="gtitle">累积扣除:</td><td>${views.rmb(e.accumulateDeduction)?string('0.##')}</td>
+			</tr>
+			<tr>
+				<td class="gtitle">应发工资:</td><td>${views.rmb(shouldSalary)?string("0.##")}</td>
+				<td class="gtitle">个人所得税:</td><td>${views.rmb(e.tax)?string("0.##")}</td>
+				<td class="gtitle">实发工资:</td><td id="shifa">${views.rmb(shouldSalary+allowance-deduction+e.commission+e.subsidies-e.accumulateDeduction)?string("0.##")}</td>
+			</tr>
+			<tr>
+				<td colspan="6" style="text-align: center;"><button type="button"  class="btn primary xs" onclick="update()">提交</button></td>
+			</tr>
+		</table>	
+		</form>	
+		</#list>
+		<#else>
+			<div style="width: 875px;margin:50px auto auto;text-align: center; height: 50px;line-height: 50px;border: 1px solid #CCC;font-size: 18px;">
+				${mb.year}年${mb.month}月 暂无工资条数据
+			</div>
+		</#if>
+		
+		
+		<!-- <div id="footer"></div> -->
+	</div>
+	
+	<script type="text/javascript">
+	
+	var update = function(){
+		$.post("update",$("#form").serialize(),function(result){
+			window.location.href = "edit?userId="+result.userId+"&month="+result.month;
+		},"json")
+	}
+	
+		$(document).ready(function() {
+			$("#year").select({ "name": "year" });
+			$("#month").select({ "name": "month" });
+		});
+		
+		function download() {
+			var year = $("input[name=year]").val();
+			var month = $("input[name=month]").val();
+			
+			if (!year) {
+				danger(1, "请选择年份");
+				return;
+			}
+			if (!month) {
+				danger(1, "请选择月份");
+				return;
+			}
+			var param = "";
+			param += "year=" + year;
+			param += "&month=" + month;
+			location.assign("download?" + param);
+		}
+		
+		window.onload = window.onresize = function() {
+			var width = $(".table_body table").width();
+			$(".table_head table").css("width", width + "px");
+			var all = $(window).height();
+			var a = $("#header").height();
+			var b = $("#wrapper").height();
+			$("#footer").css("min-height", all - a - b - 56);
+		}
+	</script>
+</body>
+</html>

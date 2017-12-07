@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 补录审批</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	<style type="text/css">
+	.reasonDiv ul li{list-style-type: none;height: 50px;line-height: 30px;}
+	.optDiv ul li{list-style-type: none;}
+	.reasonDiv{width:380px;margin:26px auto auto;height: 260px;}
+	.optDiv{width:380px;margin:65px auto;height: 95px;}
+	.submitDiv{width: 370px;margin: auto;text-align: right;}
+	.operator{width: 55px;float: left;}
+	.reasonLi{height: 25px;line-height: 25px;}
+	</style>
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div class="message"></div>
+	</div>
+	<form action="recordSubmitApprove" method="post" id="form">
+		<div class="reasonDiv">
+			<ul>
+				<li>
+					申 请 人:
+					 <input type="text" readonly="readonly" class="input xl" value="${trueName}"/>
+					 <input type="hidden" name="recordId" value="${recordId}" />
+				</li>
+				<li>
+					申请类型:
+					<input class="input xl" type="text" name="" readonly="readonly" value="<#if type=="1">机器故障<#else><#if type=="2">忘记打卡<#else>请选择</#if></#if>" />
+				</li>
+				<li>
+					申请日期: <input class="input xl" type="text" name="nowTime" readonly="readonly" value="${nowTime}"/>
+				</li>
+				<li>
+					补录日期: 
+					<input class="input xl" style="width:100px;" type="text" name="" readonly="readonly" value="${needYearDay}" />
+					<input class="input xl"  style="width:100px;" type="text" name="" readonly="readonly" value="${quantum}" />
+				</li>
+				<li>
+					<div class="operator">
+						申请原因:
+					</div>
+					<div class="operatorTextarea">
+						<textarea class="xl" rows="4" name="reason" class="reason" readonly="readonly">${reason}</textarea>
+					</div>
+				</li>
+			</ul>
+		</div>
+		
+		<div style="float: left;"></div>
+		
+		<div class="optDiv">
+			<ul>
+				<li>
+					<div class="operator">
+						审批意见:
+					</div>
+					<div class="operatorTextarea">
+						<textarea class="xl" rows="4" name="opinion" class="reason">-</textarea>
+					</div>
+				</li>
+				<li>
+					审批状态:
+					<input type="hidden" name="approve" value="">
+					<div id="approve" class="select xl">
+						<span class="option text">请选择</span>
+						<span class="icon"></span>
+						<ul>
+							<li class="reasonLi">请选择</li>
+							<li class="reasonLi" item="1">已批准</li>
+							<li class="reasonLi" item="-1">未批准</li>
+						</ul>
+					</div> 
+				</li>
+			</ul>
+		<div class="submitDiv" style="margin-top: 10px;"><button class="btn primary xs" type="submit">提交</button></div>
+		</div>
+	</form>
+	<script type="text/javascript">
+	$(document).ready(function(){
+		$("#approve").select({ "name": "approve" });
+		
+		$("#form").ajaxForm({
+			url: "recordSubmitApprove",
+			type: "post",
+			resetForm: false,
+			dataType: "json",
+			success: function(data) {
+				if (data.code == 1) {
+					success_callback(data, "record_page");
+				} else {
+					danger_callback(data);
+				}
+			}
+		});
+		
+	});
+	</script>
+</body>
+</html>

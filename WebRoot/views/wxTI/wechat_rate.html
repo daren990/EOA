@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>${sign.studentName} - 上课评价</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+		<link rel="stylesheet" href="${ctx}/jw_js_css_img/mui/css/mui.min.css">
+		
+        <link href="${ctx}/jw_js_css_img/font-awesome-4.7.0/css/font-awesome.css" rel="stylesheet">
+		
+		<link href="${ctx}/jw_js_css_img/bootstrap-3.3.4/css/bootstrap.min.css" rel="stylesheet">
+
+		<link href="${ctx}/jw_js_css_img/css/star-rating.css" media="all" rel="stylesheet" type="text/css" />
+
+		<script src="${ctx}/jw_js_css_img/jquery-1.9.1/jquery.min.js"></script>
+
+		<script src="${ctx}/jw_js_css_img/js/star-rating.js" type="text/javascript"></script>
+
+	    <script src="${ctx}/jw_js_css_img/mui/js/mui.min.js"></script>
+
+		<style>
+			p {
+				text-indent: 22px;
+			}
+			
+			span.mui-icon {
+				font-size: 14px;
+				color: #007aff;
+				margin-left: -15px;
+				padding-right: 10px;
+			}
+			
+			#info {
+				padding: 20px 10px;
+			}
+			/*.des {
+				margin: .5em 0;
+			}
+			.des>li {
+				font-size: 14px;
+				color: #8f8f94;
+			}*/
+		</style>
+	</head>
+
+	<body>
+	
+	<input type="hidden" id="student_id" name="student_id" value="${sign.studentId}">
+	<input type="hidden" id="studentIsRate" name="studentIsRate" value="${sign.studentIsRate}">
+	
+    <input type="hidden" id="studentRateDetail" name="studentRateDetail" value="${rate.studentRateDetail}">
+    <input type="hidden" id="teacherRateDetail" name="teacherRateDetail" value="${rate.teacherRateDetail}">
+
+		<div class="mui-content">
+			<div class="mui-content-padded">
+			<div class="mui-card">
+				<div class="mui-card-header">上课评价</div>
+				<div class="mui-card-content">
+					<div class="mui-card-content-inner">
+						<table>
+							<tr height="25px">
+								<td>&nbsp;&nbsp;<span class="fa fa-child"></span>&nbsp;&nbsp;课程</td>
+								<td>&nbsp;&nbsp;<font color="#999999">${courseDetail.name}</font></td>
+							</tr>							
+							
+							<tr height="25px">
+								<td>&nbsp;&nbsp;<span class="fa fa-user"></span>&nbsp;&nbsp;老师</td>
+								<td>&nbsp;&nbsp;<font color="#999999">${courseDetail.teacherName}</font></td>
+							</tr>
+							
+							<tr height="25px">
+								<td>&nbsp;&nbsp;<span class="fa fa-clock-o"></span>&nbsp;&nbsp;时间</td>
+								<td>&nbsp;&nbsp;<font color="#999999">${time}</font></td>
+							</tr>
+							
+						</table>
+					</div>
+				</div>
+			</div>
+		
+		    <div class="mui-card">
+				<div class="mui-card-header">老师点评</div>
+				<div class="mui-card-content">
+					<div class="mui-card-content-inner">
+
+                        <div class="mui-input-row" style="margin: 10px 5px;">
+					        <textarea id="teacherTextArea" name="teacherTextArea" rows="2" readonly="readonly" placeholder="未填写评价" ></textarea>
+				        </div>
+                        
+					</div>
+				</div>
+			</div>
+
+		    <div class="mui-card">
+				<div class="mui-card-header">评价老师</div>
+				<div class="mui-card-content">
+					<div class="mui-card-content-inner">
+
+                        <center><p><font size="1px">请根据老师的表现，评个分吧(匿名)。</font></p></center>
+                        <div class="container">
+                 <form action="javascript:void(0);" id="studentForm">
+                 
+                    <input type="hidden" id="org_id" name="org_id" value="${org_id}">
+                    <input type="hidden" id="signId" name="signId" value="${sign.id}">
+                                                   
+                	<center>
+                        <input id="markStar" name="markStar" value="${marks}" type="number" class="rating" min=0 max=5 step=0.5 data-size="md" >
+                    </center>
+                    
+                    <div class="mui-input-row" style="margin: 10px 5px;">
+					    <textarea id="studentTextArea" name="studentTextArea" rows="2" placeholder="其他的意见，匿名投送，请放心填写。"></textarea>
+				    </div>
+                    
+                    <div class="form-group">
+                        <center>
+                            <button id="studentSubmit" type="submit" onclick="studentSubmit()" class="mui-btn mui-btn-primary" style="width: 100%;" >提交</button>
+                        </center>
+                    </div>
+                </form>
+
+					</div>
+				</div>
+			</div>
+
+			</div>
+		</div>
+    </div>
+ 
+	</body>
+	<script>
+		
+	    var flag = $("#studentIsRate").val();
+	
+		jQuery(document).ready(function () {
+            $(".rating-kv").rating();
+            if($("#teacherRateDetail") != null && $("#teacherRateDetail") != "")
+            {
+            	$("#teacherTextArea").val($("#teacherRateDetail").val());
+            }	
+            if($("#studentRateDetail") != null && $("#studentRateDetail") != "")
+            {
+            	$("#studentTextArea").val($("#studentRateDetail").val());
+            }
+            if(flag == 1)
+            {
+				var form = document.forms[0]; 
+				for (var i = 0; i < form.length; i++) 
+				{ 
+					var element = form.elements[i]; 
+					element.disabled = "true"; 
+				}
+				$("#studentSubmit").hide();
+           	}
+        });
+ 
+		function studentSubmit()
+		{
+			$.ajax({
+				url: "rate",
+				type: "post",
+				data: $('#studentForm').serialize(),
+				resetForm: false,
+				dataType: "json",
+				success: function(data) {
+					if (data.code == 1) {
+						history.back();
+					} else {
+						alert("评价失败");
+					}
+				}
+			});	
+		}
+
+		
+		mui.init({
+			swipeBack:true //启用右滑关闭功能
+		});
+		mui('body').on('shown', '.mui-popover', function(e) {
+			//console.log('shown', e.detail.id);//detail为当前popover元素
+		});
+		mui('body').on('hidden', '.mui-popover', function(e) {
+			//console.log('hidden', e.detail.id);//detail为当前popover元素
+		});
+
+        mui(document.body).on('tap', '#studentSubmit', function(e) {
+            mui(this).button('loading');
+            studentSubmit();
+        });
+		        
+	</script>
+
+</html>

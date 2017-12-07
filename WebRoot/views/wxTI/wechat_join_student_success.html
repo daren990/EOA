@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>登记成功</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+</head>
+
+<body>
+
+</body>
+<script src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript">
+	function config() {
+		wx.config({
+			debug : false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+			appId : '${appId}',
+			timestamp : '${timestamp}',
+			nonceStr : '${nonceStr}',
+			signature : '${signature}',
+			// 所有要调用的 API 都要加到这个列表中
+			jsApiList : ["closeWindow"]
+		});
+		wx.ready(function() {
+			alert("登记成功");
+			wx.closeWindow();
+		});
+		wx.error(function(res){
+			console.log(res);
+		    // config信息验证失败会执行error函数，如签名过期导致验证失败，具体错误信息可以打开config的debug模式查看，也可以在返回的res参数中查看，对于SPA可以在这里更新签名。
+		});
+	}
+	config();
+
+	
+	
+</script>
+</html>

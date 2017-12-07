@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  	<#include "/views/meta.html" />
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/js/jquery-1.9.1.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/js/report.js"></script>
+	<link type="text/css" rel="stylesheet" href="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.css" />
+	<title>报告</title>
+  </head>
+  <body>
+  	<div class="ui-grid-a">
+	    <div class="ui-block-a"><div class="ui-bar"><a href="#apply" data-transition="flip" class="ui-btn ui-corner-all ui-shadow ui-icon-info ui-btn-icon-right" data-rel="popup" data-position-to="window">申请报告</a></div></div>
+	    <div class="ui-block-b"><div class="ui-bar"><a href="/addressBook/viewShare/wxpage" class="ui-btn ui-corner-all ui-icon-heart ui-btn-icon-right">查看分享</a></div></div>
+	</div>
+  	<form class="ui-filterable">
+  		<input id="searchinput" data-type="search" placeholder="请输入标题/日期/姓名/内容" />
+  	</form>
+  	<div data-role="collapsibleset" data-filter="true" data-children="> div, > div div ul li" data-inset="true" id="collapsiblesetForFilterChildren" data-input="#searchinput">
+  	<!------------------------ 下面是周报 ------------------------------------>
+	  	<div data-role="collapsible" data-inset="true" data-collapsed-icon="carat-d" data-expanded-icon="carat-u">
+	  		<h3>周报</h3>
+	  		<ul data-role="listview" data-inset="true" data-split-icon="action">
+	  		<#if page.result?size gt 0>
+				<#list page.result as e>
+				<#if e.type = 0>
+	  			<li>
+	  				<a href="#">
+	  					<h2>标题:${e.title}</h2>
+	  					<#if e.createTime??><#assign createTime = e.createTime?date /></#if>
+	  					<p>时间:${createTime?default('')}</p>
+	  					<p><strong>作者:${e.trueName}</strong></p>
+	  					<p><strong>内容:${e.content}</strong></p>
+	  					<p style="color: red"><strong><#if e.share=0>已分享</#if><#if e.share=1>未分享</#if></strong></p>
+	  				</a>
+	  				<#if e.share=1>
+	  				<a href="#share" data-transition="slide" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-action slide" data-rel="popup">Slide</a>
+	  				<input type="hidden" value="${e.reportId}" />
+	  				<#else>
+	  				<a href="#unshare" data-transition="slide" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-action unslide" data-rel="popup">Slide</a>
+	  				<input type="hidden" value="${e.reportId}" />
+	  				</#if>
+	  			</li>
+	  			</#if>
+	  			</#list>
+			</#if>
+	  		</ul>
+	  	</div>
+	  	
+	  	<!------------------------ 下面是日报 ------------------------------------>
+	  	<div data-role="collapsible" data-inset="true" data-collapsed-icon="carat-d" data-expanded-icon="carat-u">
+	  		<h3>日报</h3>
+	  		<ul data-role="listview" data-inset="true" data-split-icon="action">
+	  		<#if page.result?size gt 0>
+				<#list page.result as e>
+				<#if e.type = 1>
+	  			<li>
+	  				<a href="#">
+	  					<h2>标题:${e.title}</h2>
+	  					<#if e.createTime??><#assign createTime = e.createTime?date /></#if>
+	  					<p>时间:${createTime?default('')}</p>
+	  					<p><strong>作者:${e.trueName}</strong></p>
+	  					<p><strong>内容:${e.content}</strong></p>
+	  					<p style="color: red"><strong><#if e.share=0>已分享</#if><#if e.share=1>未分享</#if></strong></p>
+	  				</a>
+	  				<#if e.share=1>
+	  				<a href="#share" data-transition="slide" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-action slide" data-rel="popup">Slide</a>
+	  				<input type="hidden" value="${e.reportId}" />
+	  				<#else>
+	  				<a href="#unshare" data-transition="slide" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-action unslide" data-rel="popup">Slide</a>
+	  				<input type="hidden" value="${e.reportId}" />
+	  				</#if>
+  			</li>
+  				</#if>
+	  			</#list>
+			</#if>
+	  		</ul>
+	  	</div>
+	  	
+	  	<!------------------------------------ 下面是汇报 ---------------------------------------->
+	  	<div data-role="collapsible" data-inset="true" data-collapsed-icon="carat-d" data-expanded-icon="carat-u">
+	  		<h3>汇报</h3>
+	  		<ul data-role="listview" data-inset="true" data-split-icon="action">
+	  		<#if page.result?size gt 0>
+				<#list page.result as e>
+				<#if e.type = 2>
+	  			<li>
+	  				<a href="#">
+	  					<h2>标题:${e.title}</h2>
+	  					<#if e.createTime??><#assign createTime = e.createTime?date /></#if>
+	  					<p>时间:${createTime?default('')}</p>
+	  					<p><strong>作者:${e.trueName}</strong></p>
+	  					<p><strong>内容:${e.content}</strong></p>
+	  					<p style="color: red"><strong><#if e.share=0>已分享</#if><#if e.share=1>未分享</#if></strong></p>
+	  				</a>
+	  				<#if e.share=1>
+	  				<a href="#share" data-transition="slide" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-action slide" data-rel="popup">Slide</a>
+	  				<input type="hidden" value="${e.reportId}" />
+	  				<#else>
+	  				<a href="#unshare" data-transition="slide" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-action unslide" data-rel="popup">Slide</a>
+	  				<input type="hidden" value="${e.reportId}" />
+	  				</#if>
+	  			</li>
+	  				</#if>
+	  			</#list>
+			</#if>
+	  		</ul>
+	  	</div>
+  	</div>
+  	
+  	<div class="ui-grid-b" style="text-align: center;">
+  		<div class="ui-block-a"><a href="/addressBook/approveReport/wxpage" class="ui-btn ui-btn-inline">查看周报</a></div>
+  		<div class="ui-block-b"><a href="/addressBook/approveReport/wxpage" class="ui-btn ui-btn-inline">查看日报</a></div>
+  		<div class="ui-block-c"><a href="/addressBook/approveReport/wxpage" class="ui-btn ui-btn-inline">查看汇报</a></div>
+  	</div>
+  	
+  	<!-- 弹出申请报告对话框 -->
+	<div data-role="popup" id="apply" class="ui-content" data-theme="a" style="text-align: center;">
+		<a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+		<h4>请选择你需要申请报告类别</h4>
+		<fieldset data-role="controlgroup" data-type="horizontal">
+			<label for="weekly">周报</label><input type="radio" name="thereport" id="weekly" value="0" checked="checked" />
+			<label for="daily">日报</label><input type="radio" name="thereport" id="daily" value="1" />
+			<label for="report">汇报</label><input type="radio" name="thereport" id="report" value="2" />
+		</fieldset>
+		<fieldset class="ui-grid-a">
+			<div class="ui-block-a"><a class="ui-btn ui-corner-all ui-icon-check ui-btn-icon-right" id="sure">确定</a></div>
+			<div class="ui-block-b"><a class="ui-btn ui-corner-all ui-icon-delete ui-btn-icon-right" id="cancel">取消</a></div>
+		</fieldset>
+	</div>
+	<!-- 弹出分享对话框 -->
+	<div data-role="popup" id="share" class="ui-content" data-theme="a">
+		<p><strong>分享此报告？</strong></p>
+		<fieldset class="ui-grid-a">
+			<div class="ui-block-a"><a class="ui-btn ui-corner-all ui-icon-check ui-btn-icon-right surebg" class="surebg">确定</a></div>
+			<div class="ui-block-b"><a class="ui-btn ui-corner-all ui-icon-delete ui-btn-icon-right cancelbg" id="cancelbg">取消</a></div>
+		</fieldset>
+	</div>
+	
+		<div data-role="popup" id="unshare" class="ui-content" data-theme="a">
+		<p><strong>取消分享此报告？</strong></p>
+		<fieldset class="ui-grid-a">
+			<div class="ui-block-a"><a class="ui-btn ui-corner-all ui-icon-check ui-btn-icon-right unsurebg">确定</a></div>
+			<div class="ui-block-b"><a class="ui-btn ui-corner-all ui-icon-delete ui-btn-icon-right cancelbg" id="uncancelbg">取消</a></div>
+		</fieldset>
+	</div>
+	
+	<input type="hidden" id="c" value="${ctx}" />
+	<script type="text/javascript">
+	$(document).ready(function(){
+		$("#cancel").click(function(){
+			$("#apply").popup("close");
+		});
+		$("#cancelbg").click(function(){
+			$("#share").popup("close");
+		});
+		$("#uncancelbg").click(function(){
+			$("#unshare").popup("close");
+		});
+		$("#sure").click(function(){
+			var repval = $("input[name='thereport']:checked").val();//获取报告选中的value
+			window.location.href="/addressBook/applyReport/wxadd?type="+repval;
+		});
+	});
+	</script>
+  </body>
+</html>

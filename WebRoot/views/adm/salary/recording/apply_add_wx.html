@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if recording.recordingId??>编辑<#else>新建</#if>补录申请</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/bootstrap-3.3.4/css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/bootstrap-3.3.4/css/bootstrap-theme.min.css" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/bootstrap-3.3.4/css/bootstrap-datetimepicker.min.css" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/css/add_wx.css" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/select2/select2.css" />
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/bootstrap-3.3.4/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/bootstrap-3.3.4/js/bootstrap-datetimepicker.min.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/bootstrap-3.3.4/js/bootstrap-datetimepicker.fr.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/select2/select2.min.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/select2/select2_locale_zh-CN.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/layer.m/layer.m.js"></script>
+	<style>
+		html,body{
+			height:100%;
+		}
+	</style>
+</head>
+<body>
+	<div class="headerDiv"><a href="wxpage" class="btn btn-default" id="return"><img src="${ctx}/jw_js_css_img/img/return.png" />返回</a><#if recording.recordingId??>编辑<#else>新建</#if>补录申请</div>
+
+	<div id="from" class="contentDiv" >
+		<form action="add" method="post" class="form-horizontal">
+
+			<input type="hidden" name="recordingId" value="${recording.recordingId}">
+			<div class="form-group">
+				<label class="col-xs-4 control-label">申请人</label>
+				<div class="col-xs-7">
+					<input type="text" class="input form-control" value="${currentUser.trueName}" readonly="readonly"  name="titleName" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-4 control-label">申请时间</label>
+				<div class="col-xs-7 control-label">
+					<#assign createTime = now?date />
+					<#if recording.createTime??><#assign createTime = recording.createTime?date /></#if>
+					<input type="text" class="input form-control" value="${createTime}" readonly="readonly">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-4 control-label">补录时间</label>
+			    <div class="col-xs-7">
+					<input type="hidden" name="type" id="typeId" value="">
+					<select class="selectOpetor" id="selectOpetor">
+						<option value="" selected="selected">请选择</option>
+						<option value="0" >上午</option>
+						<option value="1" >下午</option>
+					</select>
+			    </div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-4 control-label">补录日期</label>
+				<span class="col-xs-4 control-label">
+					<#if recording.recordingTime??><#assign work_yyyyMMdd = recording.recordingTime?date /></#if>
+					<input type="text" class="input form-control Wdate" readonly="readonly" name="work_yyyyMMdd" value="${work_yyyyMMdd?default('')}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+					<input type="hidden" name="type" class="form-control" value="${recording.recordingAM}" />
+					<!-- <#if flag!=null||flag!="">
+						<div id="type" class="select xs">
+						<span class="option text"><#if flag='in'>上午<#else>下午</#if></span><span class="icon"></span>
+						<ul>
+							<li item="0">上午</li>
+							<li item="1">下午</li>
+						</ul>
+					</div>
+					
+					<#else>
+					<div id="type" class="select xs">
+						<span class="option text"></span><span class="icon"></span>
+						<ul>
+							<li item="0">上午</li>
+							<li item="1">下午</li>
+						</ul>
+					</div>
+					</#if> -->
+				</span>
+				sss
+			</div>
+			<div class="form-group">
+				<label class="col-xs-4 control-label">补录原因</label>
+				<div class="col-xs-7">
+			    	<textarea name="reason" class="form-control" rows="4" style="resize:none" placeholder="请输入补录原因">${recording.reason}</textarea>
+			    </div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-4 control-label">上级审批</label>
+					
+			    <div class="col-xs-7">
+			    	<input type="hidden" name="operatorId" value="${recording.operatorId?default(currentUser.managerId)}" />
+					<select class="opetorSelect" id="operatorId">
+						<!-- <option value="" selected="selected">请选择</option> -->
+						<#list operators as e>
+							<option value="${e.userId}">${e.trueName}</option>
+							<input type="hidden" value="${e.username}" name="${e.userId}" />
+						</#list>	
+					</select>
+			    </div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-4 control-label"></label>
+				<div class="col-xs-7">
+					<button type="submit" class="btn btn-primary" id="submit">提交</button>
+				</div>
+			</div>	
+	    </form>
+	</div>
+
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$(".opetorSelect").select2({
+				width:"160px",
+				minimumResultsForSearch:-1
+			});
+			$(".opetorSelect").change(function(){
+				var operatorId = $(this).val();
+				$("#operatorId").val(operatorId);
+			});
+			
+			$("#type").select({ "name": "type" });
+			$("#operatorId").select({ "name": "operatorId" });
+			
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.work_yyyyMMdd, [RQ], "补录日期");
+						validate(form.type, [RQ], "补录时间");
+						validate(form.reason, [RQ], "补录原因");
+						validate(form.operatorId, [RQ], "上级审批");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+ 					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					} 
+				}
+			});
+		});
+	</script>
+</body>
+</html>

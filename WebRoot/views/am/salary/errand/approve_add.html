@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if errand.errandId??>编辑<#else>新建</#if>出差审批</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit" style="">
+			<div id="form" class="clearfix" style="width: 570px;">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="errandId" value="${errand.errandId}">
+					<table class="flow table">
+						<tr>
+							<td>申请人：</td>
+							<td></td>
+							<td class="lg">${errand.trueName}</td>
+							<td>申请时间：</td>
+							<td></td>
+							<td><#if errand.createTime??>${errand.createTime?date}<#else>${now?date}</#if></td>
+						</tr>
+						<tr>
+							<td>开始时间：</td>
+							<td class="required"></td>
+							<td>
+								<#if errand.startTime??><#assign startTime = errand.startTime?date /></#if>
+								<input type="text" class="input" value="${startTime?default('')}" readonly="readonly" />
+							</td>
+							<td>结束时间：</td>
+							<td class="required"></td>
+							<td>
+								<#if errand.endTime??><#assign endTime = errand.endTime?date /></#if>
+								<input type="text" class="input" value="${endTime?default('')}" readonly="readonly" />
+							</td>
+						</tr>
+						<tr>
+							<td class="">出差地点：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input" value="${errand.place}" readonly="readonly">
+							</td>
+							<td class="">需要设备：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input" value="${errand.equipment}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td class="">所需项目：</td>
+							<td class="required"></td>
+							<td colspan="4">
+								<input type="text" class="input xl" value="${errand.project}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">工作描述：</td>
+							<td class="pos required"></td>
+							<td colspan="4">
+								<textarea class="xl" rows="4" readonly="readonly">${errand.content}</textarea>
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">备注：</td>
+							<td class="pos required"></td>
+							<td colspan="4">
+								<textarea class="xl" rows="4" readonly="readonly">${errand.remark}</textarea>
+							</td>
+						</tr>
+						<tr>
+							<td>上级审批：</td>
+							<td class="required"></td>
+							<td colspan="4">
+								<input type="text" class="input" value="${errand.operator}" readonly="readonly" />
+							</td>
+						</tr>
+						<tr>
+							<td>审批状态：</td>
+							<td class="required">*</td>
+							<td colspan="4">
+								<input type="hidden" name="approve" value="${errand.approve}" />
+								<div id="approve" class="select">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<li item="">请选择</li>
+										<li item="1">已批准</li>
+										<li item="-1">未批准</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div id="footer"></div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#approve").select({ "name": "approve" });
+			
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.approve, [RQ, N], "审批状态");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+	</script>
+</body>
+</html>

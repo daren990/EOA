@@ -1,0 +1,83 @@
+/******************** header ********************/
+#header {
+	background-color: #3e74ae;
+	border-bottom-width: 4px;
+	border-bottom-style: solid;
+	border-bottom-color: #a1c5e5;
+	height: 72px;
+	min-width: 920px;
+	color: white;
+}
+
+#header #logo {
+	padding: 26px 0 0 24px;
+}
+
+#header #logo strong {
+	margin-left: 8px;
+	vertical-align: 5px;
+	font-size: 18px;
+	color: white;
+}
+
+#header #menu {
+	margin-left: 30px;
+	padding-top: 44px; /* !IE */
+}
+
+#header #menu li {
+	margin-left: 1px;
+	list-style: none;
+	float: left;
+}
+
+#header #menu a {
+	padding: 8px 18px 4px 18px;
+	border: 1px solid #3e74ae;
+	border-top-width: 1px;
+	border-bottom-width: 1px;
+	border-top-right-radius: 4px;
+	border-top-left-radius: 4px;
+	line-height: 32px;
+	background-color: #3e74ae;
+	font-weight: bolder;
+	font-size: 12px;
+	color: #a1c5e5;
+}
+
+#header #menu a.active,#header #menu a:hover,#header #menu a.active:hover
+	{
+	border: 1px solid #a1c5e5;
+	background-color: #a1c5e5;
+	color: #004080;
+}
+
+#header #meta {
+	padding: 8px 12px 0 0;
+}
+#header #meta a {
+	color: #cdbfe3;
+}
+
+#header #meta a:hover  {
+	color: white;
+}
+
+#header #meta span {
+	margin: 0 4px;
+}
+
+/******************** header ********************/
+#wrapper #left {
+	width: 159px;
+	height: 580px;
+	min-width: 159px;
+	min-height: 480px;
+	border-right: 1px solid #a9b2b8;
+}
+
+#wrapper #right {
+	margin-left: 160px;
+	min-width: 760px;
+	min-height: 480px;
+}

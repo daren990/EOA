@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>报读课程</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+<script type="text/javascript" src="${ctx}/js/jquery-ui.min.js"></script>
+
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit">
+			<div id="form" class="clearfix" style="width: 500px;">
+				<table class="table">
+					 <tr>
+						<td>选择商品：</td>
+						<td>
+							<input type="text" id="productName" class="input xl" readonly="readonly" placeholder="请先选择商品">	
+							<input type="hidden" id="productId" name="productId" class="input xl">					
+						</td>
+					</tr>
+					<tr>
+						<td>商品名称：</td>
+						<td id="spvoname"></td>
+					</tr>
+					<tr>
+						<td>包含课程：</td>
+						<td id="spvochildList"></td>
+					</tr>
+					<tr>
+						<td>商品简介：</td>
+						<td id="spvodetail"></td>
+					</tr>
+					<tr>
+						<td>商品价格：</td>
+						<td id="spvoprice"></td>
+					</tr>
+					<tr>
+						<td>开售时间：</td>
+						<td id="spvostartTime"></td>
+					</tr>
+					<tr>
+						<td>停售时间：</td>
+						<td id="spvoendTime"></td>
+					</tr>
+					<tr>
+						<td>家长姓名：</td>
+						<td><input type="text" id="client_Name" class="input xl"
+							placeholder="家长姓名" /></td>
+					</tr>
+					<tr>
+						<td>家长电话：</td>
+						<td><input type="text" id="client_Phone" class="input xl"
+							placeholder="家长电话" /></td>
+					</tr>
+					<tr>
+						<td>学生姓名：</td>
+						<td><input type="text" id="stu_Name" class="input xl"
+							placeholder="学生姓名" /></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td><button id="submitButton" type="submit"
+								class="btn primary xs">报名</button></td>
+					</tr>
+				</table>
+			</div>
+		</div>
+	</div>
+	
+	<div id="product_pop" class="pop bind" style="display: none; width: 318px;">
+		<div class="pop_content">
+			<div class="auto_height sm">
+				<ul id="tree" class="ztree"></ul>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+	var nodes = [
+	    		<#list nodes as e>
+	    			    {id: "${e.id}", name: "${e.name}"}<#if e_has_next>,</#if>
+	    		</#list>
+	    		];
+	    		
+	    		var setting = {
+	    			data: { simpleData: { enable: true } },
+	    			view: { showIcon: false },
+	    			callback: { onClick: getShopProductVo }
+	    		};	
+	
+	function getShopProductVo(event, id, node) {
+		$("#spvoname").text("");
+    	$("#spvochildList").empty();
+    	$("#spvodetail").text("");
+    	$("#spvoprice").text("");
+    	$("#submitButton").attr('disabled',"true");
+    	$("#spvostartTime").text("");
+    	$("#spvoendTime").text("");
+    	
+    	$("input[name=productId]").val(node.id);
+	    $("#productName").val(node.name);
+	    var par = {};
+		par['productId'] = node.id;
+	    $.ajax({
+        	type: 'POST',
+            url: '${ctx}/edu/sell/order/getShopProductVo',
+            data:par,
+            dataType: 'json',
+            success: function(data){
+            	
+            	console.log(data)
+            	$("#spvoname").text(data.spvo.name);
+            	
+            	$("#spvochildList").empty();
+            	var spvochildList = "";
+            	if(data.spvo.hasOwnProperty("childList") == true && data.spvo.childList.length > 0){
+            		$.each(data.spvo.childList, function(i,child){ 
+            			spvochildList += child.sgvo.name+"("+child.sgvo.teacher_name+")"
+                		if((i+1) < data.spvo.childList.length){
+                			spvochildList += "<br/>";
+                		}
+    				});
+            	}else{
+            		spvochildList += data.spvo.sgvo.name+"("+data.spvo.sgvo.teacher_name+")"
+            	}
+            	$("#spvochildList").append(spvochildList);
+            	
+            	$("#spvodetail").text(data.spvo.detail);
+            	$("#spvoprice").text("￥"+data.spvo.price+"元");
+            	var now = new Date;
+            	var startTime = new Date(data.spvo.startTime);
+            	var endTime = new Date(data.spvo.endTime);
+            	if (now < startTime) {
+            	    $("#submitButton").attr('disabled',"true");
+            	    $("#submitButton").text("未开售");
+            	} else if (now > endTime) {
+            	    $("#submitButton").attr('disabled',"true");
+            	    $("#submitButton").text("已停售");
+            	} else {
+            	    $("#submitButton").removeAttr("disabled"); 
+            	    $("#submitButton").text("报名");
+            	}
+            	$("#spvostartTime").text(data.spvo.startTime.split(" ")[0]);
+            	$("#spvoendTime").text(data.spvo.endTime.split(" ")[0]);
+            },
+            error: function(xhr, type){
+                alert("内部服务器错误")
+            }
+        });
+	    close_pop();
+	}
+	    		
+	$(function(){
+	
+		$.fn.zTree.init($("#tree"), setting, nodes);
+		
+		$("#productName").click(function() {
+			open_pop(null, "#productName", "#product_pop", false);
+			return false;
+		});
+		
+		$("#submitButton").click(function(){
+			var shopProduct_id = $("#productId").val();
+			if(shopProduct_id == null || shopProduct_id == '' ){
+				alert("请先选择课程");
+				return false;
+			}
+			var client_Name = $("#client_Name").val();
+			if(client_Name == null || client_Name == ''){
+				alert("请输入家长姓名");
+				return false;
+			}
+			var client_Phone = $("#client_Phone").val();
+			if(client_Phone == null || client_Phone == ''){
+				alert("请输入家长电话");
+				return false;
+			}
+			var stu_Name = $("#stu_Name").val();
+			if(stu_Name == null || stu_Name == ''){
+				alert("请输入学生姓名");
+				return false;
+			}
+			
+			var isOne = $("input[name='isOne']").is(':checked') ? 1 : 0;
+			var isBookPrice = $("input[name='isBookPrice']").is(':checked') ? 1 : 0;
+			var par = {};
+			par['isBookPrice'] = isBookPrice;
+			par['isOne'] = isOne;
+			par['shopProduct_id'] = shopProduct_id;
+			par['client_Name'] = client_Name;
+			par['client_Phone'] = client_Phone;
+			par['stu_Name'] = stu_Name;
+				
+			$.ajax({
+	        	type: 'POST',
+	            url: '${ctx}/edu/sell/order/addOrder',
+	            data:par,
+	            dataType: 'json',
+	            success: function(data){
+	            	if(data.code == 1){
+	            		success_callback(data, "page");
+	            	}else{
+	            		danger(1,data.message);
+	            	}
+	            },
+	            error: function(xhr, type){
+	                alert("内部服务器错误")
+	            }
+	        });
+		});
+	})
+	</script>
+</body>
+</html>

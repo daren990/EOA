@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 合作机构查询</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<div id="left" class="left">
+			</div>
+			<div id="right" class="right">
+				<form id="search" action="cooperation" method="post">
+					<input type="hidden" id="id" name="id" value="${id}">
+					<input type="hidden" name="pageSize" value="${page.pageSize}">
+					<input type="hidden" name="pageNo" value="${page.pageNo}">
+					<ul>
+						<li class="text">机构名称</li>
+						<li><input type="text" class="input sm" name="name" value="${mb.name}" /></li>
+						<li><button type="button" class="btn primary xxs" onclick="search()">搜索</button></li>
+					</ul>
+				</form>
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	
+	<input type="hidden" id="myId" name="myId" value="${id}">
+	<input type="hidden" id="listSize" name="listSize" value="${size}">
+	<input type="hidden" id="flagSize" name="flagSize" value="${flagSize}">
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+			<div class="table_head">
+				<table class="table">
+					<thead>
+						<tr>
+							<th width=""><center><input type="checkbox" id="checkedIds"></center></th>
+							<th width="40%"><center>机构名称</center></th>
+							<th width="25%"><center>联系人</center></th>
+							<th width="25%"><center>联系人电话</center></th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+			<div class="table_body auto_height">
+				<table class="table">
+					<tbody>
+							<#list flagList as fl>
+							<input type="hidden" id="checkedIds_${fl_index}_f" name="checkedIds_${fl_index}_f" value="${fl.coopIdOther}">
+							</#list>
+						<#if page.result?size gt 0>
+							<#list page.result as e>
+						<tr>
+							<td width="">
+							
+							<center>
+							<input type="hidden" id="checkedIds_${e_index}_e" name="checkedIds_${e_index}_e" value="${e.orgId}">
+							<input type="checkbox" id="checkedIds_${e_index}" name="checkedIds_${e_index}" value="${e.orgId}_${e.orgName}">
+							</center>
+							</td>
+							<td width="40%"><center>${e.orgName}</center></td>
+							<td width="25%"><center>${e.contactName}</center></td>
+							<td width="25%"><center>${e.contactNumber}</center></td>
+						</tr>
+							</#list>
+						</#if>
+					</tbody>
+				</table>
+			</div>
+			<#if page.result?size lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<@fm.page page=page />
+		</div>
+	</div>
+	
+	<div id="able_authority" class="pop" style="display: none; width: 280px;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<div class="pop_title">启用权限</div>
+			<div class="pop_content blank">确定要启用所选权限吗？</div>
+			<div class="pop_btn ">
+				<input type="hidden" id="status" value="1" />
+				<button type="button" class="btn primary xs" onclick="able()">确定</button>
+				<button type="button" class="btn default xs" onclick="close_pop()">取消</button>
+			</div>
+		</div>				
+	</div>
+	
+	<script type="text/javascript">
+		function open_able(id, status) {
+			if (id) {
+				get_checked(id);
+			}
+			var before = status == 1 ? "禁用" : "启用";
+			var after = status == 1 ? "启用" : "禁用";
+			$(".pop_title").text($(".pop_title").text().replace(before, after));
+			$(".pop_content").text($(".pop_content").text().replace(before, after));
+			$("#status").val(status);
+			open_pop(null,null,"#able_authority",true);
+		}
+		
+		function able() {
+			var status = $("#status").val();
+			ajax_checked("请选择需要" + (status == 1 ? "启用" : "禁用") + "的权限", "able?&status=" + status + "&token=${token}");
+			close_pop();
+		}
+		
+		$(document).ready(function() {
+						
+			var i = 0;
+			var j = 0;
+			var id = $("#myId").val();
+			var size = $("#listSize").val();
+			var flagSize = $("#flagSize").val();
+			
+			for(i=0;i<size;i++)
+			{
+				$("#checkedIds_" + i).click(function(){
+					var flag = false;
+					var t = $(this).val();
+					if($(this).is(':checked'))
+					{
+						flag = true;
+					}
+					else
+					{
+						flag = false;
+					}
+										
+					$.ajax({  
+				          type:"post",  
+				          url: "cooperationAjax",  
+				          dataType: "json",  
+				          data: {"id":id,"coopId": t,"flag":flag},
+				          success:function(data){  
+
+				          }  
+				        });
+
+					
+				});
+			}
+			
+			for(i=0;i<size;i++)
+			{
+			    for(j=0;j<flagSize;j++)
+			    {
+			    	if($("#checkedIds_" + i + "_e").val() == $("#checkedIds_" + j + "_f").val())
+			    	{
+			    		$("#checkedIds_" + i).attr("checked", true);
+			    	}	
+			    }	
+			}
+			
+		});
+		
+	</script>
+</body>
+</html>

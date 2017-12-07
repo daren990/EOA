@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 日志查询</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<div id="right" class="right">
+				<form id="search" action="page" method="get">
+					<input type="hidden" name="pageSize" value="${page.pageSize}">
+					<input type="hidden" name="pageNo" value="${page.pageNo}">
+					<ul>
+						<#if views.hasAnyRole("admin", roleNames)>
+						<li class="text">姓名</li>
+						<li>
+							<input type="hidden" name="userId" value="${mb.userId}" />
+							<div id="userId" class="select sm">
+								<span class="option text">请选择</span><span class="icon"></span>
+								<ul class="auto_height sm">
+									<#list users as e>
+									<li item="${e.userId}">${e.trueName}</li>
+									</#list>
+								</ul>
+							</div>
+						</li>
+						</#if>
+						<li class="text">操作时间</li>
+						<li>
+							<input type="text" class="input sm Wdate" name="startTime" value="${mb.startTime}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							<span>至</span>
+							<input type="text" class="input sm Wdate" name="endTime" value="${mb.endTime?default('')}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+						</li>
+						<li><button type="button" class="btn primary xxs" onclick="search()">搜索</button></li>
+					</ul>
+				</form>
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+			<div class="table_head">
+				<table class="table">
+					<thead>
+						<tr>
+							<th width="40"><input type="checkbox" id="checkedIds"></th>
+							<th width="15%">姓名</th>
+							<th width="10%">工号</th>
+							<th width="10%">IP</th>
+							<th width="15%">客户端</th>
+							<th width="">请求地址</th>
+							<th width="10%">操作内容</th>
+							<th width="15%">操作时间</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+			<div class="table_body auto_height">
+				<table class="table">
+					<tbody>
+						<#if page.result?size gt 0>
+							<#list page.result as e>
+						<tr>
+							<td width="26"><input type="checkbox" name="checkedIds" value="${e.userId}"></td>
+							<td width="15%">${e.trueName}</td>
+							<td width="10%">${e.jobNumber}</td>
+							<td width="10%">${e.ip}</td>
+							<td width="15%">${e.client}</td>
+							<td width="">${e.url}</td>
+							<td width="10%">${e.content}</td>
+							<td width="15%">${e.modifyTime?datetime}</td>
+						</tr>
+							</#list>
+						</#if>
+					</tbody>
+				</table>
+			</div>
+			<#if page.result?size lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<@fm.page page=page />
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#userId").select({ "name": "userId" });
+		});
+	</script>
+</body>
+</html>

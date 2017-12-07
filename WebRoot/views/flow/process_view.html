@@ -1,0 +1,38 @@
+<script type="text/javascript" src="${ctx}/js/raphael-min.js"></script>
+<script type="text/javascript" src="${ctx}/js/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="${ctx}/js/jquery-ui-1.8.4.custom.min.js"></script>
+<script type="text/javascript" src="${ctx}/js/workflow/snaker.designer.js"></script>
+<script type="text/javascript" src="${ctx}/js/workflow/snaker.model.js"></script>
+<script type="text/javascript" src="${ctx}/js/workflow/snaker.editors.js"></script>
+<script type="text/javascript" src="${ctx}/js/common.js?${version}"></script>
+
+<div class="pop_close">X</div>
+<div class="pop_limit">
+	<div class="pop_title">流程状态</div>
+	<div class="pop_content" style="height: 420px;">
+		<div id="flow" class="auto_height" style="max-height: 420px;"></div>
+	</div>
+</div>
+	
+<script type="text/javascript">
+function view(process, active) {
+	$('#flow').snakerflow($.extend(true, {
+		basePath: "${ctx}/",
+		restore: eval("(" + process + ")"),
+		editable: false
+		}, eval("(" + active + ")")
+	));
+}
+$.ajax({
+	url: "${ctx}/flow/process/view",
+	data: "orderId=${order.id}",
+	type: "POST",
+	dataType: "json",
+	success: function(data) {
+		view(data.process, data.active);
+	},
+	error: function() {
+		return false;
+	}
+});
+</script>

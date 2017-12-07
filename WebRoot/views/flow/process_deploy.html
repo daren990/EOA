@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 流程部署</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit">
+			<div id="form" class="clearfix" style="width: 600px;">
+				<form action="deploy" method="post" enctype="multipart/form-data">
+					<input type="hidden" name="token" value="${token}">
+					<table class="table">
+						<tr>
+							<td class="pos">流程定义文件：</td>
+							<td class="required pos">*</td>
+							<td colspan="4">
+								<input type="file" name="file">
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"></td>
+							<td colspan="4"><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div id="footer"></div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("form").ajaxForm({
+				url: "deploy",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.file, [RQ], "流程定义文件");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+	</script>
+</body>
+</html>

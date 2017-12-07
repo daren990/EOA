@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<process displayName="简单流转" name="Simple">
+<start displayName="start1" layout="62,95,-1,-1" name="start1">
+<transition g="" name="transition1" offset="0,0" to="task1"/>
+</start>
+<task assignee="task1.operator" displayName="task1" layout="180,93,-1,-1" name="task1" performType="ANY">
+<transition g="" name="transition2" offset="0,0" to="task2"/>
+</task>
+<end displayName="end1" layout="328,95,-1,-1" name="end1"/>
+<task assignee="task2.operator" displayName="task2" layout="212,201,-1,-1" name="task2" performType="ANY">
+<transition g="" name="transition3" offset="0,0" to="end1"/>
+</task>
+</process>

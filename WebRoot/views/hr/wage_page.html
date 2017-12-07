@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 工资查询</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<div id="right" class="right">
+				<form id="search" action="page" method="get">
+					<input type="hidden" name="pageSize" value="${page.pageSize}">
+					<input type="hidden" name="pageNo" value="${page.pageNo}">
+					<ul>
+						<li class="text">姓名</li>
+						<li><input type="text" class="input sm" name="trueName" value="${mb.trueName}" /></li>
+						<li><button type="button" class="btn primary xxs" onclick="search()">搜索</button></li>
+					</ul>
+				</form>
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+			<div class="table_head">
+				<table class="table">
+					<thead>
+						<tr>
+							<th width="80" rowspan="2">姓名</th>
+							<th width="24%" colspan="3">基本工资</th>
+							<th width="36%" colspan="6">津贴</th>
+							<th width="8%" rowspan="2">社保</th>
+							<th width="8%" rowspan="2">公积金</th>
+							<th width="8%" rowspan="2">税</th>
+							<th width="" rowspan="2">操作</th>
+						</tr>
+						<tr>
+							<th width="">标准工资</th>
+							<th width="">岗位工资</th>
+							<th width="">浮动工资</th>
+							<th width="">通信</th>
+							<th width="">交通</th>
+							<th width="">高温</th>
+							<th width="">节日</th>
+							<th width="">提成</th>
+							<th width="">伙食</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+			<div class="table_body auto_height">
+				<table class="table">
+					<tbody>
+						<#if page.result?size gt 0>
+							<#list page.result as e>
+						<tr>
+							<td width="66">${e.trueName}</td>
+							<td width="8%">${views.rmb(e.standardSalary)?string("0.##")}</td>
+							<td width="8%">${views.rmb(e.postSalary)?string("0.##")}</td>
+							<td width="8%">${views.rmb(e.floatingSalary)?string("0.##")}</td>
+							<td width="6%">${views.rmb(e.communicationAllowance)?string("0.##")}</td>
+							<td width="6%">${views.rmb(e.trafficAllowance)?string("0.##")}</td>
+							<td width="6%">${views.rmb(e.heatingAllowance)?string("0.##")}</td>
+							<td width="6%">${views.rmb(e.holidayAllowance)?string("0.##")}</td>
+							<td width="6%">${views.rmb(e.percentageAllowance)?string("0.##")}</td>
+							<td width="6%">${views.rmb(e.mealAllowance)?string("0.##")}</td>
+							<td width="8%">${views.rmb(e.socialSecurity)?string("0.##")}</td>
+							<td width="8%">${views.rmb(e.accumulationFund)?string("0.##")}</td>
+							<td width="8%">${views.rmb(e.tax)?string("0.##")}</td>
+							<td>
+								<a href="add?userId=${e.userId}" title="编辑"><span class="icons icon_edit"></span></a>
+							</td>
+						</tr>
+							</#list>
+						</#if>
+					</tbody>
+				</table>
+			</div>
+			<#if page.result?size lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<@fm.page page=page />
+		</div>
+	</div>
+	
+	<div id="footer"></div>
+	
+	<script type="text/javascript">
+		window.onload = window.onresize = function() {
+			var width = $(".table_body table").width();
+			$(".table_head table").css("width", width + "px");
+		}
+	</script>
+</body>
+</html>

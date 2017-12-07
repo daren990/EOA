@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 查阅周报</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.css" />
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.js"></script>
+	<style type="text/css">
+	.listinfo ul li{list-style-type: none;height: 40px;line-height: 40px;}
+	.plan{margin-top: 20px;}
+	</style>
+</head>
+  
+  <body>
+  	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+			<div id="form" class="clearfix" style="width:100%;">
+				<form action="wxadd" method="post">
+				  	<input type="hidden" name="reportId" value=${report.reportId}>
+				  	<input type="hidden" name="token" value="${token}">
+				  	<input type="hidden" name="type" value=${type}>
+				  	<div class="listinfo">
+				  		<ul>
+				  			<li>
+				  				编写
+				  				<input name="approveActor" type="hidden" type="text" class="input xl" value="${report.userId}" readonly="readonly">
+			  					<input type="text" class="input xss" value="${report.trueName}" readonly="readonly" data-role="none">
+				  			</li>
+				  			<li>日期 ${report.startDate}</li>
+				  		</ul>
+				  	</div>
+				  	
+				  	<div class="ui-corner-all custom-corners plan">
+				  		<div class="ui-bar ui-bar-a">
+				  			<h3>本周进度</h3>
+				  		</div>
+				  		<div class="ui-body ui-body-a">
+				  			<p class="planP">${report.content1}</p>
+				  		</div>
+				  	</div>
+				  	
+				  	<div class="ui-corner-all custom-corners plan">
+				  		<div class="ui-bar ui-bar-a">
+				  			<h3>下周计划</h3>
+				  		</div>
+				  		<div class="ui-body ui-body-a">
+				  			<p class="planP">${report.content2}</p>
+				  		</div>
+				  	</div>
+				  	
+				  	<div class="ui-grid-a">
+				  		<div class="ui-block-a"><button type="submit" class="ui-btn">不通过</button></div>
+				  		<div class="ui-block-b"><a href="wxpage" class="ui-btn">通过</a></div>
+				  	</div>
+		  	</form>
+  	</div>
+  	</div>
+  	<script type="text/javascript">
+  		$(document).ready(function(){
+  			
+  			jQuery.mobile.ajaxEnabled = false;
+  		
+  			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",				
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "wxpage");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+  		});
+  	</script>
+  </body>
+</html>

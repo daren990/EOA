@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<config>
+	<!-- 
+	<bean class="org.snaker.engine.access.jdbc.JdbcAccess"/>
+	<bean class="org.snaker.engine.access.transaction.DataSourceTransactionInterceptor"/>
+	 -->
+	<bean class="cn.oa.app.workflow.NutAccess"/>
+	<bean class="cn.oa.app.workflow.NutTransactionInterceptor"/>
+	<bean class="org.snaker.engine.access.dialect.MySqlDialect" />
+	<bean class="org.snaker.engine.impl.JuelExpression" />
+</config>

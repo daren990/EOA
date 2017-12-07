@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 发起任务</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<div id="right" class="right">
+				<form id="search" action="page" method="get">
+					<ul>
+						<li class="text">标题</li>
+						<li>
+							<input type="text" class="input xl" name="subject" value="${mb.subject}" />
+						</li>
+						<li class="text">发起时间</li>
+						<li>
+							<input type="text" class="input sm Wdate" name="startTime" value="${mb.startTime}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							<span>至</span>
+							<input type="text" class="input sm Wdate" name="endTime" value="${mb.endTime?default('')}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+						</li>
+						<li><button type="submit" class="btn primary xxs">搜索</button></li>
+					</ul>
+				</form>
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+			<div class="table_head">			
+				<table class="table">
+					<thead>
+						<tr>
+							<th width="40"><input type="checkbox" id="checkedIds"></th>
+							<th width="">标题</th>
+							<th width="15%">发起人</th>
+							<th width="15%">发起时间</th>
+							<th width="15%">流程日志</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+			<div class="table_body auto_height">
+				<table class="table">
+					<tbody>
+					<#if page.result?size gt 0>
+						<#assign i = 0 />
+						<#list page.result as e>
+						<tr>
+							<td width="26"><input type="checkbox" name="checkedIds" value="order_${e.id}"></td>
+							<td width="">
+								<a href="${ctx}/flow/form/all?processId=${e.processId}&orderId=${e.orderId}&type=send">${e.processName}_${e.orderNo}</a>
+								&nbsp;&nbsp;
+								<a href="javascript:open_flow('${e.orderId}')" title="流程图"><img src="${ctx}/img/icons/wf_view.png" style="vertical-align: middle;"></a>
+							</td>
+							<td width="15%">${userMap[e.creator]}</td>
+							<td width="15%">${e.orderCreateTime?substring(0,16)}</td>
+							<td width="15%">
+							<a href="javascript: flow_actors('${e.orderId}', '${i}')" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a>
+							</td>
+						</tr>
+						<#assign i = i + 1 />
+						</#list>
+					</#if>
+					</tbody>
+				</table>
+			</div>
+			<#if page.result?size lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<@fm.page page=page />
+		</div>
+	</div>
+	
+	<div id="actors_pop" class="pop bind" style="display: none; width: 278px;">
+		<div class="pop_content" style="padding: 0;">
+			<div class="auto_height xl">
+		   		<table class="table">
+		   		</table>
+			</div>
+		</div>
+	</div>
+	
+	<div id="flow_pop" class="pop" style="display: none; width: 918px;"></div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#shortcuts").select({ "name": "shortcuts" });
+			$("#shortcuts li").click(function() {
+				location.assign($(this).attr("item"));
+			});
+		});
+		
+		function flow_actors(id, _id) {
+			close_pop();
+			$("#actors_pop .table").empty();
+			
+			$.ajax({
+				url: "/flow/task/actors?orderId=" + id + "&token=${token}",
+				type: "post",
+				dataType: "json",
+				success: function(data) {
+					if (data.code == 1) {
+						$("#actors_pop .table").empty();
+						var text = "";
+						text += "<tr>";
+						text += "<th>操作人</th><th>操作内容</th><th>操作时间</th>";
+						text += "</tr>";
+						
+						$.each(data.actors, function(idx, obj) {
+							text += "<tr>";
+							text += "<td>" + obj.operator + "</td>";
+							text += "<td>" + obj.content + "</td>";
+							text += "<td>" + obj.modifyTime.substring(0,16) + "</td>";
+							text += "</tr>";
+						});
+						$("#actors_pop .table").append(text);
+					} else {
+						danger(1, data.message);
+					}
+				}
+			});
+			
+			open_pop(null,"#actors_"+_id,"#actors_pop",false);
+			return false;
+		};
+		
+		function open_flow(id) {
+			open_pop("${ctx}/flow/process/view?orderId=" + id,null,"#flow_pop",true);
+		}
+	</script>
+</body>
+</html>

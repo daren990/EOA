@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 批量补录</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit">
+			<div id="form" class="clearfix" style="width: 420px;" id="mainform">
+				<form action="add" method="post">	
+					<table class="table">
+						<tr>
+							<td class="pos">使用说明：</td>
+							<td class="pos required"></td>
+							<td colspan="4" style="background:#fff;padding:10px;border:1px solid #ccc;">
+								<strong>先选定公司(多选)才能选择用户(多选)</strong>,
+								<br />
+								如果不选定用户则表示修改该公司下所有用户的信息
+								
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">公司：</td>
+							<td class="pos required">*</td>
+							<td colspan="4">
+								<textarea class="xl" id="orgNames" rows="4" readonly="readonly">${oList}</textarea>
+								<input type="hidden" name="modelOrgs" value="">
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">用户：</td>
+							<td class="pos required"></td>
+							<td colspan="4">
+								<textarea class="xl" id="trueNames" rows="4" readonly="readonly">${uList}</textarea>
+								<input type="hidden" name="modelUsers" value="">
+							</td>
+						</tr>
+						<tr>
+						<td class="pos">补录日期：</td>
+							<td class="pos required">*</td>
+							<td>
+								<input type="text" id="start_yyyyMMdd" value="" class="input sm Wdate" name="start_yyyyMMdd" value="" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+								<input type="hidden" name="startType" />
+								<div id="startType" class="select xs">
+									<span class="option text"></span><span class="icon"></span>
+									<ul>
+										<li item="0">上班</li>
+										<li item="1">下班</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">补录原因：</td>
+							<td class="pos required">*</td>
+							<td colspan="4">
+								<textarea class="xl" rows="4" name="redressDesc" ></textarea>
+							</td>
+						</tr>
+						<tr>
+							<td>上级审批：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="operatorId" />
+								<div id="operatorId" class="select xl">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul class="auto_height sm">
+										<#list operators as e>
+										<li item="${e.userId}">${e.trueName}</li>
+										<input type="hidden" value="${e.username}" name="${e.userId}" />
+										</#list>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<div id="user_pop" class="pop bind" style="display: none; width: 318px;">
+		<div class="pop_content" style="padding: 0;">
+			<div class="auto_height sm">
+		   		<ul class="checked">
+					<#list users as u>
+						<li><input type="checkbox" name="checkedIds" value="${u.userId}" title="${u.trueName}" ><span>${u.trueName}</span></li>
+					</#list>
+		   		</ul>
+			</div>
+		</div>
+		<div class="pop_btn">
+			<input type="checkbox" id="checkedIds">
+		</div>
+	</div>
+
+	<div id="org_pop" class="pop bind" style="display: none; width: 318px;">
+		<div class="pop_content" style="padding: 0;">
+			<div class="auto_height sm">
+		   		<ul class="checked">
+		   		<#list orgs as o>
+					<li><input type="checkbox" name="orgIds" value="${o.orgId}" title="${o.orgName}" ><span>${o.orgName}</span></li>
+				</#list>
+				
+		   		</ul>
+			</div>
+		</div>
+		<div class="pop_btn">
+			<input type="checkbox" id="orgIds">
+		</div>
+	</div>
+	<script type="text/javascript">
+		$(document).ready(function() {
+		var param = "";
+			param += "corpId=" + "${corpId}";
+			param += "&userId=" + "${userId}";
+			param += "&startTime=" + "${startTime}";
+			param += "&endTime=" + "${endTime}";
+			param += "&remarkIn=" + "${remarkIn}";
+			param += "&remarkOut=" + "${remarkOut}";
+			$("#type").select({ "name": "type" });
+			$("#startType").select({ "name": "startType" });
+			$("#operatorId").select({ "name": "operatorId" });
+			$("#trueNames").click(function() {
+ 				open_pop(null,"#trueNames","#user_pop",false);
+ 				return false;
+ 			});
+			$("#checkedIds").click(function() { checkedIds(); });
+			$("input[name=checkedIds]").live("click",function(){
+				checkedIds();
+			});							
+		
+			$("#orgNames").click(function() {
+ 				open_pop(null,"#orgNames","#org_pop",false);
+ 				return false;
+ 			});
+			$("#orgIds").click(function() { 
+				if (this.checked) {
+					$("input[name='orgIds']").each(function() {
+						this.checked = true;
+					});
+					} else {
+					$("input[name='orgIds']").each(function() {
+						this.checked = false;
+					});
+				}
+				orgIds(); 
+				changeuser();
+			});
+			$("input[name=orgIds]").click(function() {
+				orgIds();
+				changeuser();
+			});
+		
+			$("form").ajaxForm({
+				url: "record",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+				},
+				success: function(data) {
+					if (data.code == 1) {
+						//成功不进行跳转
+						success(1, data.message);
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+		
+		function checkedIds() {
+			var ids = "";
+			var names = "";
+			$("input[name='checkedIds']").each(function() {
+				if ($(this).prop("checked") == true) {
+					ids += $(this).val() + ",";
+					names += $(this).attr("title") + ",";
+				}
+			});
+			$("input[name=modelUsers]").val(ids);
+			$("#trueNames").val(names);
+		}
+		function orgIds() {
+			var ids = "";
+			var names = "";
+			$("input[name='orgIds']").each(function() {
+				if ($(this).prop("checked") == true) {
+					ids += $(this).val() + ",";
+					names += $(this).attr("title") + ",";
+				}
+			});
+			$("input[name=modelOrgs]").val(ids);
+			$("#orgNames").val(names);
+		}
+		function changeuser(){
+				var org = $("input[name='modelOrgs']").val();				
+				$.ajax({
+				url: "change?modelOrgs="+org,
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+				},
+				success: function(data) {
+					$("#trueNames").val("");
+ 					$("input[name='modelUsers']").val("");
+					if (data.code == 1) { 						
+ 						var user = "";
+						for(var i=0;i<data.users.length;i++){
+ 							user += "<li><input type=\"checkbox\" name=\"checkedIds\" value=\""+data.users[i].userId+"\" title=\""+data.users[i].trueName+"\"><span>"+data.users[i].trueName+"</span></li>";
+ 						}
+ 						$("#user_pop ul").html(user);
+ 						$("#user_pop ul").addClass("checked");
+					} else {
+						$("#user_pop ul").html("");
+						danger_callback(data);
+					}
+				}
+				});
+		}
+	</script>
+</body>
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 结算明细 </title>
+	<#include "/views/js.html" />
+	<link rel="stylesheet" href="${ctx}/jw_js_css_img/bootstrap-3.3.4/css/bootstrap.min.css">
+	<#include "/views/css.html" />
+	<script src="${ctx}/jw_js_css_img/jquery-1.9.1/jquery.js"></script>
+	<script src="${ctx}/jw_js_css_img/bootstrap-3.3.4/js/bootstrap.min.js"></script>
+</head>
+<body>
+	<div id="path"></div>
+	<div class="container" style="margin: 10px;">
+		<form>
+			<div class="row clearfix">
+				<div class="col-md-12 column">
+					<div class="row clearfix" >
+						<div class="col-md-3 column">
+							<ul class="list-group" style="font-size: 17px; line-height: 20px;">
+							    <li class="list-group-item">商品名称:${vo.sp.name}
+							    <input type="hidden" value="${vo.sp.id}" name="shop_product_id"/>
+							    <input type="hidden" value="${vo.sp.corpId}" name="corp_id"/>
+							    <input type="hidden" value="${vo.orderids}" name="orderids"/>
+							    </li>
+							    <li class="list-group-item">商品类型:
+							    						<#if vo.sp.type == '单个商品'>
+														    <input type="hidden" value="0" name="type"/>
+							    							单品
+							    							<#elseif vo.sp.type == '商品套餐'>
+														    <input type="hidden" value="1" name="type"/>
+							    							组合
+							    						</#if>		
+							    </li>
+							    <li class="list-group-item">操作人名:${vo.operatorName}
+							    <input type="hidden" value="${vo.operatorId}" name="operatorId"/></li>
+							   	<li class="list-group-item">第${vo.times}次结算
+								<input type="hidden" value="${vo.times}" name="times"/></li>
+							    <li class="list-group-item">结算总金额:￥${vo.amount}元
+								<input type="hidden" value="${vo.amount}" name="amount"/></li>
+							    <li class="list-group-item">结算退款金额:￥${vo.unsubscribe}元
+								<input type="hidden" value="${vo.unsubscribe}" name="unsubscribe"/></li>
+							</ul>
+						</div>
+						<div class="col-md-9 column" style="border-radius: 6px; border: 1px solid #ddd; background-color: white;">
+							<div class="row clearfix" style="margin: 10px;">
+							
+								<table class="table table-striped">
+									<caption><h3>本次结算退订数据</h3>&nbsp;总金额:￥${vo.unsubscribe}元</caption>
+									<thead>
+										<tr>
+											<th>操作人名</th>
+											<th>是否全款</th>
+											<th>退款类型</th>
+											<th>退款金额</th>
+											<th>操作时间</th>
+										</tr>
+									</thead>
+									<tbody>
+										<#if vo.uvoList?size gt 0>
+											<#list vo.uvoList as uvo>
+												<tr>
+													<td>${uvo.operatorName}</td>
+													<td>
+														<#if uvo.isAll ==  null || uvo.isAll == 0>
+															否
+															<#elseif uvo.isAll == 1>
+															是
+														</#if>
+													</td>
+													<td>
+														<#if uvo.unsubscribeType == 1>
+															协商退订
+															<#elseif uvo.unsubscribeType == 2>
+															商家退订
+															<#elseif uvo.unsubscribeType == 0>
+															其他原因
+														</#if>
+													</td>
+													<td>￥${uvo.amount}元</td>
+													<td>${uvo.createTime}</td>
+												</tr>
+											</#list>
+										</#if>
+									</tbody>
+								</table>
+								
+								<table class="table table-striped">
+									<caption><h3>本次结算订单数据</h3>&nbsp;总金额:￥${vo.amount}元</caption>
+									<thead>
+										<tr>
+											<th>消费者名</th>
+											<th>使用者名</th>
+											<th>订单时间</th>
+											<th>金额</th>
+											<th>状态</th>
+										</tr>
+									</thead>
+									<tbody>
+										<#if vo.ovoList?size gt 0>
+											<#list vo.ovoList as ovo>
+												<tr>
+													<td>${ovo.shop_client_name}</td>
+													<td>${ovo.edu_student_name}</td>
+													<td>${ovo.create_time}</td>
+													<td>￥${ovo.amount}元</td>
+													<td>
+														<#if ovo.payStatus == 0>
+							    							未支付
+							    							<#elseif ovo.payStatus == 1>
+							    							已支付
+							    						</#if>	
+													</td>
+												</tr>
+											</#list>
+										</#if>
+									</tbody>
+								</table>
+								
+								<input type="hidden" value="${vo.targetList?size}" name="tsize"/>
+								<table class="table table-striped" style="font-size: 17px; line-height: 20px;">
+									<caption><h3>本次结算支出数据</h3></caption>
+									<tbody>
+										<#if vo.targetList?size gt 0>
+											<#assign i = 1 />
+											<#list vo.targetList as target>
+											
+												<input type="hidden" value="${target.targerId}" name="targetid_${i}"/>
+												<input type="hidden" value="${target.shop_goods_id}" name="sgid_${i}"/>
+												<input type="hidden" value="${target.shop_product_id}" name="spid_${i}"/>
+												<input type="hidden" value="${target.type}" name="ttype_${i}"/>
+												<input type="hidden" value="${target.coopType}" name="tcoopType_${i}"/>
+												<#if target.coopType != '自营'>
+													<tr>
+														<td>
+															课程：<span class="text-danger">${target.shop_goods_name}</span>，
+																支出对象：<span class="text-danger">${target.targername}</span>，
+																结算方式：<span class="text-danger">
+																<#if target.gainSharingType == 1>
+																	按学生绝对值：有效订单数 * 绝对值
+																	<#elseif target.gainSharingType == 2>
+																		按学生比例：(总收入-总退款) * 比例
+																	<#elseif target.gainSharingType == 3>
+																		按课时绝对值：课时 * 绝对值
+																</#if></span>
+															<br/>
+																<input type="hidden" value="${target.amount}" name="tamount_${i}"/>
+																<input type="hidden" value="${target.lastBalance}" name="tlastBalance_${i}"/>
+																本次结算可支出金额&nbsp;&nbsp;=&nbsp;&nbsp;<br/>
+																<span class="text-warning">上次结算余额：￥${target.lastBalance}元</span>&nbsp;&nbsp;+&nbsp;&nbsp;
+																<span class="text-warning">本次结算实际金额：(
+																<#if target.gainSharingType == 1>
+																	${vo.effective_orders}&nbsp;&nbsp;*&nbsp;&nbsp;
+																	${target.gainSharingNum}&nbsp;&nbsp;=&nbsp;&nbsp;￥${target.amount}元
+																	<#elseif target.gainSharingType == 2>
+																	(${vo.amount}&nbsp;&nbsp;-&nbsp;&nbsp;${vo.unsubscribe})&nbsp;&nbsp;*&nbsp;&nbsp;
+																	(${target.gainSharingNum}/100)&nbsp;&nbsp;=&nbsp;&nbsp;￥${target.amount}元
+																	<#elseif target.gainSharingType == 3>
+																	${target.couCount}&nbsp;&nbsp;*&nbsp;&nbsp;
+																	${target.gainSharingNum}&nbsp;&nbsp;=&nbsp;&nbsp;￥${target.amount}元
+																</#if>)</span>
+																&nbsp;&nbsp;=&nbsp;&nbsp;<span class="text-success">￥<span class="${target.shop_goods_id}_kzc">${target.amount + target.lastBalance}</span>元</span>
+															<br/>
+															实际支出金额： <input name="tsj_${i}" type="text" style="display: inline;" class="form-control input-sm sjzc" data-gid="${target.shop_goods_id}" value="${target.amount}" />元
+														</td>
+													</tr>
+													<#elseif target.coopType == '自营'>
+													<tr>
+														<td>
+															课程：${target.shop_goods_name}，自营课程，不需支出
+														</td>
+													</tr>
+												</#if>
+												<#assign i = i + 1 />
+											</#list>
+										</#if>
+									</tbody>
+								</table>
+							</div>
+						</div>
+						<span id="s_btn_span" class="btn primary xs pull-right" style="margin-top: 10px;">提交</span>
+						<span class="pull-right" style="margin-top: 10px; font-size: 17px; line-height: 20px;">结算支出金额:￥<span class="text-danger exp_span">${vo.expenditure}</span>元&nbsp;&nbsp;</span>
+						<input type="hidden" value="${vo.expenditure}" name="expenditure" id="h_expenditure"/>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+	
+	<script type="text/javascript">
+	
+		function countExpenditure(){
+			var exp = 0;
+			$(".sjzc").each(function(){
+				exp += Number($(this).val());
+			});
+			$(".exp_span").text(exp);
+			$("#h_expenditure").val(exp);
+		}
+	
+		$(function(){
+			$(".sjzc").keyup(function(){
+				var gid = $(this).attr("data-gid");
+				var val = $(this).val();
+				if(!isNaN(val)){
+					var kzc = $("."+gid+"_kzc").text();
+					if(Number(val) > Number(kzc)){
+						alert("实际支出不能大于可支出金额");
+						return false;
+					}
+				}else{
+					alert("请输入正确的数字");
+					return false;
+				}
+				countExpenditure();
+			})
+			
+			$("#s_btn_span").click(function(){
+		            $.ajax({
+						type: "post",
+						url: "/edu/sell/shopProductSettlement/addSettlement",
+		                data:$('form').serialize(),
+		                dataType:"json",
+		                success: function(data) {
+							alert(data.message);
+							if (data.code == 1) {
+								window.history.go(-1);
+							} else {
+							}
+						}
+		            });
+			})
+		})
+	
+	</script>
+</body>
+</html>

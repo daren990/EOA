@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 待办事项</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	<link rel="stylesheet" type="text/css" href="/jw_js_css_img/css/pending_page.css" />
+	<script type="text/javascript" src="/jw_js_css_img/layer.m/layer.m.js"></script>
+	<script>
+		attentimei=0;
+		function attentime(stringTime,stringTime2){			
+		    var timestamp = Date.parse(new Date(stringTime.replace(/-/g,"/")));
+			var timestamp2 = Date.parse(new Date(stringTime2.replace(/-/g,"/")));		
+			timestamp = timestamp / 1000;
+			timestamp2 = timestamp2 / 1000;		
+			if(timestamp < timestamp2){
+				document.write("<tr style=\"display:none\">");
+			}else{
+				document.write("<tr>");
+				attentimei+=1;
+			}
+		}
+		function countattentime(){
+			attentimei+=1;
+		}
+	</script>
+</head>
+<#assign isPerform = "false" />
+<#if views.hasAnyRole("perform.manager", roleNames)><#assign isPerform = "true" /></#if>
+
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div class="message"></div>
+	</div>
+	
+	<div style="float: left;width: 100%">
+	<!-- 左边div开始 -->
+	<div class="leftDiv">
+		<!-- 代办事项开始 -->
+		<div class="agencyDiv">
+			<div class="agencyHeadDiv">
+				<span class="daibanText">我的代办事项</span> (共<span class="countSpan"></span>条记录)
+			</div>
+			<div class="daibanContent">
+				<#assign len = 0 />
+				<#assign i = 0 />
+				<div class="agencyListDiv">
+				<#if record?size gt 0>
+					<#assign len = len + record?size />
+					<#list record as r>
+					<script>countattentime();</script>
+				<ul>
+					<li style="width: 50%"><a href="/adm/salary/attendance/recordApprove?recordId=${r.recordId}">${r.subject}</a></li>
+					<li style="width: 10%">${r.trueName}</li>
+					<li style="width: 16%"><#if r.date??>${r.date?datetime}</#if></li>
+					<li style="width: 10%;padding-top: 8px;"><a href="javascript: ajax_actors('/adm/salary/attendance/actors?recordId=${r.recordId}', 'record', '${i}')" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a></li>
+				</ul>
+				<div class="clear"></div>
+					<#assign i = i + 1 />
+					</#list>
+				</#if>
+				
+				<!-- 出差审批列表 -->
+				<#if leaves?size gt 0>
+					<#assign len = len + leaves?size />
+					<#list leaves as e>												
+					<#if att!=null>
+					<script>attentime("${e.startTime?datetime}","${att.endDate?datetime}");</script>
+					<#else>
+					</#if>
+					<ul>
+						<li style="width: 50%"><a href="/adm/salary/leave/approve/add?leaveId=${e.leaveId}">${e.subject}</a></li>
+						<li style="width: 10%">${e.trueName}</li>
+						<li style="width: 16%"><#if e.createTime??>${e.createTime?datetime}</#if></li>
+						<li style="width: 10%;padding-top: 8px;"><a href="javascript: ajax_actors('/adm/salary/leave/approve/actors?leaveId=${e.leaveId}', 'leave', '${i}')" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a></li>
+					</ul>
+					<div class="clear"></div>
+					<#assign i = i + 1 />
+					</#list>
+				</#if>
+				
+				<#if warn?size gt 0>
+					<#assign len = len + warn?size />
+					<#list warn as e>
+					<script>countattentime();</script>
+				<ul>
+					<li style="width: 50%"><a href="/res/warn/approve/add?warnId=${e.warnId}">${e.subject}</a></li>
+					<li style="width: 10%">${e.trueName}</li>
+					<li style="width: 16%"><#if e.createTime??>${e.createTime?datetime}</#if></li>
+					<li style="width: 10%;padding-top: 8px;"><a href="javascript: ajax_actors('/res/warn/approve/actors?warnId=${e.warnId}', 'warn', '${i}')" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a></li>
+				</ul>
+				<div class="clear"></div>
+					<#assign i = i + 1 />
+					</#list>
+				</#if>
+				
+				<#if resign?size gt 0>
+					<#assign len = len + resign?size />
+					<#list resign as e>
+					<script>countattentime();</script>
+				<ul>
+					<li style="width: 50%"><a href="/hrm/resign/approve/add?resignId=${e.resignId}">${e.subject}</a></li>
+					<li style="width: 10%">${e.trueName}</li>
+					<li style="width: 16%"><#if e.createTime??>${e.createTime?datetime}</#if></li>
+					<li style="width: 10%;padding-top: 8px;"><a href="javascript: ajax_actors('/hrm/resign/approve/actors?resignId=${e.resignId}', 'resign', '${i}')" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a></li>
+				</ul>
+				<div class="clear"></div>
+					<#assign i = i + 1 />
+					</#list>
+				</#if>
+				
+				<#if regular?size gt 0>
+					<#assign len = len + regular?size />
+					<#list regular as e>
+					<script>countattentime();</script>
+				<ul>
+					<li style="width: 50%"><a href="/hrm/regular/approve/add?resignId=${e.resignId}">${e.subject}</a></li>
+					<li style="width: 10%">${e.trueName}</li>
+					<li style="width: 16%"><#if e.createTime??>${e.createTime?datetime}</#if></li>
+					<li style="width: 10%;padding-top: 8px;"><a href="javascript: ajax_actors('/hrm/regular/approve/actors?resignId=${e.resignId}', 'resign', '${i}')" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a></li>
+				</ul>
+				<div class="clear"></div>
+					<#assign i = i + 1 />
+					</#list>
+				</#if>
+				
+				<#if change?size gt 0>
+					<#assign len = len + change?size />
+					<#list change as e>
+					<script>countattentime();</script>
+				<ul>
+					<li style="width: 50%"><a href="/res/change/approve/add?changeId=${e.changeId}">${e.subject}</a></li>
+					<li style="width: 10%">${e.trueName}</li>
+					<li style="width: 16%"><#if e.createTime??>${e.createTime?datetime}</#if></li>
+					<li style="width: 10%;padding-top: 8px;"><a href="javascript: ajax_actors('/res/change/approve/actors?changeId=${e.changeId}', 'change', '${i}')" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a></li>
+				</ul>
+				<div class="clear"></div>
+					<#assign i = i + 1 />
+					</#list>
+				</#if>
+				
+				<#if errands?size gt 0>
+					<#assign len = len + errands?size />
+					<#list errands as e>
+				<#if att!=null>
+				<script>attentime("${e.startTime?datetime}","${att.endDate?datetime}");</script>
+				<#else>
+				</#if>
+				<ul>
+					<li style="width: 50%"><a href="/adm/salary/errand/approve/add?errandId=${e.errandId}">${e.subject}</a></li>
+					<li style="width: 10%">${e.trueName}</li>
+					<li style="width: 16%"><#if e.createTime??>${e.createTime?datetime}</#if></li>
+					<#--<li style="width: 10%;padding-top: 8px;"><a href="javascript: actors('${e.opinion}','${e.operator}','${views.approve(e.approve)}','${e.modifyTime?datetime}', '${i}')" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a></li>-->
+				</ul>
+				<div class="clear"></div>
+					<#assign i = i + 1 />
+					</#list>
+				</#if>
+				
+				<!-- 外勤审批列表 -->
+				<#if outworks?size gt 0>
+					<#assign len = len + outworks?size />
+					<#list outworks as e>
+				<#if att!=null>
+				<script>attentime("${e.startTime?datetime}","${att.endDate?datetime}");</script>
+				<#else>
+				</#if>
+				<ul>
+					<li style="width: 50%"><a href="/adm/salary/outwork/approve/add?outworkId=${e.outworkId}">${e.subject}</a></li>
+					<li style="width: 10%">${e.trueName}</li>
+					<li style="width: 16%"><#if e.createTime??>${e.createTime?datetime}</#if></li>
+					<li style="width: 10%;padding-top: 8px;"><a href="javascript: actors('${e.opinion}','${e.operator}','${views.approve(e.approve)}','${e.modifyTime?datetime}', '${i}')" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a></li>
+				</ul>
+				<div class="clear"></div>
+					<#assign i = i + 1 />
+					</#list>
+				</#if>
+				
+				<!-- 加班审批列表 -->
+				<#if overtimes?size gt 0>
+				<#assign len = len + overtimes?size />
+				<#list overtimes as e>
+				<#if att!=null>
+				<script>attentime("${e.startTime?datetime}","${att.endDate?datetime}");</script>
+				<#else>
+				</#if>
+				<ul>
+					<li style="width: 50%"><a href="/adm/salary/overtime/approve/add?overtimeId=${e.overtimeId}">${e.subject}</a></li>
+					<li style="width: 10%">${e.trueName}</li>
+					<li style="width: 16%"><#if e.createTime??>${e.createTime?datetime}</#if></li>
+					<li style="width: 10%;padding-top: 8px;"><a href="javascript: ajax_actors('/adm/salary/overtime/approve/actors?overtimeId=${e.overtimeId}', 'overtime', '${i}')" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a></li>
+				</ul>
+				<div class="clear"></div>
+					<#assign i = i + 1 />
+					</#list>
+				</#if>
+				
+				<!-- 绩效审批列表 -->
+				<#if performs?size gt 0>
+					<#assign len = len + performs?size />
+					<#list performs as e>
+					<script>countattentime();</script>
+				<ul>
+					<li style="width: 50%">
+						<a href="/adm/examine/perform/approve/add?performId=${e.performId}">${e.subject}</a>
+						&nbsp;
+						<a href="javascript: ajax_nodes('/adm/examine/perform/apply/nodes?performId=${e.performId}', 'perform', '${i}')" title="考核目标"><img id="nodes_${i}" src="${ctx}/img/icons/many.png" style="vertical-align: middle;"></a>
+					</li>
+					<li style="width: 10%">${e.trueName}</li>
+					<li style="width: 16%"><#if e.createTime??>${e.createTime?datetime}</#if></li>
+					<li style="width: 10%;padding-top: 8px;"><a href="javascript: ajax_actors('/adm/examine/perform/approve/actors?performId=${e.performId}', 'perform', '${i}')" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a></li>
+				</ul>
+				<div class="clear"></div>
+					<#assign i = i + 1 />
+					</#list>
+				</#if>
+				
+				<#if reimburses?size gt 0>
+				<#assign len = len + reimburses?size />
+				<#list reimburses as e>
+				<script>countattentime();</script>
+				<ul>
+					<li style="width: 50%"><a href="/adm/expense/reimburse/approve/add?reimburseId=${e.reimburseId}">${e.subject}</a></li>
+					<li style="width: 10%">${e.trueName}</li>
+					<li style="width: 16%"><#if e.createTime??>${e.createTime?datetime}</#if></li>
+					<li style="width: 10%;padding-top: 8px;"><a href="javascript: ajax_actors('/adm/expense/reimburse/approve/actors?reimburseId=${e.reimburseId}', 'reimburse', '${i}')" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a></li>
+				</ul>
+				<div class="clear"></div>
+					<#assign i = i + 1 />
+					</#list>
+				</#if>
+				
+				<!-- 借支审批列表 -->
+				<#if borrows?size gt 0>
+					<#assign len = len + borrows?size />
+					<#list borrows as e>
+					<script>countattentime();</script>
+				<ul>
+					<li style="width: 50%"><a href="/adm/expense/borrow/approve/add?borrowId=${e.borrowId}">${e.subject}</a></li>
+					<li style="width: 10%">${e.trueName}</li>
+					<li style="width: 16%"><#if e.createTime??>${e.createTime?datetime}</#if></li>
+					<li style="width: 10%;padding-top: 8px;"><a href="javascript: ajax_actors('/adm/expense/borrow/approve/actors?borrowId=${e.borrowId}', 'borrow', '${i}')" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a>志</li>
+				</ul>
+				<div class="clear"></div>
+					<#assign i = i + 1 />
+					</#list>
+				</#if>
+				
+				<!-- 票务审批列表 -->
+				<#if tickets?size gt 0>
+					<#assign len = len + tickets?size />
+					<#list tickets as e>
+					<script>countattentime();</script>
+				<ul>
+					<li style="width: 50%"><a href="/res/ticket/approve/add?ticketId=${e.ticketId}">${e.subject}</a></li>
+					<li style="width: 10%">${e.trueName}</li>
+					<li style="width: 16%"><#if e.createTime??>${e.createTime?datetime}</#if></li>
+					<li style="width: 10%;padding-top: 8px;"><a href="javascript: ajax_actors('/res/ticket/approve/actors?ticketId=${e.ticketId}', 'ticket', '${i}')" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a></li>
+				</ul>
+				<div class="clear"></div>
+					<#assign i = i + 1 />
+					</#list>
+				</#if>
+				
+				<#if works?size gt 0>
+					<#assign len = len + works?size />
+					<#list works as e>
+					<script>countattentime();</script>
+				<ul>
+					<li style="width: 50%">
+						<a href="javascript:;">${r.processName}_${e.orderNo}</a> 
+						&nbsp;&nbsp;
+						<a href="javascript:open_flow('${e.orderId}')" title="流程图"><img src="${ctx}/img/icons/wf_view.png" style="vertical-align: middle;"></a>
+					</li>
+					<li style="width: 10%">${userMap[e.creator]}</li>
+					<li style="width: 16%">${e.orderCreateTime?substring(0,16)}</li>
+					<li style="width: 10%;padding-top: 8px;"><a href="javascript: flow_actors('${e.orderId}', '${i}')" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a></li>
+				</ul>
+				<div class="clear"></div>
+					<#assign i = i + 1 />
+					</#list>
+				</#if>
+				
+				<!-- 批量补录审批 -->
+				<#if redressRecord?size gt 0>
+					<#assign len = len + redressRecord?size />
+					<#list redressRecord as e>
+						<script>countattentime();</script>
+						<ul>
+							<li style="width: 50%"><a href="/adm/salary/attendance/record_page">【${e.trueName}】申请考勤补录，原因：${e.redressDesc}</a></li>
+							<li style="width: 10%">${e.trueName}</li>
+							<li style="width: 16%"><#if e.creatorTime??>${e.creatorTime?datetime}</#if></li>
+							<li style="width: 10%; padding-top: 8px;"><a href="javascript: " title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a></li>
+						</ul>
+						<div class="clear"></div>
+						<#assign i = i + 1 />
+					</#list>
+				</#if>
+	
+				<div class="clear"></div>
+				<#if len lt 1>
+					<div class="noAgency">暂时没有代办事项</div>
+				</#if>
+			</div>
+			</div>
+		</div>
+		<div class="clear"></div>
+		<!-- 代办事项结束 -->	
+	
+		<!-- 周报日报开始 -->
+		<#if jobReport?size gt 0>
+		<#assign weekReport = 0 />
+		<#assign dayReport = 0 />
+		<div class="report">
+			<div class="reportMenu">
+				<ul>
+					<li class="menuselect">周报审阅</li>
+					<li>日报审阅</li>
+				</ul>
+				<div class="clear"></div>
+			</div>
+			<div class="reportContentDiv" id="weekReport">
+				<#list jobReport as j>
+					<#if j.type == 1>
+					<#assign weekReport = weekReport+1 />
+						<ul>
+							<li class="title"><a href="${ctx}/addressBook/approveWeekReport/add?reportId=${j.reportId}">${j.trueName} 写了 ${j.startDate} 到 ${j.endDate} 的${j.title}</a></li>
+							<li class="time"><#if j.createTime??>${j.createTime?datetime}</#if></li>
+						</ul>
+						<div class="clear"></div>
+					</#if>
+				</#list>
+				<#if weekReport == 0>
+					<div style="width: 100%;height: 70px;line-height: 70px;text-align: center;">
+						暂无未审阅的周报
+					</div>
+				</#if>
+			</div>
+			<div class="reportContentDiv" id="dayReport">
+				<#list jobReport as j>
+					<#if j.type == 2>
+					<#assign dayReport = dayReport+1 />
+						<ul>
+							<li class="title"><a href="${ctx}/addressBook/approveWeekReport/add?reportId=${j.reportId}">${j.trueName} 写了 ${j.startDate} 到 ${j.endDate} 的${j.title}</a></li>
+							<li class="time"><#if j.createTime??>${j.createTime?datetime}</#if></li>
+						</ul>
+						<div class="clear"></div>
+					</#if>
+				</#list>
+				<#if dayReport == 0>
+					<div style="width: 100%;height: 70px;line-height: 70px;text-align: center;">
+						暂无未审阅的日报
+					</div>
+				</#if>
+			</div>
+		</div>
+		</#if>
+		<!-- 周报日报结束 -->	
+		
+	</div>
+	<!-- 左边div结束 -->
+	
+	<!-- 右边div开始 -->
+	<div class="rightDiv" >
+		<!-- 公司公告开始 -->
+		<div class="noticeDiv">
+			<div class="noticeHeadDiv">
+				<span>公告</span>
+			</div>
+			<div class="noticeState">
+				<ul>
+					<li class="menuselect">未阅</li>
+					<li>已阅</li>
+				</ul>
+			</div>
+			<div class="clear"></div>
+			<div class="noticeContentDiv">
+			<#if notices?size gt 0>
+			<#assign read = 0 />
+			<#assign unread = 0 />
+			<!-- 未阅 -->
+			<div class="unReadNotice">
+				<#list notices as n>
+					<ul>
+						<#if n.receive==0 && n.type==0>
+						<#assign unread = unread +1 />
+							<li class="noticeContentLi"><a href="javascript:;">${n.title}</a><input type="hidden" value="${n.content}" class="content" /><input type="hidden" value="${n.noticeId}" class="noticeId" /></li>
+							<li class="noticeTrue">${n.true_name}</li>
+							<li class="noticeTimeLi">${n.creatTime?date}</li>
+							<input type="hidden" value="${n.true_name}" />
+							<input type="hidden" value="${n.orgName}" />
+						</#if>
+					</ul>
+				</#list>
+				<#if unread == 0 >
+					暂时还没有未阅公告
+				</#if>
+			</div>
+			<!-- 未阅结束 -->
+			
+			<!-- 已阅 -->
+			<div class="readNotice">
+				<#list notices as n>
+					<ul>
+						<#if n.receive==1 && n.type==0>
+						<#assign read = read+1 />
+							<li class="noticeContentLi"><a href="javascript:;">${n.title}</a><input type="hidden" value="${n.content}" class="content" /><input type="hidden" value="${n.noticeId}" class="noticeId" /></li>
+							<li class="noticeTrue">${n.true_name}</li>
+							<li class="noticeTimeLi">${n.creatTime?date}</li>
+							<input type="hidden" value="${n.true_name}" />
+							<input type="hidden" value="${n.orgName}" />
+						</#if>
+					</ul>
+				</#list>
+				<#if read == 0 >
+					暂时还没有已阅公告
+				</#if>
+			</div>
+			<!-- 已阅结束 -->
+			<#else>
+				<div style="width:90px;margin:auto;margin-top:5px;margin-bottom:5px;">暂时没有公告</div>
+			</#if>
+				<div class="clear"></div>
+			</div>
+		</div>
+		<br/>
+		<!-- 公司公告开始 -->
+		<div class="noticeDiv">
+			<div class="noticeHeadDiv">
+				<span>存休时长</span>
+			</div>
+			<div class="clear"></div>
+			<div class="noticeContentDiv">
+				<table style="width: 30%">
+					<tr>
+						<td>存休时长</td>
+						<td>${overtimeRest}小时</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+		<!-- 公司公告结束 -->
+	</div>
+	</div>
+	<div id="actors_pop" class="pop bind" style="display: none; width: 278px;">
+		<div class="pop_content" style="padding: 0;">
+			<div class="auto_height xl">
+		   		<table class="table">
+		   		</table>
+			</div>
+		</div>
+	</div>
+		
+	<div id="nodes_pop" class="pop bind" style="display: none; width: 378px;">
+		<div class="pop_content" style="padding: 0;">
+			<div class="auto_height xl">
+		   		<table class="table">
+		   		</table>
+			</div>
+		</div>
+	</div>
+	
+	<div id="noticeDetail" class="pop" style="display: none; width: 600px;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<div class="pop_title" id="pop_title"></div>
+			<div class="pop_content blank" id="pop_content"></div>
+			<div class="pop_btn ">
+				<button type="button" class="btn primary xs" onclick="close_pop()">知道了</button>
+				<!-- <button type="button" class="btn default xs" onclick="close_pop()">取消</button> -->
+			</div>
+		</div>		
+	</div>
+	
+	<div id="flow_pop" class="pop" style="display: none; width: 918px;"></div>
+	<script type="text/javascript">
+	
+		$(document).ready(function(){
+			$("#dayReport").hide();
+			$(".readNotice").hide();
+			$(".countSpan").html(attentimei);
+			$(".reportMenu ul li").click(function(){
+				$(this).addClass("menuselect");
+				$(this).siblings().removeClass("menuselect");
+				if($(this).html() == "周报审阅"){
+					$("#dayReport").hide();
+					$("#weekReport").show();
+				}else if($(this).html() == "日报审阅"){
+					$("#weekReport").hide();
+					$("#dayReport").show();
+				}
+			});
+			
+			$(".noticeState ul li").click(function(){
+				$(this).addClass("menuselect");
+				$(this).siblings().removeClass("menuselect");
+				if($(this).html() == "未阅"){
+					$(".unReadNotice").show();
+					$(".readNotice").hide();
+				}else{
+					$(".unReadNotice").hide();
+					$(".readNotice").show();
+				}
+			});
+			
+			$(".noticeContentLi a").live("click",function(){
+				var title = $(this).html();
+				var content = $(this).next().val();
+				var noticeId = $(this).siblings(".noticeId").val();
+				var removeLi = $(this).parent().parent();
+				var licount = $(".unReadNotice").find("li").length;
+				$("#pop_title").html(title);
+				$("#pop_content").html(content);
+				$.ajax({
+					type:"post",
+					url:"/sys/conf/announcement/able",
+					data:{"noticeId":noticeId},
+					dataType:"json",
+					success:function(data){
+						if(data.code == 1){
+							removeLi.remove();
+							if(licount == 3){
+								$(".unReadNotice").html("暂无未读公告");
+							}
+							if($(".readNotice").find("li").length == 0){
+								$(".readNotice").html("");
+								$(".readNotice").append("<ul>"+removeLi.html()+"</ul>");
+							}else{
+								$(".readNotice").append("<ul>"+removeLi.html()+"</ul>");
+							}
+						}
+					}
+				});
+				open_pop(null,null,"#noticeDetail",true);
+			});
+		});
+		
+		function actors(opinion, actorName, approve, modifyTime, _id) {
+			close_pop();
+			$("#actors_pop .table").empty();
+			var text = "";
+			text += "<tr>";
+			text += "<th>操作人</th><th>操作内容</th><th>审批意见</th><th>操作时间</th>";
+			text += "</tr>";
+			text += "<tr>";
+			text += "<td>" + actorName + "</td>";
+			text += "<td>" + approve + "</td>";
+			text += "<td>" + opinion + "</td>";
+			text += "<td>" + modifyTime + "</td>";
+			text += "</tr>";
+			$("#actors_pop .table").append(text);
+			open_pop(null,"#actors_"+_id,"#actors_pop",false);
+		}
+		
+		function ajax_actors(url, t, _id) {
+			close_pop();
+			$.ajax({
+				url: url + "&token=${token}",
+				type: "post",
+				dataType: "json",
+				success: function(data) {
+					if (data.code == 1) {
+						$("#actors_pop .table").empty();
+						var text = "";
+						text += "<tr>";
+						text += "<th>操作人</th><th>操作内容</th><th>审批意见</th><th>操作时间</th>";
+						text += "</tr>";
+						if (data.actors.length == 0) {
+							text += "<tr>";
+							text += "<td colspan=\"3\">-</td>";
+							text += "</tr>";
+						} else {
+							$.each(data.actors, function(idx, obj) {
+								var approve = "";
+								var modifyTime = obj.modifyTime.substring(0, 16);
+								if (obj.approve == 1) {
+									if (t == "perform" && obj.variable == "self") approve = "同意";
+									else approve = "已批准";
+								} else if (obj.approve == -1) {
+									if (t == "perform" && obj.variable == "self") approve = "不同意";
+									else approve = "未批准";
+								} else {
+									if (t == "perform" && obj.variable == "self") approve = "待处理";
+									else approve = "待审批";
+									modifyTime = "-";
+								}
+								
+								text += "<tr>";
+								text += "<td>" + obj.actorName + "</td>";
+								text += "<td>" + approve + "</td>";
+								text += "<td>" + obj.opinion + "</td>";
+								text += "<td>" + modifyTime + "</td>";
+								text += "</tr>";
+							});
+						}
+						$("#actors_pop .table").append(text);
+					} else {
+						danger(1, data.message);
+					}
+				}
+			});
+			open_pop(null,"#actors_"+_id,"#actors_pop",false);
+		}
+		
+		function ajax_nodes(url, t, _id) {
+			close_pop();
+			$.ajax({
+				url: url + "&token=${token}",
+				type: "post",
+				dataType: "json",
+				success: function(data) {
+					if (data.code == 1) {
+						$("#nodes_pop .table").empty();
+						var userId = "${currentUser.userId}";
+						var text = "";
+						text += "<tr>";
+						text += "<th width=\"\">目标</th><th width=\"20%\">权重</th><th width=\"20%\">本人评分</th><th width=\"20%\">上级评分</th>";
+						text += "</tr>";
+						$.each(data.nodes, function(idx, obj) {
+							var myScore = "-";
+							var score = "-";
+							if (obj.version == "1" && obj.approved != "0")
+								myScore = obj.myScore;
+							if (obj.version == "1" && obj.approved != "0" && (userId == obj.userId || "${isPerform}" == "false"))
+								score = obj.score;
+							text += "<tr>";
+							text += "<td style=\"text-align: left; padding-left: 6px;\">" + obj.content + "</td>";
+							text += "<td>" + obj.weight + "</td>";
+							text += "<td>" + myScore + "</td>";
+							text += "<td>" + score + "</td>";
+							text += "</tr>";
+						});
+						$("#nodes_pop .table").append(text);
+					} else {
+						danger(1, data.message);
+					}
+				}
+			});
+			open_pop(null,"#nodes_"+_id,"#nodes_pop",false);
+		}
+		
+		function flow_actors(id, _id) {
+			close_pop();
+			$("#actors_pop .table").empty();
+			
+			$.ajax({
+				url: "/flow/task/actors?orderId=" + id + "&token=${token}",
+				type: "post",
+				dataType: "json",
+				success: function(data) {
+					if (data.code == 1) {
+						$("#actors_pop .table").empty();
+						var text = "";
+						text += "<tr>";
+						text += "<th>操作人</th><th>操作内容</th><th>操作时间</th>";
+						text += "</tr>";
+						
+						$.each(data.actors, function(idx, obj) {
+							text += "<tr>";
+							text += "<td>" + obj.operator + "</td>";
+							text += "<td>" + obj.content + "</td>";
+							text += "<td>" + obj.modifyTime.substring(0,16) + "</td>";
+							text += "</tr>";
+						});
+						$("#actors_pop .table").append(text);
+					} else {
+						danger(1, data.message);
+					}
+				}
+			});
+			
+			open_pop(null,"#actors_"+_id,"#actors_pop",false);
+		};
+		
+		function open_flow(id) {
+			open_pop("${ctx}/flow/process/view?orderId=" + id,null,"#flow_pop",true);
+		}
+	</script>
+</body>
+</html>

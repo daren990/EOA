@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if file.fileId??>编辑<#else>新建</#if>人事档案处理</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit auto_height">
+			<div id="form" class="clearfix" style="width: 430px;">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="fileId" value="${file.fileId}">
+					<table class="table">
+						<tr>
+							<td>申请人：</td>
+							<td></td>
+							<td><input type="text" class="input xl" value="${file.modifyName}" readonly="readonly"></td>
+						</tr>
+						<tr>
+							<td>申请时间：</td>
+							<td></td>
+							<td>
+								<#assign createTime = now?date />
+								<#if file.createTime??><#assign createTime = file.createTime?date /></#if>
+								<input type="text" class="input xl" value="${createTime}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>原始姓名：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" value="${file.orgTrueName}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>姓名：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" value="${file.trueName}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>性别：</td>
+							<td class="required"></td>
+							<td>
+								<#if file.gender == 1><#assign gender = "男" /></#if>
+								<input type="text" class="input xl" value="${gender?default('女')}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>出生年月：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" value="${file.birthday}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>籍贯：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" value="${file.place}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>民族：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" value="${file.nation}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>健康状况：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" value="${file.health}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>婚否：</td>
+							<td class="required"></td>
+							<td>
+								<#if file.marry == 1><#assign marry = "已婚" /></#if>
+								<input type="text" class="input xl" value="${marry?default('未婚')}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>最高学历：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" value="${file.degree}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>所学专业：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" value="${file.major}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>毕业院校：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" value="${file.school}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>身份证：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" value="${file.idcard}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>联系电话：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" value="${file.phone}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>入职日期：</td>
+							<td class="required"></td>
+							<td>
+								<#if file.entryDate??>
+								<#assign entry_yyyyMMdd = file.entryDate?date />
+								</#if>
+								<input type="text" class="input sm" value="${entry_yyyyMMdd?default('')}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>转正日期：</td>
+							<td class="required"></td>
+							<td>
+								<#if file.fullDate??>
+								<#assign full_yyyyMMdd = file.fullDate?date />
+								</#if>
+								<input type="text" class="input sm" value="${full_yyyyMMdd?default('')}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>状态：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="approve" value="${actor.approve}" />
+								<div id="approve" class="select xl">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<li item="">请选择</li>
+										<li item="1">同意</li>
+										<li item="-1">拒绝</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+  			$("#approve").select({ "name": "approve" });
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.approve, [RQ], "状态");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+	</script>
+</body>
+</html>

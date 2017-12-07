@@ -1,0 +1,105 @@
+#tools,#props {
+	border: 1px solid #3e74ae;
+	position: absolute;
+	background-color: #fff;
+}
+
+#tools #title,#props #title {
+	margin: 2px 2px 0 2px;
+	padding: 0 0 0 4px;
+	border: 1px solid #3e74ae;
+	height: 20px;
+	line-height: 20px;
+	color: black;
+	background-color: #8ebe00;
+	font-weight: bolder;
+	cursor: move;
+	background-color: #8ebe00;
+}
+
+#tools {
+	width: 120px;
+}
+
+#tools ul {
+	padding: 4px 0px;
+}
+
+#tools ul li {
+	padding: 1px 0 2px 0;
+	list-style: none;
+}
+
+#tools ul li.line {
+	background-color: #fff;
+	margin-bottom: 4px;
+	border-bottom: 1px solid #a1c5e5;
+}
+
+#tools ul li img {
+	margin-left: 4px;
+	vertical-align: middle;
+}
+
+#tools ul li span {
+	margin-left: 8px;
+}
+
+#tools ul li:hover {
+	border-right: 1px solid #8ebe00;
+	background-color: #d9edf7;
+	cursor: default;
+}
+
+#tools ul li.line:hover {
+	border-right: 0;
+	background-color: #fff;
+}
+
+#props {
+	width: 520px;
+}
+
+#props #table {
+	margin: 2px;
+	width: 516px;
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+#props #table td {
+	border: 1px solid #ccc;
+	overflow: hidden;
+	white-space: nowrap;
+	height: 22px;
+	line-height: 22px;
+}
+
+#props #table td.prop_name {
+	padding: 0 0 0 4px;
+}
+
+.prop_name {
+	width: 120px;
+	color: #000;
+	background-color: #8ebe00;
+}
+
+.prop_value {
+	height: 20px;
+}
+
+#props input[type="text"] {
+	margin: 1px;
+	padding: 2px;
+	border: 1px solid #000;
+	height: 16px;
+	width: 392px;
+}
+
+#props select {
+	margin: 1px;
+	border: 1px solid #000;
+	height: 21px;
+	width: 398px;
+}

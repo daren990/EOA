@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="zh-cn">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>列表</title>
+    <style>
+		* {
+			margin: 0;
+			padding: 0;
+			-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+			-webkit-text-size-adjust: none;
+		}
+</style>
+    <link rel="stylesheet" href="${ctx}/jw_js_css_img/dropload-gh-pages/dist/dropload.css">
+    
+    <!--标准mui.css-->
+	<link rel="stylesheet" href="${ctx}/jw_js_css_img/mui/css/mui.min.css">
+    
+</head>
+<body>
+<input type="hidden" value="${org_id}" id="org_id" />
+<header class="mui-bar mui-bar-nav">
+	<form action="javascript:return true;">
+		<div class="mui-input-row mui-search" style="display: block;">
+			<input id="seacherKey_text" type="search" class="mui-input-clear" placeholder="关键字搜索" onsearch="search()">
+		</div>
+	</form>
+	<!-- <button id="search_key" class="mui-btn mui-btn-primary" style="display: block;">搜索</button> -->
+</header>
+<div class="mui-content">
+	<div class="content">
+		<div class="container">
+			<div class="row clearfix">
+			    <div class="lists"></div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- jQuery1.7以上 或者 Zepto 二选一，不要同时都引用 -->
+<script src="${ctx}/jw_js_css_img/dropload-gh-pages/examples/js/zepto.min.js"></script>
+<script src="${ctx}/jw_js_css_img/dropload-gh-pages/dist/dropload.min.js"></script>
+<script src="${ctx}/jw_js_css_img/mui/js/mui.min.js"></script>
+<script type="text/javascript" charset="utf-8">
+mui.init({
+	swipeBack:true //启用右滑关闭功能
+});
+
+var pageSize = 10;
+var pageNo = 1;
+
+function search(){
+	// 清空内容
+    $('.lists').html('');
+    $('.dropload-down').remove();
+    pageNo = 1
+    initData();
+}
+
+$(function(){
+	initData();
+	/* $("#search_key").click(function(){
+		search();
+	}); */
+});
+
+var notSale = function(msg){
+	mui.toast(msg);
+}
+
+var initData = function(){
+	// dropload
+    $('.content').dropload({
+        scrollArea : window,
+        loadDownFn : function(me){
+            $.ajax({
+                type: 'POST',
+                url: '${ctx}/wx/list/getData',
+                data:{pageNo : pageNo , pageSize : pageSize , org_id : $("#org_id").val() , seacherKey : $("#seacherKey_text").val()},
+                dataType: 'json',
+                success: function(data){
+                	var result = '';
+                	pageNo += 1;
+                	$.each(data.voList,function(index,vo){
+                		
+                		var detail = vo.detail == '' ? '无简介' : vo.detail;
+                		
+                		var now = new Date;
+                    	var startTime = new Date(vo.st);
+                    	var endTime = new Date(vo.et);
+                    	
+                    	var onclick = "";
+                    	if (now < startTime) {
+                    		onclick = "onClick=\"notSale('未开售')\"";
+                			payStatus = '<span class="mui-pull-right mui-badge mui-badge-danger">未开售</span>';
+                    	} else if (now > endTime) {
+                    		onclick = "onClick=\"notSale('已停售')\"";
+                			payStatus = '<span class="mui-pull-right mui-badge mui-badge-warning">已停售</span>';
+                		}else{
+                    		onclick = "onClick=\"canSale('" + vo.id + "')\"";
+                			payStatus = '<span class="mui-pull-right mui-badge mui-badge-primary">售卖中</span>';
+                		}
+                		result +="<div class='mui-card' " + onclick + ">"+
+        							"<div class='mui-card-header'>" + vo.name +"<span class='mui-badge mui-badge-danger'>" + vo.sold + "/" + vo.max + "</span></div>"+
+			        				"<div class='mui-card-content'>"+
+			        					"<div class='mui-card-content-inner'>"+
+			        						"教学点:"+ vo.location + 
+			        						"<br/>"+
+				        					"简介:"+ detail +
+			        					"</div>"+
+			        				"</div>"+
+			        				"<div class='mui-card-footer'>";
+			        				if(comp(vo.st)){
+			       						result+='<span style="font-size: 14px; color: #262626;">停售日期:<span style="color:#f00;">'+vo.et+'</span></span>';
+			       					}else{
+			       						result+='<span style="font-size: 14px; color: #262626;">开售日期:<span style="color:#f00;">'+vo.st+'</span></span>';
+			       					}
+			        				result += payStatus;
+			        				result+="</div>"+
+			        			"</div>";
+                	})
+                	if(data.voList.length == 0){
+                		me.lock();
+                		me.noData();
+                	}
+                	// 为了测试，延迟1秒加载
+                    setTimeout(function(){
+                        $('.lists').append(result);
+                        // 每次数据加载完，必须重置
+                        me.resetload();
+                    },1000);
+                },
+                error: function(xhr, type){
+                    // 即使加载出错，也得重置
+                    me.resetload();
+                }
+            });
+        }
+    });
+}
+
+var comp = function(date) {
+    var now = new Date;
+    var d = new Date(date);
+    if (now > d) {
+        return true;
+    } else if (now < d) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+</script>
+</body>
+</html>

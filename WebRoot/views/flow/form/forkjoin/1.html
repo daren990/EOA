@@ -1,0 +1,44 @@
+<#assign url = "${ctx}/flow/form/forkjoin/1" />
+<form id="1" action="${url}" method="post">
+	<input type="hidden" name="token" value="${token}">
+	<input type="hidden" name="processId" value="${process.id}">
+	<input type="hidden" name="orderId" value="<#if order??>${order.id}</#if>">
+	<table class="table">
+		<#if active>
+		<tr>
+			<td colspan="2"></td>
+			<td><button type="submit" class="btn primary xs">提交</button></td>
+		</tr>
+		</#if>
+	</table>
+</form>
+<#if active>
+<script type="text/javascript">
+	$(document).ready(function() {
+		$("#1").ajaxForm({
+			url: "${url}",
+			type: "post",
+			resetForm: false,
+			dataType: "json",
+			beforeSubmit: function(formData, jqForm, options) {
+				danger(0);
+				disabled_on();
+				var form = jqForm[0];
+				try {
+				} catch(err) {
+					danger(1, err);
+					disabled_off();
+					return false;
+				}
+			},
+			success: function(data) {
+				if (data.code == 1) {
+					success_callback(data, "${ctx}/coll/send/page");
+				} else {
+					danger_callback(data);
+				}
+			}
+		});
+	});
+</script>
+</#if>

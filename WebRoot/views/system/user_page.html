@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 用户查询</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<div id="left" class="left">
+				<a href="${ctx}/system/user/add"><span class="icons icon_add"></span><span class="icons_text">新建</span></a>
+				<span class="split">|</span>
+				<a href="javascript:open_able('', '1')"><span class="icons icon_unlock"></span><span class="icons_text">启用</span></a>
+				<span class="split">|</span>
+				<a href="javascript:open_able('', '0')"><span class="icons icon_lock"></span><span class="icons_text">禁用</span></a>
+			</div>
+			<div id="right" class="right">
+				<form id="search" action="page" method="get">
+					<input type="hidden" name="pageSize" value="${page.pageSize}">
+					<input type="hidden" name="pageNo" value="${page.pageNo}">
+					<ul>
+						<li class="text">用户名</li>
+						<li><input type="text" class="input sm" name="username" value="${mb.username}" /></li>
+						<li class="text">姓名</li>
+						<li><input type="text" class="input sm" name="trueName" value="${mb.trueName}" /></li>
+						<li><button type="button" class="btn primary xxs" onclick="search()">搜索</button></li>
+					</ul>
+				</form>
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+			<div class="table_head">
+				<table class="table">
+					<thead>
+						<tr>
+							<th width="40"><input type="checkbox" id="checkedIds"></th>
+							<th width="10%">用户名</th>
+							<th width="15%">架构组织</th>
+							<th width="10%">姓名</th>
+							<th width="10%">工号</th>
+							<th width="10%">邮箱</th>
+							<th width="20%">角色组</th>
+							<th width="10%">状态</th>
+							<th width="">操作</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+			<div class="table_body auto_height">
+				<table class="table">
+					<tbody>
+						<#if page.result?size gt 0>
+							<#list page.result as e>
+						<tr>
+							<td width="26"><input type="checkbox" name="checkedIds" value="${e.userId}"></td>
+							<td width="10%">${e.username}</td>
+							<td width="15%">${e.orgName}</td>
+							<td width="10%">${e.trueName}</td>
+							<td width="10%">${e.jobNumber}</td>
+							<td width="10%">${e.email}</td>
+							<#assign arr = e.roleNames?split(",") />
+							<#assign names = "" />
+							<#assign i = 0 />
+							<#list arr as a>
+								<#assign names = names + a />
+								<#if a_has_next><#assign names = names + "、" /></#if>
+								<#if (i+1) % 5 == 0><#assign names = names + "\n" /></#if>
+								<#assign i = i + 1 />
+							</#list>
+							<td width="20%" title="${names}"><div class="word_break xs">${e.roleNames?replace(",", "、")}</div></td>
+							<td width="10%"><#if e.status == 1>启用<#else>禁用</#if></td>
+							<td>
+								<a href="add?userId=${e.userId}" title="编辑"><span class="icons icon_edit"></span></a>
+								<#assign able = 1 />
+								<#assign title = "启用" />
+								<#assign check = "icon_unlock" />
+								<#if e.status == 1>
+									<#assign able = 0 />
+									<#assign title = "禁用" />
+									<#assign check = "icon_lock" />
+								</#if>
+								<a href="javascript:open_able('${e.userId}', '${able}');" title="${title}"><span class="icons ${check}"></span></a>
+							</td>
+						</tr>
+							</#list>
+						</#if>
+					</tbody>
+				</table>
+			</div>
+			<#if page.result?size lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<@fm.page page=page />
+		</div>
+	</div>
+	
+	<div id="footer"></div>
+	
+	<div id="able_user" class="pop" style="display: none; width: 280px;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<div class="pop_title">启用用户</div>
+			<div class="pop_content blank">确定要启用所选用户吗？</div>
+			<div class="pop_btn">
+				<input type="hidden" id="status" value="1" />
+				<button type="button" class="btn primary xs" onclick="able()">确定</button>
+				<button type="button" class="btn default xs" onclick="close_pop()">取消</button>
+			</div>
+		</div>				
+	</div>
+	
+	<script type="text/javascript">
+		function open_able(id, status) {
+			if (id) {
+				get_checked(id);
+			}
+			var before = status == 1 ? "禁用" : "启用";
+			var after = status == 1 ? "启用" : "禁用";
+			$(".pop_title").text($(".pop_title").text().replace(before, after));
+			$(".pop_content").text($(".pop_content").text().replace(before, after));
+			$("#status").val(status);
+			open_pop(null,null,"#able_user");
+		}
+		function able() {
+			var status = $("#status").val();
+			ajax_checked("请选择需要" + (status == 1 ? "启用" : "禁用") + "的用户", "able?&status=" + status + "&token=${token}");
+			close_pop();
+			auto_width();
+		}
+		window.onload = window.onresize = function() {
+			auto_width();
+		}
+	</script>
+</body>
+</html>

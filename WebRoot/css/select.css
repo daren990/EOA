@@ -1,0 +1,67 @@
+.select {
+	border: 1px solid #c5cfd7;
+	position: relative;
+	height: 22px;
+	line-height: 26px;
+	display: inline-block;
+	background-color: #fff;
+	vertical-align:middle;
+}
+
+.select .option {
+	padding: 0 5px;
+	border: none;
+	line-height: 24px;
+	white-space: nowrap;
+	overflow: hidden;
+	color: #000;
+	float:left;
+}
+
+.select ul {
+	border: 1px solid #c5cfd7;
+	border-top: 0 !important;
+	position: absolute;
+	top: 24px !important;
+	left : -1px;
+	width: 100%;
+	display: none;
+	z-index: 1;
+	bottom:auto !important;
+	overflow-y: scroll;
+	height:17vw;
+}
+
+.select ul li {
+	padding: 0 5px;
+	line-height: 24px;
+	list-style: none;
+	background-color: #fff;
+	cursor: pointer;
+	text-align:left;
+}
+
+.select ul li:hover {
+	background-color: #d9edf7;
+}
+
+.select ul.on {
+	display: block !important;
+}
+
+.select ul.off {
+	display: none !important;
+}
+
+.select .text {
+	color: #000;
+}
+
+.select .icon {
+	width: 20px;
+	height: 20px;
+	position: absolute;
+	right: 1px;
+	top: 1px;
+	background: url("/img/icons/arrow_down.gif") no-repeat center center;
+}

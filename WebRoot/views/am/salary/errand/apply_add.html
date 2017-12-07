@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if errand.errandId??>编辑<#else>新建</#if>出差申请</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit">
+			<div id="form" class="clearfix" style="width: 570px;">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="errandId" value="${errand.errandId}">
+					<table class="flow table">
+						<tr>
+							<td>申请人：</td>
+							<td></td>
+							<td class="lg">${currentUser.trueName}</td>
+							<td>申请时间：</td>
+							<td></td>
+							<td><#if errand.createTime??>${errand.createTime?date}<#else>${now?date}</#if></td>
+						</tr>
+						<tr>
+							<td>开始时间：</td>
+							<td class="required">*</td>
+							<td>
+								<#if errand.startTime??><#assign startTime = errand.startTime?date /></#if>
+								<input type="text" class="input Wdate" name="startTime" value="${startTime?default('')}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							</td>
+							<td>结束时间：</td>
+							<td class="required">*</td>
+							<td>
+								<#if errand.endTime??><#assign endTime = errand.endTime?date /></#if>
+								<input type="text" class="Wdate input" name="endTime" value="${endTime?default('')}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							</td>
+						</tr>
+						<tr>
+							<td class="">出差地点：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input" name="place" value="${errand.place}">
+							</td>
+							<td class="">需要设备：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input" name="equipment" value="${errand.equipment}">
+							</td>
+						</tr>
+						<tr>
+							<td class="">所需项目：</td>
+							<td class="required"></td>
+							<td colspan="4">
+								<input type="text" class="input xl" name="project" value="${errand.project}">
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">工作描述：</td>
+							<td class="pos required">*</td>
+							<td colspan="4">
+								<textarea class="xl" name="content" rows="4">${errand.content}</textarea>
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">备注：</td>
+							<td class="pos required"></td>
+							<td colspan="4">
+								<textarea class="xl" name="remark" rows="4">${errand.remark}</textarea>
+							</td>
+						</tr>
+						<tr>
+							<td>上级审批：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="operatorId" value="${errand.operatorId}" />
+								<div id="operatorId" class="select">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<li item="">请选择</li>
+										<#list operators as e>
+										<li item="${e.userId}">${e.trueName}</li>
+										</#list>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div id="footer"></div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#workTime").select({ "name": "workTime" });
+			$("#operatorId").select({ "name": "operatorId" });
+			
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.startTime, [RQ], "开始时间");
+						validate(form.endTime, [RQ], "结束时间");
+						validate(form.place, [RQ, RANGE, "{1,60}"], "出差地点");
+						validate(form.equipment, [RANGE, "{1,60}"], "需要设备");
+						validate(form.project, [RANGE, "{1,60}"], "所属项目");
+						validate(form.content, [RQ, RANGE, "{1,200}"], "工作描述");
+						validate(form.remark, [RANGE, "{1,60}"], "备注");
+						validate(form.operatorId, [RQ], "上级审批");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+	</script>
+</body>
+</html>

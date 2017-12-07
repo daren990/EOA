@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  	<meta name="viewport" content="width=device-width, initial-scale=1" />
+  	<link rel="stylesheet" type="text/css" href="/jw_js_css_img/css/album_headImg.css" />
+  	<link rel="stylesheet" type="text/css" href="/jw_js_css_img/jcrop/css/jquery.Jcrop.min.css" />
+  	<script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
+  	<script type="text/javascript" src="/jw_js_css_img/jcrop/js/jquery.Jcrop.min.js"></script>
+  	<script type="text/javascript" src="/jw_js_css_img/layer.m/layer.m.js"></script>
+    <title>上传头像</title>
+  </head>
+  
+  <body>
+    <!-- <div style="width: 50%;margin: 50px auto;" id="imgDiv">
+    	<img src="${path}" id="target" width="100%" />
+    </div>
+        <form action="cutHeadImg" method="post">  
+       	 点击  
+        <input type="hidden" name="x" id="x"/>  
+        <input type="hidden" name="y" id="y"/>  
+        <input type="hidden" name="width" id="width"/>  
+        <input type="hidden" name="height" id="height"/>  
+        <input type="submit" value="确定" />  
+                   ，设置完成。  
+    </form>  -->
+    <script type="text/javascript">
+    $(document).ready(function(){
+    	
+    	window.location.href="share";
+    	
+    	/* layer.open({
+    		content:"拖动选择框选择你需要头像部分",
+    		time:3
+    	});
+    	
+    	$("#target").Jcrop({
+    		minSize:[250,250],
+    		maxSize:[250,250],
+    		bgFade: true,
+    		onChange:   showCoords,
+    		onSelect:   showCoords
+    	});
+    	
+      function showCoords(c)
+	  {
+	    $("#x").val(c.x);
+	    $("#y").val(c.y);
+	    $("#width").val(c.w);
+	    $("#height").val(c.h);
+	  }; */
+    });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "views/meta.html" />
+	<title>${pageTitle} :: 登录</title>
+	<link href="${ctx}/css/base.css?${version}" rel="stylesheet">
+	<link href="${ctx}/css/login.css?${version}" rel="stylesheet">
+	<link rel="icon" href="${ctx}/img/logo.ico" type="image/x-icon" />
+	<link rel="shortcut icon" href="${ctx}/img/logo.ico" type="image/x-icon" />
+	<link rel="Bookmark" href="${ctx}/img/logo.ico">
+	<script type="text/javascript" src="${ctx}/js/jquery-1.7.2.min.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery.form-3.17.js"></script>
+	<script type="text/javascript" src="${ctx}/js/common.js?${version}"></script>
+	<script type="text/javascript" src="${ctx}/js/validator.js?${version}"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/layer.m/layer.m.js"></script>
+</head>
+
+<body>
+	<div id="header" class="clearfix">
+		<div id="logo" class="left">
+			<a href="" title="和德科技"><img src="${ctx}/img/logo.png"><strong>和德集团</strong></a>
+		</div>
+		<div id="link" class="right">
+			<a href="javascript:;" id="favorites">加入收藏夹</a>
+		</div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div id="login">
+			<form class="right" action="${ctx}/login" method="post">
+				<input type="hidden" name="token" value="${token}">
+				<div id="form_header"><strong>用户登录</strong></div>
+				<div id="form_content">
+					<div class="error">
+						<span class="icons icon_danger hide"></span>
+						<label></label>
+					</div>
+					<div class="input_group">
+						<div class="wrap">
+							<span class="icons icon_user">
+							</span><input type="text" class="input" name="username" value="${uid}">
+						</div>
+					</div>
+					<div class="input_group">
+						<div class="wrap">
+							<span class="icons icon_lock"></span>
+							<input type="password" class="input" name="password" value="">
+						</div>
+					</div>
+					<div class="input_group">
+						<#if remember_me?? && remember_me>
+							<#assign checked = "checked='checked'" />
+						</#if>
+						<input type="checkbox" id="remember_me" name="remember_me" value="true" ${checked?default("")}><label for="remember_me">记住我</label>
+					</div>
+				</div>
+				<div id="form_footer">
+					<button type="submit" class="btn primary lg"><strong>登录</strong></button>
+				</div>
+			</form>
+		</div>
+	</div>
+	<div id="footer" class="clearfix">
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("form").ajaxForm({
+				url: "/login",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				timeout: 15000,
+				beforeSubmit: function(formData, jqForm, options) {
+					error(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.username, [RQ, RANGE, "{2,60}"], "用户名");
+						validate(form.password, [RQ, RANGE, "{4,32}"], "密码");
+					} catch(err) {
+						error(1, err);
+						disabled_off();	
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+						$(location).attr('href', '/');
+					} else {
+						error_callback(data);	
+					}
+				},
+				error: function() {
+					error(1, "登录超时");
+					disabled_off();
+				}
+			});
+		});
+		
+		jQuery.fn.addFavorite = function(l, h) {
+	    return this.click(function() {
+	        var t = jQuery(this);
+	        if(jQuery.browser.msie) {
+	            window.external.addFavorite(h, l);
+	        } else if (jQuery.browser.mozilla || jQuery.browser.opera) {
+	            t.attr("rel", "sidebar");
+	            t.attr("title", l);
+	            t.attr("href", h);
+	        } else {
+	        	layer.open({
+	        		content:"请使用 ctrl+D 加入收藏夹",
+	        		time:2,
+	        		shade: [0.1, '#000']
+	        	});
+	        }
+	    });
+	};
+	$(function(){
+	    $('#favorites').addFavorite('收藏本站',location.href);
+	});
+	</script>
+</body>
+</html>

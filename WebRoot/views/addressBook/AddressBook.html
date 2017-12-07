@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 通讯录</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.css" />
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/layer.m/layer.m.js"></script>
+	<style type="text/css">
+	#mailList li{list-style-type: none!important}
+	*{ 
+		-ms-touch-callout: none;
+		-moz-touch-callout: none;
+		-webkit-touch-callout: none;
+		-o-touch-callout: none; 
+} 
+	</style>
+</head>
+<body data-role="page">
+	<div id="path"></div>
+	<div id="header">
+		<div class="message"></div>
+	</div>
+	
+	<div data-role="header">
+		<a href="useradd" data-role="button" data-icon="arrow-l">新建成员</a>
+		<h1>我的通讯录</h1>
+		<a href="groupadd" data-role="button" data-icon="arrow-r" data-iconpos="right">新建组别</a>
+	</div>
+	
+	<div id="mailList" style="display: none">
+		<!-- <ul style="list-style-type: none">
+			<li class="titleLi" style="background: #e9e9e9;height: 25px;line-height: 25px;padding: 5px;">组别 <span style="float: right;"> <a href="javascript:;">编辑分组</a> | <a href="javascript:;">删除分组</a> </span></li>
+			<li class="contentLi" style="height: 25px;line-height: 25px;border-bottom: 1px solid #EEE;">姓名姓</li>
+			<li class="contentLi" style="height: 25px;line-height: 25px;border-bottom: 1px solid #EEE;">姓名姓</li>
+			<li class="contentLi" style="height: 25px;line-height: 25px;border-bottom: 1px solid #EEE;">姓名姓</li>
+		</ul> -->
+	</div>
+	
+	<div class="contentMail">
+		<ul data-role="listview" data-inset="true" data-filter="true" data-filter-placeholder="姓名或电话号码......">
+			<#list corps as c>
+				<li style="background: #CCC;color: #FFF;">${c.name} <span style="margin-left: 40%"><a href="groupadd?groupid=${c.groupid}">编辑分组</a> | <a href="javascript:open_delGroup(${c.groupid});">删除分组</a></span></li>
+					<#list address as a>
+						<#if c.groupid == a.u_groupid>
+						<li class="contentLi">
+							<a href="useradd?uuserid=${a.u_userid}">
+								<img src="${ctx}/jw_js_css_img/img/touxiang.png" width="63" height="63" style="margin: 10px;" />
+								<h2>${a.username}</h2>
+								<p>${a.phone}</p>
+							</a>
+						</li>
+						<input type="hidden" value="${a.u_userid}" />
+						</#if>
+					</#list>
+				</li>
+			</#list>
+		</ul>
+	</div>
+	
+	
+	<div id="delUser_apply" class="pop" style="display: none; width: 280px;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<div class="pop_title">删除通讯录成员</div>
+			<div class="pop_content blank">确定要删除所选通讯录成员吗？</div>
+			<div class="pop_btn ">
+				<button type="button" class="ui-btn ui-corner-all ui-btn-inline" onclick="delUser()">确定</button>
+				<button type="button" class="ui-btn ui-corner-all ui-btn-inline" onclick="close_pop()">取消</button>
+			</div>
+		</div>				
+	</div>
+	<div id="delGroup_apply" class="pop" style="display: none; width: 280px;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<div class="pop_title">删除通讯录组</div>
+			<div class="pop_content blank">确定要删除所选通讯录组吗？</div>
+			<div class="pop_btn ">
+				<button type="button" class="ui-btn ui-corner-all ui-btn-inline" onclick="delGroup()">确定</button>
+				<button type="button" class="ui-btn ui-corner-all ui-btn-inline" onclick="close_pop()">取消</button>
+			</div>
+		</div>				
+	</div>
+	<script type="text/javascript">
+	$(document).ready(function() {
+			
+			jQuery.mobile.ajaxEnabled = false;
+			
+			
+			$(".contentLi").live("taphold",function(){
+				var id = $(this).next().val();
+				window.location.href="javascript:open_delUser("+id+")";
+			});
+			
+			 var nodes = [
+ 				<#list address as e>
+ 				{groupid: "${e.groupid}",sort:"${e.sort}", ugroupid: "${e.u_groupid}", groupname: "${e.name}",uuserid:"${e.u_userid}", username: "${e.username}", relation: "${e.relation}", position: "${e.position}",phone: "${e.phone}",email: "${e.email}",qq:"${e.qq}",exigencyphone:"${e.exigencyphone}"}<#if e_has_next>,</#if>
+ 				</#list>
+ 			];
+ 			
+ 			
+ 			for(var i=0;i<nodes.length;i++){
+ 				var groupid = parseInt(nodes[i].groupid);
+ 				var id =$('#mailList').find('"#group'+groupid+'"').attr('id');
+ 				var cid = null;
+ 				if (id == "undefined" || id == null || id ==""){
+ 					cid = id;
+ 				}else{
+ 					cid = id.replace("group",""); 					
+ 				}
+ 				var a = parseInt(cid);
+ 				if(a != groupid){
+ 					$('#mailList').append('<ul style="list-style-type: none" id="group'+groupid+'"><li class="titleLi" style="background: #e9e9e9;height: 35px;line-height: 35px;padding: 5px;padding-left:8px;">'+nodes[i].groupname+'<span style="float: right;"> <a href="groupadd?groupid='+nodes[i].groupid+'">编辑分组</a> | <a href="javascript:open_delGroup('+nodes[i].groupid+');" class=\"deleteGroup\">删除分组</a><input type="hidden" value="'+nodes[i].groupid+'" name=\"checkedIds\" /> </span></li><li class="contentLi" style="height: 35px;line-height: 35px;border-bottom: 1px solid #EEE;">'+nodes[i].username+'</li><input type="hidden" value="'+nodes[i].uuserid+'" name=\"checkedIds\" /></ul>');
+ 				}else{
+ 					$('#mailList').append('<li class="contentLi" style="height: 35px;line-height: 35px;border-bottom: 1px solid #EEE;">'+nodes[i].username+'</li><input type="hidden" value="'+nodes[i].uuserid+'" name=\"checkedIds\" />');
+ 				};
+ 			}
+ 			
+ 			
+			$("#corpId").select({ "name": "corpId" });
+			$(".group").click(function(){
+				$(this).next(".table_body").slideToggle();
+			});
+		});
+	
+		function open_able(id, status) {
+			if (id) {
+				get_checked(id);
+			}
+			var before = status == 1 ? "禁用" : "启用";
+			var after = status == 1 ? "启用" : "禁用";
+			$(".pop_title").text($(".pop_title").text().replace(before, after));
+			$(".pop_content").text($(".pop_content").text().replace(before, after));
+			$("#status").val(status);
+			open_pop(null,null,"#able_user",true);
+		}
+		
+		function able() {
+			var status = $("#status").val();
+			ajax_checked("请选择需要" + (status == 1 ? "启用" : "禁用") + "的用户", "able?&status=" + status + "&token=${token}");
+			close_pop();
+		}
+		
+		function download() {
+			location.assign("download");
+		}
+		
+		function open_delUser(id) {
+			if (id) {
+				get_checked(id);
+			}
+			layer.open({
+				content:"确定删除吗?",
+				btns:2,
+				btn:["确定","取消"],
+				yes:function(){
+					delUser();
+				}
+			});
+		}
+		function open_delGroup(id) {
+			if (id) {
+				get_checked(id);
+			}
+			layer.open({
+				content:"确定删除通讯录组吗?",
+				btns:2,
+				btn:["确定","取消"],
+				yes:function(){
+					delGroup();
+				}
+			});
+		}
+		function delUser() {
+			ajax_checked("请选择需要删除通讯录成员", "userdel?token=${token}" ,"wxpage");
+			close_pop();
+		}
+		function delGroup() {
+			ajax_checked("请选择需要删除通讯录组", "groupdel?token=${token}" ,"wxpage");
+			close_pop();
+		}
+	</script>
+</body>
+</html>
+

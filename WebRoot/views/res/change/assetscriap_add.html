@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 新建资产报废</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+  
+  <body>
+    <div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit">
+			<div id="form" class="clearfix" style="width: 460px;">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="scriapId" value="${assetScriap.scriapId}">
+					<input type="hidden" name="assetId" value="${assetScriap.assetId}">
+					<table class="table">
+						<tr>
+							<td>申请报废时间：</td>
+							<td class="required">*</td>
+							<td>
+								<#assign createTime = now?date />
+								<#if assetScriap.createTime??><#assign createTime = assetScriap.createTime?date /></#if>
+								<input type="text" class="input sm" value="${createTime}" readonly="readonly" >
+							</td>
+							<td>申请人：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input sm" name="applyName" value="${assetScriap.applyName}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>资产名称：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input sm" name="assetName" value="${asset.assetName}" readonly="readonly">
+							</td>
+							<td>资产编号：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input sm" name="assetNumber" value="${asset.assetNumber}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>资产种类：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input sm" name="type" value="${assetMap[asset.typeId?string]}" readonly="readonly">
+							</td>
+							<td>报废存放地点：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input sm" name="storagePlace" value="${assetScriap.storagePlace}">
+							</td>
+						</tr>
+						<tr>
+							<td>使用人：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input sm" name="userName" value="${asset.trueName}" readonly="readonly">
+							</td>
+							<td>使用部门：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input sm" name="orgName" value="${asset.orgName}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>购买日期：</td>
+							<td class="required">*</td>
+							<td>
+								<#assign time = now?date />
+								<#if asset.shopTime??><#assign time = asset.shopTime?date /></#if>
+								<input type="text" class="input sm" name="shopTime" value="${time}" readonly="readonly">
+							</td>
+							<td>原购价：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input sm" name="price" value="${asset.price}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>计划使用到：</td>
+							<td class="required">*</td>
+							<td>
+								<#assign realAge = now?date />
+								<#if asset.planAge??><#assign realAge =asset.planAge?date /></#if>
+								<input type="text" class="input sm" name="planAge" value="${realAge}" readonly="readonly">
+							</td>
+							<td>实际使用时间：</td>
+							<td class="required">(月)</td>
+							<td>
+								<input type="text" class="input sm" name="realage" value="${assetScriap.realAge}" readonly="readonly">
+							</td>
+						</tr>
+							<tr>
+							<td>已提折旧额：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input sm" name="depreciation" value="${asset.depreciation}" readonly="readonly">
+							</td>
+							<td>报废类型：</td>
+							<td class="required">*</td>
+							<td>
+							<#assign type = "" />
+							<#if assetScriap.scriapType == 0><#assign type ="已达到预计年限"></#if><#if assetScriap.scriapType == 1><#assign type ="未达到预计年限"></#if>
+								<input type="hidden" name="scriapType" value="${assetScriap.scriapType}">
+								<input type="text" class="input sm" name="type" value="${type}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>审批人员：</td>
+							<td class="required">*</td>
+							<td colspan="4">
+								<input type="hidden" name="operatorId" value="${assetScriap.actorId}">
+								<div id="operatorId" class="select xl" style="width: 338px">
+									<span class="option text" >请选择</span><span class="icon"></span>
+									<ul class="auto_height sm">
+									<#list operators as o>
+										<li item="${o.userId}">${o.trueName}</li>
+									</#list>
+										
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">报废原因：</td>
+							<td class="pos required"></td>
+							<td colspan="4">
+								<textarea class="xl" rows="4" name="reason" id="reason" style="width: 340px">${assetScriap.reason}</textarea>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+		$(function(){
+			$("#operatorId").select({ "name": "operatorId" });
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.storagePlace, [RQ], "报废存放地点");
+						validate(form.operatorId, [RQ], "审批人员");
+						validate(form.reason, [RQ], "报废原因");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+	</script>
+  </body>
+</html>

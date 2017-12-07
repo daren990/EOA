@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  	<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  	<link type="text/css" rel="stylesheet" href="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.css" />
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/js/jquery-1.9.1.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.js"></script>
+    <title>查看分享</title>
+  </head>
+  
+  <body>
+  	<div data-role="header">
+  		<h1>我分享，我快乐！</h1>
+  	</div>
+  	
+  	<div class="contentdata">
+  		<ul data-role="listview" data-inset="true">
+  			<#if page.result?size gt 0>
+				<#list page.result as e>
+  			<li>
+  				<a href="/addressBook/viewSharDetail/wxadd?reportId=${e.reportId}" rel="external">
+  					<img src="${ctx}/jw_js_css_img/img/touxiang.png" />
+  					<h2>标题:${e.title}</h2>
+  					<h2>作者:${e.trueName}</h2>
+  					<#if e.createTime??><#assign createTime = e.createTime?date /></#if>
+	  				<p>时间:${createTime?default('')}</p>
+  					<p><strong>内容:${e.content}</strong></p>
+  				</a>
+  			</li>
+  				</#list>
+			</#if>
+  		</ul>
+  	</div>
+  	
+  </body>
+</html>

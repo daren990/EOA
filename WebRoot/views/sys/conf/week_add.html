@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if week.weekId??>编辑<#else>新建</#if>周排班</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit">
+			<div id="form" class="clearfix" style="width: 480px;">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="weekId" value="${week.weekId}">
+					<table class="table">
+						<tr>
+							<td>周排班名称：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input xl" name="workName" value="${week.workName}">
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">工作日：</td>
+							<td class="pos required">*</td>
+							<td>
+								<#assign workDays = "" />
+								<#assign arr = week.workDays?default("")?split(",") />
+								<#assign i = 0 />
+								<#list ["一","二","三","四","五","六","日"] as e>
+									<#assign i = i + 1 />
+									<#if arr?seq_contains(i?html)>
+										<#assign workDays = workDays + "星期" + e />
+										<#if i lt (arr?size - 1)><#assign workDays = workDays + "," /></#if>
+									</#if>
+								</#list>
+								<input type="text" class="input xl" id="workDays" value="${workDays}">
+								<input type="hidden" name="workDays" value="${week.workDays}">
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">公司绑定：</td>
+							<td class="pos required"></td>
+							<td>
+								<textarea class="xl" id="corpNames" rows="3" readonly="readonly">${week.corpNames}</textarea>
+								<input type="hidden" name="corpIds" value="${week.corpIds}">
+							</td>
+						</tr>
+						<tr>
+							<td>状态：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="status" value="${week.status?default(1)}" />
+								<div id="status" class="select xl">
+									<span class="option text">启用</span><span class="icon"></span>
+									<ul>
+										<li item="0">禁用</li>
+										<li item="1">启用</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<div id="week_pop" class="pop bind" style="display: none; width: 318px;">
+		<div class="pop_content" style="padding: 0;">
+			<div class="auto_height sm">
+		   		<ul class="checked">
+		   		<#assign arr = week.workDays?default("")?split(",") />
+		   		<#assign i = 0 />
+				<#list ["一","二","三","四","五","六","日"] as e>
+					<#assign i = i + 1 />
+					<#assign checked = arr?seq_contains(i?html)?string("checked='checked'", "") />
+					<li><input type="checkbox" name="checkedWeek" value="${i}" title="星期${e}" ${checked}><span>星期${e}</span></li>
+		   		</#list>		   		
+		   		</ul>
+			</div>
+		</div>
+		<div class="pop_btn">
+			<input type="checkbox" id="checkedWeek">
+		</div>
+	</div>
+		
+	<div id="corp_pop" class="pop bind" style="display: none; width: 318px;">
+		<div class="pop_content" style="padding: 0;">
+			<div class="auto_height sm">
+		   		<ul class="checked">
+		   		<#assign arr = week.corpIds?default("")?split(",") />
+				<#list corps as e>
+					<#assign checked = arr?seq_contains(e.orgId?html)?string("checked='checked'", "") />
+					<li><input type="checkbox" name="checkedCorp" value="${e.orgId}" title="${e.orgName}" ${checked}><span>${e.orgName}</span></li>
+		   		</#list>		   		
+		   		</ul>
+			</div>
+		</div>
+		<div class="pop_btn">
+			<input type="checkbox" id="checkedCorp">
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#status").select({ "name": "status" });
+			
+			$("#workDays").click(function() {
+				open_pop(null,"#workDays","#week_pop",false);
+ 				return false;
+ 			});
+			$("#corpNames").click(function() {
+				open_pop(null,"#corpNames","#corp_pop",false);
+ 				return false;
+ 			});
+			
+			// 工作日
+			$("input[name=checkedWeek]").click(function() {
+				checkedIds("workDays", "workDays", "checkedWeek");
+			});
+			$("#checkedWeek").click(function() {
+				checked_all(this, "checkedWeek");
+				checkedIds("workDays", "workDays", "checkedWeek");
+			});
+			
+			// 公司绑定
+			$("input[name=checkedCorp]").click(function() {
+				checkedIds("corpIds", "corpNames", "checkedCorp");
+			});
+			$("#checkedCorp").click(function() {
+				checked_all(this, "checkedCorp");
+				checkedIds("corpIds", "corpNames", "checkedCorp");
+			});
+			
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.workName, [RQ, RANGE, "{1,20}"], "周排班名称");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+		
+		function checked_all(obj, $name) {
+			if (obj.checked) {
+				$("input[name=" + $name + "]").each(function() {
+					this.checked = true;
+				});
+			} else {
+				$("input[name=" + $name + "]").each(function() {
+					this.checked = false;
+				});
+			}
+		}
+		function checkedIds($ids, $names, $name) {
+			var ids = "";
+			var names = "";
+			$("input[name=" + $name + "]").each(function() {
+				if ($(this).prop("checked") == true) {
+					ids += $(this).val() + ",";
+					names += $(this).attr("title") + ",";
+				}
+			});
+			$("input[name=" + $ids + "]").val(ids);
+			$("#" + $names).val(names);
+		}
+	</script>
+</body>
+</html>

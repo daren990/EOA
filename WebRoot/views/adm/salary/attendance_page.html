@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 考勤查询</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/select2/select2.css" />
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/select2/select2.min.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/select2/select2_locale_zh-CN.js"></script>
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<div id="left" class="left">
+				<a href="javascript:download()"><span class="icons icon_upload"></span><span class="icons_text">导出</span></a>
+			</div>
+			<div id="right" class="right">
+				<form id="search" action="page" method="get">
+					<ul>
+						<li class="text">年份</li>
+						<li>
+							<@fm.year name="year" year=mb.year?default(mb.years) arr=(mb.years-3)..(mb.years+1) />
+						</li>
+						<li class="text">月份</li>
+						<li>
+							<@fm.month name="month" month=mb.month?default(mb.months) />
+						</li>
+						<li><button type="submit" class="btn primary xxs">搜索</button></li>
+					</ul>
+				</form>
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+			<div class="table_head">
+				<table class="table">
+					<thead>
+						<tr>
+							<th width="15%">姓名</th>
+							<th width="15%">日期</th>
+							<th width="15%">上班</th>
+							<th width="15%">下班</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+			<div class="table_body auto_height">
+				<table class="table">
+					<tbody>
+						<#if attendances?? && attendances?size gt 0>
+							<#list attendances as e>
+								<tr>
+									<td width="15%">${e.trueName}</td>
+									<td width="15%">${views.fmt(e.workDate, "yyyy-MM-dd（E）")}</td>
+									<td width="15%" class="state">
+										<#if e.remarkIn?? && e.remarkIn != "已补录">
+											${e.checkedIn}
+										</#if>
+										<#if e.remarkIn == "公休" || e.remarkIn == "已补录">
+											${e.remarkIn}
+										<#else>
+											<#if !e.remarkedIn?? && e.remarkIn == "未打卡">
+												<select class="selectOpetor" name="checkedIn" data="${views.fmt(e.workDate, 'yyyy-MM-dd')}">
+													<option value="0" selected="selected" >${e.remarkIn}</option>
+													<option value="1">请假申请</option>
+													<option value="2">出差申请</option>
+													<option value="3">外勤申请</option>
+												</select>
+												<input type="hidden" name="date" value="${views.fmt(e.workDate, 'yyyy-MM-dd')}" />
+												<input type="hidden" value="0" />
+											<#elseif e.remarkIn != "正常">
+												<span style="color: red">${e.remarkIn}</span>
+											</#if>
+										</#if>
+										<#if e.remarkedIn??>
+											<span style="color: #a1c5e5">${e.remarkedIn}</span>
+										</#if>
+									</td>
+									<td width="15%" class="state">
+										<#if e.checkedOut?? && e.remarkOut != "已补录">
+											${e.checkedOut}
+										</#if>
+										<#if e.remarkOut == "公休" || e.remarkOut == "已补录">
+											${e.remarkOut}
+										<#else>
+											<#if !e.remarkedOut?? && e.remarkOut == "未打卡">
+												<select class="selectOpetor" name="checkedOut" data="${views.fmt(e.workDate, 'yyyy-MM-dd')}">
+													<option value="0" selected="selected">${e.remarkOut}</option>
+													<option value="1">请假申请</option>
+													<option value="2">出差申请</option>
+													<option value="3">外勤申请</option>
+												</select>
+												<input type="hidden" value="${views.fmt(e.workDate, 'yyyy-MM-dd')}" />
+												<input type="hidden" value="1" />
+											<#elseif e.remarkOut != "正常">
+												<span style="color: red">${e.remarkOut}</span>
+											</#if>
+										</#if>
+										<#if e.remarkedOut??>
+											<span style="color: #a1c5e5">${e.remarkedOut}</span>
+										</#if>
+									</td>
+								</tr>
+							</#list>
+						</#if>
+					</tbody>
+				</table>
+			</div>
+			<#if !attendances?? || attendances?size lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<div id="page" class="clearfix" >
+				<div class="left">
+					<span>共<#if attendances?? && attendances?size gt 0>${attendances?size}<#else>0</#if>条记录</span>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#year").select({ "name": "year" });
+			$("#month").select({ "name": "month" });
+			$(".abc").select({ "name": "approve" });
+			$(".selectOpetor").select2({
+				width:"95",
+				minimumResultsForSearch:-1
+			});
+			
+			/* $(".state:contains('未批准')").each(function(){
+				$(this).find("span").css("color","blue");
+				$(this).siblings("td:last").html("<a style='color: blue'>未批准</a>");
+			});
+			
+			$(".state:contains('待审批')").each(function(){
+				$(this).find("span").css("color","blue");
+				$(this).siblings("td:last").html("<a style='color: blue'>待审批</a>");
+			});
+			
+			$(".state:contains('已批准')").each(function(){
+				$(this).siblings("td:last").html("<a>正常</a>");
+			}); */
+			
+			
+			$(".selectOpetor").change(function(){
+				var state = $(this).val();
+				var quantum = $(this).next().next().val();
+				var name = $(this).attr("name");
+				var date = $(this).attr("data");
+				if(state == "1"){
+					window.location.href="/adm/salary/leave/apply/add?name="+name+"&date="+date;
+				}else if(state == "2"){
+					window.location.href="/adm/salary/errand/apply/add";
+				}else if(state == "3"){
+					window.location.href="/adm/salary/outwork/apply/add?name="+name+"&date="+date;
+				}else if(state == "4"){
+					window.location.href="recording?date="+date+"&quantum="+quantum;
+				}
+			});
+			
+		});
+		
+		function download() {
+			var year = $("input[name=year]").val();
+			var month = $("input[name=month]").val();
+			if (!year) {
+				danger(1, "请选择年份");
+				return;
+			}
+			if (!month) {
+				danger(1, "请选择月份");
+				return;
+			}
+			var param = "";
+			param += "year=" + year;
+			param += "&month=" + month;
+			location.assign("download?" + param);
+		}
+	</script>
+</body>
+</html>

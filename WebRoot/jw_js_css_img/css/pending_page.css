@@ -1,0 +1,36 @@
+.clear{clear: both;}
+.leftDiv{width: 56%;float: left;padding: 1%;}
+.rightDiv{width: 40%;float: right;padding-top: 1%;}
+
+.noticeDiv{width: 95%;border: 1px solid #CCC;background: #FFF;overflow: hidden;}
+.noticeHeadDiv{width: 85px;height: 35px;line-height: 35px;width: 85px;float: left;}
+.noticeState{margin-left: 65%;}
+.noticeState ul li{list-style-type: none;float: left;height: 35px;line-height: 35px;font-size: 12px;font-weight: bolder;width: 45px;text-align: center;cursor: pointer;}
+.noticeBorder{border-bottom: 1px solid #4c8fbd;}
+.noticeHeadDiv span{margin-left: 12px;color: #4c8fbd;font-size: 14px;font-family: "微软雅黑";font-weight: bolder;}
+.noticeContentDiv{width: 100%;padding: 15px;border-top: 1px solid #CCC;}
+.readNotice{width: 100%}
+.unReadNotice{width: 100%}
+.readNotice ul li{list-style-type: none;float: left;height: 30px;line-height: 30px;}
+.unReadNotice ul li{list-style-type: none;float: left;height: 30px;line-height: 30px;}
+.noticeContentLi{width: 40%;}
+.noticeTrue{width: 30%}
+
+.agencyDiv{width: 95%;border: 1px solid #CCC;background: #FFF;}
+.agencyHeadDiv{width: 100%;height: 35px;line-height: 35px;border-bottom: 1px solid #CCC;}
+.agencyHeadDiv .daibanText{margin-left: 12px;color: #4c8fbd;font-size: 14px;font-family: "微软雅黑";font-weight: bolder;}
+.daibanContent{height: 300px; overflow-x: hidden; overflow-y: scroll;}
+.agencyListDiv{width: 100%;padding-left: 12px;}
+.agencyListDiv ul li{list-style-type: none;float: left;height: 30px;line-height: 30px;overflow: hidden;}
+.noAgency{width: 100%;height: 50px;line-height: 50px;text-align: center;}
+
+.report{width: 95%;border: 1px solid #CCC;padding-left: 3px;background: #FFF;margin-top: 8px;}
+.reportMenu ul li{list-style-type: none;float: left;width: 70px;font-size: 14px;font-weight: bolder;cursor: pointer;line-height: 35px;padding-left: 12px;}
+.reprotApply{height: 35px;line-height: 35px;float: right;padding-right: 100px;}
+.reprotApply span{padding: 4px;cursor: pointer;border-radius:2px;}
+.reprotApply span:hover{background: #EEE}
+.reportContentDiv{border-top: 1px solid #CCC;}
+.reportContentDiv ul li{list-style-type: none;float: left;height: 30px;line-height: 30px;padding-left: 12px;}
+.title{width: 260px;}
+.time{width: 150px;text-align: center;}
+.menuselect{color: #4c8fbd;border-bottom: 1px solid #4c8fbd;}

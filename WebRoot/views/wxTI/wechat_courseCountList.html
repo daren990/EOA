@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="zh-cn">
+<head>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+	<title>${student_name} - 课程列表</title>
+    <style>
+		* {
+			margin: 0;
+			padding: 0;
+			-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+			-webkit-text-size-adjust: none;
+		}
+</style>
+    
+    <!--标准mui.css-->
+	<link rel="stylesheet" href="${ctx}/jw_js_css_img/mui/css/mui.min.css">
+    
+</head>
+<body>
+<input type="hidden" value="${org_id}" id="org_id" />
+<input type="hidden" value="${student_id}" id="student_id" />
+<header class="mui-bar mui-bar-nav">
+	<form action="javascript:return true;">
+		<div class="mui-input-row mui-search">
+			<input id="seacherKey_text" type="search" class="mui-input-clear" placeholder="关键字搜索" onsearch="search()">
+		</div>
+	</form>
+	<!-- <button id="search_key" class="mui-btn mui-btn-primary" style="display: block;">搜索</button> -->
+</header>
+
+<div class="mui-content">
+	<div id="pullrefresh" class="mui-content mui-scroll-wrapper" >
+	    <div id="appendFresh" class="mui-scroll">
+	    <br><br>
+	    	<ul class="mui-table-view mui-table-view-chevron">
+
+			</ul>
+	    </div>
+    </div>		
+</div>
+
+<!-- jQuery1.7以上 或者 Zepto 二选一，不要同时都引用 -->
+<script src="${ctx}/jw_js_css_img/jquery-1.9.1/jquery.js"></script>
+<script src="${ctx}/jw_js_css_img/mui/js/mui.min.js"></script>
+<script type="text/javascript" charset="utf-8">
+mui.init({
+	swipeBack:true, //启用右滑关闭功能
+	gestureConfig:{
+		doubletap:true
+	},
+	pullRefresh: {
+		container: '#pullrefresh',
+		up: {
+		    contentnomore:'没有更多数据...',//可选，请求完毕若没有更多数据时显示的提醒内容；
+		    contentrefresh : "正在加载...",//可选，正在加载状态时，上拉加载控件上显示的标题内容
+			callback: pullupRefresh,
+		}
+
+	}
+
+});
+
+var pageSize = 5;
+var pageNo = 1;
+
+var contentWebview = null;
+
+document.querySelector('header').addEventListener('doubletap',function () {
+	if(contentWebview==null){
+		contentWebview = plus.webview.currentWebview().children()[0];
+	}
+	contentWebview.evalJS("mui('#pullrefresh').pullRefresh().scrollTo(0,0,100)");
+});
+
+function search(){
+	// 清空内容
+	$("#seacherKey_text").blur();
+    $('.mui-table-view').html('');
+    pageNo = 1
+    mui('#pullrefresh').pullRefresh().pullupLoading(); //使用这个之后，自动会加载[下拉刷新]绑定的函数
+}
+
+
+$(function(){
+	$("#search_key").click(function(){
+		search();
+	});
+	
+});
+
+mui.ready(function(){
+    mui('#pullrefresh').pullRefresh().pullupLoading(); //使用这个之后，自动会加载[下拉刷新]绑定的函数
+});
+
+function redirect(id,id2)
+{
+	window.location.href="${ctx}/wx/count/page?org_id=${org_id}&course_id=" + id + "&student_id=" + id2;
+}
+
+//$("[父元素]").on('[事件]', '[父元素下目标元素]', function (event) {
+$(".mui-scroll").on('tap', '.mui-card', function (event) {
+	this.click();
+});
+
+
+
+/**
+ * 上拉加载具体业务实现
+ */
+function pullupRefresh() {
+	mui.ajax({
+        type: 'POST',
+        url: '${ctx}/wx/course/getData',
+        data:{pageNo : pageNo , pageSize : pageSize ,student_id : $("#student_id").val() , org_id : $("#org_id").val() , seacherKey : $("#seacherKey_text").val()},
+        dataType: 'json',
+        success: function(data){
+        	var text = '';
+        	var flag = true;
+        	pageNo += 1;
+        	var listLength = data.voList.length;
+        	if(data.voList == null || listLength == 0)
+        	{
+        		flag = false;
+        	}
+        	var table = document.body.querySelector('.mui-table-view');
+           	var li = document.createElement('li');
+        	$.each(data.voList,function(index,vo){
+        	    text = "";
+        		text += "<div class='mui-card' style=\"background-color: #f0f0f0;\" onclick=\"redirect('" + vo.id + "','" + $("#student_id").val() + "')\">";
+        		text += "<div class='mui-card-header'><font size='3px'>" + vo.name + "</font>";
+        		text += "<a href=\"\" class=\"mui-navigate-right\">";
+        		if(vo.isOver == 2)
+        		{
+        			if(vo.countAppear != vo.countStart)
+        		    {
+                		text += "<span class='mui-badge mui-badge-danger'><font size='1px'>曾经缺席!</font></span>";
+        		    }
+            		text += "<span class='mui-badge mui-badge-success'><font size='1px'>课程已结束。</font></span>";
+        		}
+        		else
+        		{
+        			if(vo.countAppear != vo.countStart)
+        		    {
+                		text += "<span class='mui-badge mui-badge-danger'><font size='1px'>曾经缺席!</font></span>";
+        		    }
+            		text += "<span class='mui-badge mui-badge-danger'><font size='1px'>课程开展中。</font></span>";
+        		}
+        		text += "</a>";
+        		text += "</div>";
+        		text += "<div class='mui-card-content'>";
+        		text += "<div class='mui-card-content-inner'>";
+            	text += "负责老师:" + vo.teacherName;
+        		text += "<br/>";
+        		if(vo.teacherTelephone == null || vo.teacherTelephone == "")
+        		{
+            		text += "老师电话:未登记";
+        		}
+        		else
+        		{
+        			text += "电话:" + vo.teacherTelephone;
+        		}
+        		text += "</div>";
+        		text += "</div>";
+        		text += "<div class='mui-card-footer'>";
+        		text += "</div>";
+        		text += "</div>";
+        		
+           		var li = document.createElement('li');
+    			li.innerHTML = text;
+    			table.appendChild(li);
+    			
+        	})
+        	
+           	setTimeout(function() {           	
+	    		mui('#pullrefresh').pullRefresh().endPullupToRefresh(!flag); //参数为true代表没有更多数据了。
+        	}, 1500);
+        }
+    });
+}
+
+</script>
+</body>
+</html>

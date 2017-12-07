@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if holiday.holidayId??>编辑<#else>新建</#if>节假日设置</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit">
+			<div id="form" class="clearfix" style="width: 480px;">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="holidayId" value="${holiday.holidayId}">
+					<table class="table">
+						<tr>
+							<td>配置名称：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input xl" name="holidayName" value="${holiday.holidayName}">
+							</td>
+						</tr>
+						<tr>
+							<td>年月份：</td>
+							<td class="required">*</td>
+							<td>
+								<@fm.year name="year" year=holiday.year?default("") arr=(mb.years-3)..(mb.years+1)/>
+								<span>年</span>
+								<@fm.month name="month" month=holiday.month?default("") />
+								<span>月</span>						
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">节假日：</td>
+							<td class="pos required">*</td>
+							<td>
+								<textarea class="xl" id="holidayDays" rows="3" readonly="readonly">${holiday.holidayDays}</textarea>
+								<input type="hidden" name="holidayDays" value="${holiday.holidayDays}">
+							</td>
+						</tr>
+						<tr>
+							<td>公司绑定：</td>
+							<td class="required"></td>
+							<td colspan="7">
+								<textarea class="xl" id="corpNames" rows="4" readonly="readonly">${holiday.corpNames}</textarea>
+								<input type="hidden" name="corpIds" value="${holiday.corpIds}">
+							</td>
+						</tr>
+						<tr>
+							<td>状态：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="status" value="${holiday.status?default(1)}" />
+								<div id="status" class="select xl">
+									<span class="option text">启用</span><span class="icon"></span>
+									<ul>
+										<li item="0">禁用</li>
+										<li item="1">启用</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<div id="month_pop" class="pop bind" style="display: none; width: 278px;">
+		<div class="pop_content" style="padding: 0;">
+			<div class="auto_height xl">
+		   		<table class="table">
+		   		</table>
+			</div>
+		</div>
+	</div>
+	
+	<div id="corp_pop" class="pop bind" style="display: none; width: 318px;">
+		<div class="pop_content" style="padding: 0;">
+			<div class="auto_height sm">
+		   		<ul class="checked">
+		   			<#assign arr = holiday.corpIds?default("")?split(",") />
+				<#list corps as e>
+					<#assign checked = arr?seq_contains(e.orgId?html)?string("checked='checked'", "") />
+					<li><input type="checkbox" name="CorpcheckedIds" value="${e.orgId}" title="${e.orgName}" ${checked}><span>${e.orgName}</span></li>
+		   		</#list>
+		   		</ul>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#year").select({ "name": "year" });
+			$("#month").select({ "name": "month" });
+			$("#status").select({ "name": "status" });
+
+			days();
+			
+			$("input[name=CorpcheckedIds]").click(function() {
+				CorpNameIds();
+			});
+		//	$("#checkedIds").click(function() { CorpNameIds(); });
+			
+			$("#holidayDays").click(function() {
+				open_pop(null,"#holidayDays","#month_pop",false);
+ 				return false;
+ 			});
+ 			$("#corpNames").click(function() {
+				open_pop(null,"#corpNames","#corp_pop",false);
+ 				return false;
+ 			});
+		//	$("#checkedIds").click(function() { checkedIds(); });
+			
+			
+			$("#year").click(function() { close_pop(); });
+			$("#month").click(function() { close_pop(); });
+			$("#year.select li").click(function() { days(); });
+			$("#month.select li").click(function() { days(); });
+			
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.holidayName, [RQ, RANGE, "{1,20}"], "配置名称");
+						validate(form.year, [RQ], "配置年份");
+						validate(form.month, [RQ], "配置月份");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+		
+		function days() {
+			var arr = $("input[name=holidayDays]").val().split(",");
+			var year = $("input[name=year]").val();
+			var month = $("input[name=month]").val();
+			if (year == "" || month == "") {
+				$("#month_pop .table").empty();
+				return;
+			}
+			$.ajax({
+				url: "days?year=" + year + "&month=" + month + "&token=${token}",
+				type: "post",
+				dataType: "json",
+				success: function(data) {
+					if (data.code == 1) {
+						$("#month_pop .table").empty();
+						var text = "";
+						text += "<tr>";
+						text += "<th>一</th><th>二</th><th>三</th><th>四</th><th>五</th><th>六</th><th>日</th>";
+						text += "</tr>";
+						text += "<tr>";
+						$.each(data.days, function(idx, obj) {
+							text += "<td>";
+							if (obj != "0") {
+								var checked = "";
+								if (arr.indexOf(obj) > -1) checked = "checked=\"checked\"";
+								text += "<input type=\"checkbox\" name=\"checkedIds\" value=\"" + obj + "\" title=\"" + obj + "\" " + checked + " onclick=\"checkedIds()\">" + obj;
+							}
+							text += "</td>";
+							if ((idx + 1) % 7 == 0) text += "</tr><tr>";
+						});
+						text += "</tr>";
+						text = text.replace("<tr></tr>", "");
+						$("#month_pop .table").append(text);
+					} else {
+						danger(1, data.message);
+					}
+				}
+			});
+		}
+		
+		function CorpNameIds() {
+			var ids = "";
+			var names = "";
+			$("input[name='CorpcheckedIds']").each(function() {
+				if ($(this).prop("checked") == true) {
+					ids += $(this).val() + ",";
+					names += $(this).attr("title") + ",";
+				}
+			});
+			$("input[name=corpIds]").val(ids);
+			$("#corpNames").val(names);
+		}
+		
+		function checkedIds() {
+			var ids = "";
+			var names = "";
+			$("input[name='checkedIds']").each(function() {
+				if ($(this).prop("checked") == true) {
+					ids += $(this).val() + ",";
+					names += $(this).attr("title") + ",";
+				}
+			});
+			$("input[name=holidayDays]").val(ids);
+			$("#holidayDays").val(names);
+		}
+	</script>
+</body>
+</html>

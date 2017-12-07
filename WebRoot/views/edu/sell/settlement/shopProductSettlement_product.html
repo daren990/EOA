@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 结算明细 </title>
+	<#include "/views/js.html" />
+	<link rel="stylesheet" href="${ctx}/jw_js_css_img/bootstrap-3.3.4/css/bootstrap.min.css">
+	<#include "/views/css.html" />
+	<script src="${ctx}/jw_js_css_img/jquery-1.9.1/jquery.js"></script>
+	<script src="${ctx}/jw_js_css_img/bootstrap-3.3.4/js/bootstrap.min.js"></script>
+	<script src="${ctx}/jw_js_css_img/echart/echarts.common.min.js"></script>
+</head>
+<body>
+	<div id="path"></div>
+	<div class="container" style="margin: 10px;">
+		<div class="row clearfix">
+			<div class="col-md-12 column">
+				<div class="row clearfix" >
+					<div class="col-md-3 column">
+						<ul class="list-group">
+						    <li class="list-group-item">商品名称:${vo.shop_product_name}</li>
+						    <li class="list-group-item">操作人名:${vo.count_operatorName}</li>
+						    <li class="list-group-item">共${vo.count_times}次结算</li>
+						    <li class="list-group-item">结算总金额:￥${vo.count_amount}元</li>
+						    <li class="list-group-item">结算支出金额:￥${vo.count_expenditure}元</li>
+						</ul>
+					</div>
+					<div class="col-md-9 column" style="border-radius: 6px; border: 1px solid #ddd; background-color: white;">
+						<div class="row clearfix" style="margin: 10px;">
+							<div id="main" style="width: 100%;height:500px;"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+		
+		var orderTimes = [];
+		var amounts = [];
+		var unsubscribes = [];
+		var expenditures = [];
+	
+		<#list vo.orderTimes as ot>
+			orderTimes.push("${ot}")
+		</#list>
+		<#list vo.amounts as a>
+			amounts.push("${a}")
+		</#list>
+		<#list vo.unsubscribes as u>
+			unsubscribes.push("-${u}")
+		</#list>
+		<#list vo.expenditures as e>
+			expenditures.push("-${e}")
+		</#list>
+	
+        // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('main'));
+
+     	// 指定图表的配置项和数据
+        var option = {
+            tooltip : {
+                trigger: 'axis',
+                axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+                    type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                }
+            },
+            legend: {
+                data:['支出', '收入', '退费']
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis : [
+                {
+                    type : 'value'
+                }
+            ],
+            yAxis : [
+                {
+                    type : 'category',
+                    axisTick : {show: false},
+                    data : orderTimes
+                    //data : ['第1次结算','第2次结算','第3次结算','第4次结算','第5次结算','第6次结算','第7次结算']
+                }
+            ],
+            series : [
+				{
+				    name:'退费',
+				    type:'bar',
+				    label: {
+				        normal: {
+				            show: true,
+				            position : 'inside'
+				        }
+				    },
+				    data : unsubscribes
+				    //data:[-120, -132, -101, -134, -190, -230, -210]
+				},
+                {
+                    name:'收入',
+                    type:'bar',
+                    stack: '总量',
+                    label: {
+                        normal: {
+                            show: true
+                        }
+                    },
+                    data : amounts
+                    //data:[320, 302, 341, 374, 390, 450, 420]
+                },
+                {
+                    name:'支出',
+                    type:'bar',
+                    stack: '总量',
+                    label: {
+                        normal: {
+                            show: true,
+                            position: 'left'
+                        }
+                    },
+                    data : expenditures
+                    //data:[-120, -132, -101, -134, -190, -230, -210]
+                }
+            ]
+        };
+
+        // 使用刚指定的配置项和数据显示图表。
+        myChart.setOption(option);
+    </script>
+</body>
+</html>

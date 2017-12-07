@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 会议查询</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<div id="right" class="right">
+				<form id="search" action="page" method="get">
+					<input type="hidden" name="pageSize" value="${page.pageSize}">
+					<input type="hidden" name="pageNo" value="${page.pageNo}">
+					<ul>
+						<li class="text">预订时间</li>
+						<li>
+							<input type="text" class="input sm Wdate" name="startTime" value="${mb.startTime}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							<span>至</span>
+							<input type="text" class="input sm Wdate" name="endTime" value="${mb.endTime?default('')}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+						</li>
+						<li class="text">重复预订</li>
+						<li>
+							<input type="hidden" name="cron" value="${mb.cron}" />
+							<div id="cron" class="select sm">
+								<span class="option text">请选择</span><span class="icon"></span>
+								<ul>
+									<li item="">请选择</li>
+									<li item="0">否</li>
+									<li item="1">是</li>
+								</ul>
+							</div>
+						</li>
+						<li><button type="button" class="btn primary xxs" onclick="search()">搜索</button></li>
+					</ul>
+				</form>
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+			<div class="table_head">
+				<table class="table">
+					<thead>
+						<tr>
+							<th width="40"><input type="checkbox" id="checkedIds"></th>
+							<th width="20%">会议室</th>
+							<th width="15%">开始时间</th>
+							<th width="15%">结束时间</th>
+							<th width="15%">计划</th>
+							<th width="10%">重复预订</th>
+							<th width="10%">状态</th>
+							<th width="">操作</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+			<div class="table_body auto_height">
+				<table class="table">
+					<tbody>
+						<#if page.result?size gt 0>
+							<#list page.result as e>
+						<tr>
+							<td width="26"><input type="checkbox" name="checkedIds" value="${e.meetId}"></td>
+							<td width="20%">${e.roomName}</td>
+							<td width="15%">${e.startTime?datetime}</td>
+							<td width="15%">${e.endTime?datetime}</td>
+							<td width="15%">${views.cron(e.cron, e.startTime, e.endTime)}</td>
+							<td width="10%"><#if e.cron?? && e.cron != "">是<#else>否</#if></td>
+							<td width="10%"><#if e.completed == 1>已结束<#else>未结束</#if></td>
+							<td>
+								<a href="add?meetId=${e.meetId}" title="设置"><span class="icons icon_edit"></span></a>
+								<#if !e.cron?? || e.cron == "">
+									<#if e.completed == 0>
+										<a href="javascript:open_completed('${e.meetId}');" title="结束会议"><span class="icons icon_completed"></span></a>
+									</#if>
+								</#if>
+							</td>
+						</tr>
+							</#list>
+						</#if>
+					</tbody>
+				</table>
+			</div>
+			<#if page.result?size lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<@fm.page page=page />
+		</div>
+	</div>
+	
+	<div id="completed_apply" class="pop" style="display: none; width: 280px;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<div class="pop_title">结束会议</div>
+			<div class="pop_content blank">确定要结束所选会议吗？</div>
+			<div class="pop_btn ">
+				<button type="button" class="btn primary xs" onclick="completed()">确定</button>
+				<button type="button" class="btn default xs" onclick="close_pop()">取消</button>
+			</div>
+		</div>				
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#cron").select({ "name": "cron" });
+		});
+		
+		function open_completed(id) {
+			if (id) {
+				get_checked(id);
+			}
+			open_pop(null,null,"#completed_apply",true);
+		}
+		
+		function completed() {
+			ajax_checked("请选择需要结束的会议", "completed?token=${token}");
+			close_pop();
+		}
+	</script>
+</body>
+</html>

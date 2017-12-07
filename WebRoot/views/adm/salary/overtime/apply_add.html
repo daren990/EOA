@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if overtime.overtimeId??>编辑<#else>新建</#if>加班申请</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit auto_height">
+			<div id="form" class="clearfix" style="width: 570px;">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="overtimeId" value="${overtime.overtimeId}">
+					<table class="table">
+						<tr>
+							<td>申请人：</td>
+							<td></td>
+							<td><input type="text" class="input xl" value="${currentUser.trueName}" readonly="readonly"  name="titleName" /></td>
+						</tr>
+						<tr>
+							<td>申请时间：</td>
+							<td></td>
+							<td>
+								<#assign createTime = now?date />
+								<#if overtime.createTime??><#assign createTime = overtime.createTime?date /></#if>
+								<input type="text" class="input xl" value="${createTime}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td class="">加班类型：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="typeId" value="${overtime.typeId}" />
+								<div id="typeId" class="select xl">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<li item="">请选择</li>
+										<#list overtimeMap?keys as e>
+										<li item="${e}">${overtimeMap[e]}</li>
+										</#list>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>加班日期：</td>
+							<td class="required">*</td>
+							<td>
+								<#if overtime.startTime??><#assign work_yyyyMMdd = overtime.startTime?date /></#if>
+								<input type="text" class="input sm Wdate" name="work_yyyyMMdd" value="${work_yyyyMMdd?default('')}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							</td>
+						</tr>
+						<tr>
+							<td>加班时间：</td>
+							<td class="required">*</td>
+							<td>
+								<#if overtime.startTime??>
+									<#assign start_HH = overtime.startTime?string("HH") />
+									<#assign start_mm = overtime.startTime?string("mm") />
+								</#if>
+								<@fm.time arr=["start_HH", "start_mm"] hour=start_HH?default("") minute=start_mm?default("") />
+								<span>至</span>
+								<#if overtime.endTime??>
+									<#assign end_HH = overtime.endTime?string("HH") />
+									<#assign end_mm = overtime.endTime?string("mm") />
+								</#if>
+								<@fm.time arr=["end_HH", "end_mm"] hour=end_HH?default("") minute=end_mm?default("") />
+							</td>
+						</tr>
+						<tr>
+							<td class="">涉及项目工程：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" name="project" value="${overtime.project}">
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">加班描述：</td>
+							<td class="pos required">*</td>
+							<td>
+								<textarea class="xl" name="content" rows="3">${overtime.content}</textarea>
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">备注：</td>
+							<td class="pos required"></td>
+							<td>
+								<textarea class="xl" name="remark" rows="3">${overtime.remark}</textarea>
+							</td>
+						</tr>
+						<tr>
+							<td>上级审批：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="operatorId" value="${overtime.operatorId?default(currentUser.managerId)}" />
+								<div id="operatorId" class="select xl">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul class="auto_height sm">
+										<li item="">请选择</li>
+										<#list operators as e>
+										<li item="${e.userId}">${e.trueName}</li>
+										<input type="hidden" value="${e.username}" name="${e.userId}" />
+										</#list>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"></td>
+							<td>
+								<#if overtime.approve != "99">
+									<button type="submit" class="btn primary xs">提交</button>
+								</#if>
+							</td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#typeId").select({ "name": "typeId" });
+			$("#start_HH").select({ "name": "start_HH" });
+			$("#start_mm").select({ "name": "start_mm" });
+			$("#end_HH").select({ "name": "end_HH" });
+			$("#end_mm").select({ "name": "end_mm" });
+			$("#operatorId").select({ "name": "operatorId" });
+			
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.work_yyyyMMdd, [RQ], "加班日期");
+						validate(form.start_HH, [RQ], "开始时间");
+						validate(form.start_mm, [RQ], "开始时间");
+						validate(form.end_HH, [RQ], "结束时间");
+						validate(form.end_mm, [RQ], "结束时间");
+						validate(form.project, [RANGE, "{1,60}"], "所属项目");
+						validate(form.content, [RQ, RANGE, "{1,200}"], "工作描述");
+						validate(form.remark, [RANGE, "{1,60}"], "备注");
+						validate(form.operatorId, [RQ], "上级审批");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+	</script>
+</body>
+</html>

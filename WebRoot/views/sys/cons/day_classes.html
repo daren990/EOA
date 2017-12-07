@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>当前位班次设置</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/css/day_classes.css"/>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/js/day_classes.js"></script>
+</head>
+<body><div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<form action="select" method="post" style="display:inline;" id="select">
+	<div class="headDiv">
+		<p class="companyTitle" style="margin-left:15px;">${corp}</p>		
+		<div class="condition">
+			<ul>
+				<li>
+					<button type="submit" class="btn primary xs">保存</button>
+				</li>
+				<li>
+					<button type="button" class="btn primary xs addWork" style="width: 100px;margin-left: 5px;">添加日班</button>
+				</li>
+				<li><button type="button" class="btn primary xs addNightWork" style="width: 100px;margin-left: 5px;">添加夜班</button></li>
+			</ul>
+		</div>
+	</div>
+	
+	<p class="setWorkP">已选择的班次</p>
+	
+	<div class="chooseDiv">
+		<ul>
+			<#if shiftClasses?size gt 0>
+				<#assign i = 0 />
+					<#list shiftClasses as e>
+						<#if e.status==1>
+							<li class="chooseLi"><span class="choosespan" style="background: ${e.color}">${e.className}</span></li>
+						</#if>
+					<#assign i = i + 1 />
+				</#list>
+			</#if>
+		</ul>
+	</div>
+	
+	<p class="listWorkP">班次列表</p>
+	
+	<div class="listWorkTitle">
+		<ul>
+			<li><input type="checkbox" id="checkAll" /></li>
+			<li>班次名称</li>
+			<li>日/夜</li>
+			<li>配色</li>
+			<li>总时间(小时)</li>
+			<li>起止时间</li>
+			<li>操作</li>
+		</ul>
+	</div>
+	
+	<div class="listWork">
+	<!-- <form action="select" method="post" style="display:inline;"> -->
+	<#if shiftClasses?size gt 0>
+		<#assign i = 0 />
+		<#list shiftClasses as e>
+		<ul>
+			<li><input type='checkbox' name="classId" value='${e.classId}' class='checkWork' <#if e.status==1>checked="checked"</#if> /></li>
+			<li class='reason'>${e.className}</li><input type="hidden" value="${e.className}" /> 
+			<li class="dayOrNight"><#if e.night == 1>日班</#if><#if e.night == 0>夜班</#if></li>
+			<li class="color"><div class="colorDiv" style="background: ${e.color}"></div></li><input type="hidden" value="${e.color}" />
+			<li class="sumTime">${e.sumTime}<input type="hidden" value="${e.sumTime}" /></li>
+			<li class="firstToEnd">
+				${e.firstMorning}<input type="hidden" value="${e.firstMorning}" class="firstMorning" />~
+				${e.firstNight}<input type="hidden" value="${e.firstNight}" class="firstNight" /> 
+				<#if e.second == 1>&nbsp;,&nbsp;
+					${e.secondMorning}~<input type="hidden" value="${e.secondMorning}" />
+					${e.secondNight}<input type="hidden" value="${e.secondNight}" />
+				</#if>
+			</li>		
+			<li>
+				<span class="<#if e.night == 1>addWork<#else>addNightWork</#if>" style="display:inline;background-color:#fff;cursor: pointer;" title="${e.classId}">编辑</span><input type="hidden" value="${e.classId}" />
+					<span class="hideSpanValue">${e.className}</span>
+					<span class="hideSpanValue">${e.sumTime}</span>
+					<span class="hideSpanValue">${e.firstMorning}</span>
+					<span class="hideSpanValue">${e.firstNight}</span>
+					<span class="hideSpanValue">${e.secondMorning}</span>
+					<span class="hideSpanValue">${e.secondNight}</span>
+				/
+				<span class="del" style="cursor: pointer;" title="${e.classId}">删除</span><input type="hidden" value="${e.className}">
+			</li>
+		</ul>
+		<#assign i = i + 1 />
+		</#list>
+	</#if>
+	</div>
+	</form>
+	<!-- </div> -->
+	
+	<div id="add_work" class="pop" style="display: none; width: 600px;height: 289px;background: #EEE;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<form action="add" method="post" id="add">
+			<input type="hidden" name="night" id="night" value="1" />
+			<div class="pop_title"></div>
+			<div class="pop_content blank">				
+				<div class="content">
+					<div class="timeContent">
+						<div class="listDateCon">
+							<label class="workLabel">班 次 名 称</label>
+							<input type="hidden" name="classId" id="classId"/>
+							<input type="text" name="className" id="workName" class="workName" />
+							<!-- <input type="hidden" name="night" value="1" /> -->
+							<input type="color" style="vertical-align: middle;" id="color" name="color" />
+						</div>
+						<div class="listDateCon">
+							<label class="workLabel">时 &nbsp;间</label>
+							<input name="firstM" class="Wdate" style="width:100px;" type="text" id="timeStartDate" onFocus="WdatePicker({dateFmt:'HH:mm',onpicking:getHours($('#timeStartDate').val(),$('#timeEndDate').val())})"/> &nbsp;至&nbsp; 
+							<input name="firstN" class="Wdate" style="width:100px;" type="text" id="timeEndDate" onFocus="WdatePicker({dateFmt:'HH:mm',onpicking:getHours($('#timeStartDate').val(),$('#timeEndDate').val())})"/>
+						</div>
+						<div class="listDateCon">
+							<label class="workLabel"><input name="second" type="checkbox" value="1" id="twoWork" > 两 头 班</label>
+							<input name="secondM" class="Wdate" style="width:100px;" type="text" id="afterStartDate" onFocus="WdatePicker({dateFmt:'HH:mm',onpicking:afterGetHours($('#timeStartDate').val(),$('#timeEndDate').val(),$('#afterStartDate').val(),$('#afterEndDate').val())})" placeholder="00:00"/> &nbsp;至&nbsp; 
+							<input name="secondN" class="Wdate" style="width:100px;" type="text" id="afterEndDate" onFocus="WdatePicker({dateFmt:'HH:mm',onpicking:afterGetHours($('#timeStartDate').val(),$('#timeEndDate').val(),$('#afterStartDate').val(),$('#afterEndDate').val())})"  placeholder="00:00"/>
+						</div>
+						<div class="listDateCon">
+							<label class="workLabel">一 &nbsp;共</label>
+							<input type="text" name="sumTime" class="day" id="hours" readonly="readonly" /> &nbsp; 小时
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="pop_btn" style="position: relative;" id="timeSure">
+				<button type="submit" class="btn primary xs" id="time_sure">确定</button>
+				<button type="button" class="btn default xs" onclick="close_pop()">取消</button>
+			</div>
+			</form>
+		</div>				
+	</div>
+	
+	<div id="add_night_work" class="pop" style="display: none; width: 600px;height: 289px;background: #EEE;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<form action="add" method="post" id="nightadd">
+			<input name="classId" type="hidden" id="nightClassIds"/>
+			<div class="pop_title" id="poptitle"></div>
+			<input name="token" type="hidden" value="${token}" />
+			<div class="pop_content blank">				
+				<div class="content">
+					<div class="timeContent">
+						<div class="listDateCon">
+							<label class="workLabel">班 次 名 称</label>
+							<input type="hidden" name="classId" id="nightclassId"/>
+							<input type="text" name="className" id="nightworkName" class="workName" />
+							<input type="color" style="vertical-align: middle;" id="nightColor" name="color" />
+							<input type="hidden" name="night" value="0" />
+						</div>
+						<div class="listDateCon">
+							<label class="workLabel">时 &nbsp;间</label>
+							<input name="firstM" class="Wdate" style="width:100px;" type="text" id="nighttimeStartDate" onFocus="WdatePicker({dateFmt:'HH:mm',onpicking:getNightHours($('#nighttimeStartDate').val(),$('#nighttimeEndDate').val())})"/> &nbsp;至&nbsp; 
+							<input name="firstN" class="Wdate" style="width:100px;" type="text" id="nighttimeEndDate" onFocus="WdatePicker({dateFmt:'HH:mm',onpicking:getNightHours($('#nighttimeStartDate').val(),$('#nighttimeEndDate').val())})"/>
+						</div>
+						<div class="listDateCon">
+							<label class="workLabel">一 &nbsp;共</label>
+							<input type="text" name="sumTime" class="day" id="nighthours" readonly="readonly" /> &nbsp; 小时
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="pop_btn" style="position: relative;" id="nighttimeSure">
+				<button type="submit" class="btn primary xs" id="nighttime_sure">确定</button>
+				<button type="button" class="btn default xs" onclick="close_pop()">取消</button>
+			</div>
+			</form>
+		</div>				
+	</div>
+	
+	<div id="del_apply" class="pop" style="display: none; width: 280px;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<div class="pop_title">删除离职申请</div>
+			<div class="pop_content blank">确定要删除所选离职申请吗？</div>
+			<div class="pop_btn ">
+				<button type="button" class="btn primary xs" onclick="del()">确定</button>
+				<button type="button" class="btn default xs" onclick="close_pop()">取消</button>
+			</div>
+		</div>				
+	</div>
+	
+	<div id="del_onelist" class="pop" style="display: none; width: 280px;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<div class="pop_title">确定删除吗？</div>
+			<div class="pop_content blank">确定删除<span id="name"></span>班次吗？</div>
+			<div class="pop_btn ">
+				<button type="button" class="btn primary xs" id="sure_delone">确定</button>
+				<button type="button" class="btn default xs" onclick="close_pop()">取消</button>
+			</div>
+		</div>				
+	</div>
+	
+	<script type="text/javascript">
+	$(document).ready(function() {
+			/* $(".del").click(); */
+			$("#add").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					
+				},
+				success: function(data) {
+					if (data.code == 1) {
+						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+			
+			$("#nightadd").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					
+				},
+				success: function(data) {
+					if (data.code == 1) {
+						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+			
+			$("#select").ajaxForm({
+				url: "select",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					
+				},
+				success: function(data) {
+					if (data.code == 1) {
+						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+			
+			$(".del").click(function(){
+				var name = $(this).next().val();
+				var id= $(this).attr("title");
+				$("#sure_delone").attr("title",id);
+				$("#name").html(name);
+				open_pop(null,null,"#del_onelist",true);
+			});
+			
+			$("#sure_delone").click(function(){
+				close_pop();
+				var id = $(this).attr("title");
+				$.ajax({
+					url: "del?classId=" + id,
+					type: "post",
+					dataType: "json",
+					success: function(data) {
+						if (data.code == 1) {
+							success_callback(data, "page");
+						} else {
+							danger_callback(data);
+						}
+					}
+				});
+			});
+			
+			
+			/* $(".del").parent().ajaxForm({
+				url: "del",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					
+				},
+				success: function(data) {
+					if (data.code == 1) {
+						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			}); */
+			
+			$("#checkAll").click(function(){
+				if($(this).is(":checked")){
+					$(".compCheck").attr("checked","checked");
+				}else{
+					$(".compCheck").removeAttr("checked","checked");
+				}
+			});
+	});
+</script>
+</body>
+</html>	

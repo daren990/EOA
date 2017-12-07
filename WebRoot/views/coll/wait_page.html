@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 待发事项</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<div id="left" class="left">
+				<a href="javascript:edit()"><span class="icons icon_edit"></span><span class="icons_text">编辑</span></a>
+				<span class="split">|</span>
+				<a href="javascript:open_del()"><span class="icons icon_del"></span><span class="icons_text">删除</span></a>
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+			<div class="table_head">			
+				<table class="table">
+					<thead>
+						<tr>
+							<th width="40"><input type="checkbox" id="checkedIds"></th>
+							<th width="">标题</th>
+							<th width="15%">申请时间</th>
+							<th width="15%">上级审批</th>
+							<th width="10%">审批状态</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+			<#assign len = 0 />
+			<div class="table_body auto_height">
+				<table class="table">
+					<tbody>
+						<#if leaves?size gt 0>
+							<#assign len = len + leaves?size />
+							<#list leaves as e>
+						<tr>
+							<td width="26"><input type="checkbox" name="checkedIds" value="leave_${e.leaveId}"></td>
+							<td width="">
+							<a href="/adm/salary/leave/apply/add?leaveId=${e.leaveId}">请假申请_${e.trueName}于${e.startTime?date}至${e.endTime?date}因${leaveMap[e.typeId?string]}请假${views.day(e.leaveMinute, works)?string("0.#")}天</a>
+							</td>
+							<td width="15%"><#if e.createTime??>${e.createTime?datetime}</#if></td>
+							<td width="15%">${e.operator}</td>
+							<td width="10%">${views.approve(e.approve)}</td>
+						</tr>
+							</#list>
+						</#if>
+						<#if errands?size gt 0>
+							<#assign len = len + errands?size />
+							<#list errands as e>
+						<tr>
+							<td width="26"><input type="checkbox" name="checkedIds" value="errand_${e.errandId}"></td>
+							<td width="">
+							<a href="/adm/salary/errand/apply/add?errandId=${e.errandId}">出差申请_${e.trueName}于${e.startTime?date}至${e.endTime?date}出差</a>
+							</td>
+							<td width="15%"><#if e.createTime??>${e.createTime?datetime}</#if></td>
+							<td width="15%">${e.operator}</td>
+							<td width="10%">${views.approve(e.approve)}</td>
+						</tr>
+							</#list>
+						</#if>
+						<#if outworks?size gt 0>
+							<#assign len = len + outworks?size />
+							<#list outworks as e>
+						<tr>
+							<td width="26"><input type="checkbox" name="checkedIds" value="outwork_${e.outworkId}"></td>
+							<td width="">
+							<a href="/adm/salary/outwork/apply/add?outworkId=${e.outworkId}">外勤申请_${e.trueName}于${e.startTime?date}<#if e.type == 0>上午<#else>下午</#if>外勤</a>
+							</td>
+							<td width="15%"><#if e.createTime??>${e.createTime?datetime}</#if></td>
+							<td width="15%">${e.operator}</td>
+							<td width="10%">${views.approve(e.approve)}</td>
+						</tr>
+							</#list>
+						</#if>
+						<#if overtimes?size gt 0>
+							<#assign len = len + overtimes?size />
+							<#list overtimes as e>
+						<tr>
+							<td width="26"><input type="checkbox" name="checkedIds" value="overtime_${e.overtimeId}"></td>
+							<td width="">
+							<a href="/adm/salary/overtime/apply/add?overtimeId=${e.overtimeId}">加班申请_${e.trueName}于${e.startTime?datetime}至${e.endTime?datetime}加班</a>
+							</td>
+							<td width="15%"><#if e.createTime??>${e.createTime?datetime}</#if></td>
+							<td width="15%">${e.operator}</td>
+							<td width="10%">${views.approve(e.approve)}</td>
+						</tr>
+							</#list>
+						</#if>
+					</tbody>
+				</table>
+			</div>
+			<#if len lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<div id="page" class="clearfix">
+				<div class="left">
+					<span>共${len}条记录</span>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div id="del_apply" class="pop" style="display: none; width: 280px;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<div class="pop_title">删除事项</div>
+			<div class="pop_content blank">确定要删除所选事项吗？</div>
+			<div class="pop_btn ">
+				<button type="button" class="btn primary xs" onclick="del()">确定</button>
+				<button type="button" class="btn default xs" onclick="close_pop()">取消</button>
+			</div>
+		</div>				
+	</div>
+	
+	<script type="text/javascript">
+		function edit() {
+			var len = 0;
+			var checkedId = null;
+			$("input[name='checkedIds']").each(function() {
+				if ($(this).prop("checked") == true) {
+					len = len + 1;
+					checkedId = $(this).val();
+				}
+			});
+			if (len == 0) {
+				danger(1, "请选择需要编辑的事项");
+			} else if(len > 1) {
+				danger(1, "最多只能选择一个事项");
+			} else {
+				var item = checkedId.split("_")[0];
+				var id = checkedId.split("_")[1];
+				location.assign("/adm/salary/" + item + "/apply/add?" + item + "Id=" + id);
+			}
+		}
+	
+		function open_del() {
+			open_pop(null,null,"#del_apply",true);
+		}
+		function del() {
+			ajax_checked("请选择需要删除的事项", "/coll/wait/del?token=${token}");	
+			close_pop();
+		}
+	</script>
+</body>
+</html>

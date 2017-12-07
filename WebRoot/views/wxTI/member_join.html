@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body>
+	<section>
+	    <section style="border: none; width: 98%; margin-right: auto; margin-left: auto;" data-width="98%">
+	        <section style="width: 100%; border: 1px solid rgb(53, 49, 53); padding-bottom: 3em;box-sizing:border-box;" data-width="100%">
+	            <section style="width: 100%; background: rgb(53, 49, 53); height: auto; overflow: hidden; box-sizing: border-box; padding: 3em 2em 6em; text-align: center;" data-width="100%">
+	                <section style="margin-right: 8px;width: 100%;font-size: 3em;font-family: arial;color: #fff;line-height: 0.8em;display: inline-block;text-align:center;font-weight: bolder;vertical-align: top;" data-width="100%"></section><br/>
+	                <section style="font-size:1em;line-height:1.5em;color:#fff;">
+	                    <p>
+	                    </p>
+	                </section>
+	            </section>
+	            <section style="width: 70%; margin-right: auto; margin-left: auto; overflow: hidden; margin-top: -4em;" data-width="70%">
+	                <section>
+					    <section>
+					        <section style="width:100%;" data-width="100%">
+					            <section style="width:200px; height:172px; margin:10px auto; background-image:url(${ctx}/img/member.png); background-repeat:no-repeat; background-size:100% auto; overflow:hidden;">
+					                <section style="width:145px; height:20px; margin-left:28px; margin-top:75px; font-size:18px; text-align:center; line-height:20px;" data-brushtype="text">
+										<#if level == 3>
+											三级会员
+											<#elseif level == 2>
+											二级会员
+											<#elseif level == 1>
+											一级会员
+										</#if>
+					                </section>
+					            </section>
+					        </section>
+					        <section style="clear:both; width:100%;" data-width="100%"></section>
+					    </section>
+					</section>
+	            </section>
+	            <section style="width: 100%; font-size: 1.4em; margin-top: 0.2em; margin-bottom: 0.2em; text-align: center;" data-width="100%">
+	            	<#if type == 1>
+		            	恭喜您！成为了我们的会员！
+	            		<br/>
+	            	</#if>
+	            	以下是您的专属二维码
+	            	<img style="width:70%;border:1px solid #1F1E20;" src="${ctx}/QRCode/img/${QR_code}" data-width="70%"/>
+	            </section>
+	        </section>
+	    </section>
+	</section>
+</body>
+</html>

@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if course.id??>编辑<#else>新建</#if>课程</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+
+<!-- 引入jQuery UI的js文件 -->
+<!--  
+*  <script type="text/javascript" src="http://code.jquery.com/ui/1.10.4/jquery-ui.js" ></script>
+-->
+<link rel="stylesheet" href="${ctx}/css/jquery-ui-1.9.2.custom.css" />
+<script type="text/javascript" src="${ctx}/js/jquery-ui-1.9.2.custom.js"></script>
+
+
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit">
+			<div id="form" class="clearfix" style="width: 500px;">
+				<form id="submitForm" action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" id="id" name="id" value="${course.id}">
+					<input type="hidden" id="editFlag" name="editFlag" value="${flag}">
+					<input type="hidden" id="editFlag2" name="editFlag2" value="${flag2}">
+					<input type="hidden" id="editFlag3" name="editFlag3" value="${flag3}">
+					
+					<table class="table">
+						<tr>
+							<td>隶属学科：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" id="parentName" class="input xl" value="${parent.name?default('根目录')}" readonly="readonly">
+								<input type="hidden" id="parentId" name="parentId" value="${parent.id?default(0)}" />
+								<input type="hidden" id="parentType" name="parentType" value="${parent.type}" />						
+							</td>
+						</tr>
+                            
+                        <tr>
+							<td>课程名称：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input xl" id="couName" name="couName" value="${course.name}">
+								<input type="hidden" name="orgSubjectame" value="${course.name}">
+							</td>
+						</tr>
+                            
+                            
+                        <tr>
+							<td>开展方式：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" id="coopTypeVal" name="coopTypeVal" value="${course.coopType}" />
+								<input type="hidden" name="coopType" value="${course.coopType}" />
+								<#if flag>
+								<div id="coopType" style="width: 157px" class="select">
+									<center><span class="option text">课程开展方式</span><span class="icon"></span></center>
+									<ul>
+										<li item="自营">自营</li>
+										<li item="兼职">兼职</li>
+										<li item="合作">合作</li>
+									</ul>
+								</div>
+								<input type="hidden" name="coopId" value="${course.coopId?default(0)}" />
+								<div id="coopId" class="select" style="width: 157px">
+									<center><span class="option text">选择合作机构</span><span class="icon"></span></center>
+									<ul>
+							<#if coopOrg?size gt 0>
+							    <#list coopOrg as e>
+							    		<input type="hidden" id="type_${e.orgId}" name="type_${e.orgId}" value="${e.gainSharingType}" />
+							    		<input type="hidden" id="num_${e.orgId}" name="num_${e.orgId}" value="${e.gainSharingNum}" />
+										<li item="${e.orgId}">${e.orgName}</li>
+								</#list>
+							</#if>
+							
+									</ul>
+								</div>
+							<#else>
+							<input type="text" class="input xl" style="width: 157px" value="${course.coopType}">
+							<#if coopOrg?size gt 0>
+							    <#list coopOrg as e>
+							        <#if e.orgId == course.coopId>
+							            <#if course.coopType == "合作">
+							                <input type="text" class="input xl" style="width: 140px" value="${e.orgName}">
+							            <#break>
+							            </#if>
+								    </#if>
+								</#list>
+							</#if>
+								</#if>
+							</td>
+						</tr>
+
+                        <tr id="coopCourseName">
+							<td>合作课程原名：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" class="input xl" id="dependId" name="dependId" value="${course.dependId}">
+								<input type="text" class="input xl" id="dependName" name="dependName" value="${course.dependName}">
+							</td>
+						</tr>
+
+                        <tr>
+							<td>负责老师：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input xl" id="teacherName" name="teacherName" value="${teacherName}">
+							</td>
+						</tr>
+
+                        <tr>
+							<td>标准价格：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" style="width: 95px" class="input xl" id="couPrice" name="couPrice" value="${course.price}">元
+							</td>
+						</tr>
+
+                        <tr>
+							<td>最大人数：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" style="width: 95px" class="input xl" id="max" name="max" value="${course.max}">人
+							</td>
+						</tr>
+
+                        <tr>
+							<td>上课地点：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" id="location" name="location" value="${course.location}" />
+								<#if flag>
+								<div id="locationType" class="select xl" >
+									<center><span class="option text"><#if course.location != '' && course.location != null>${course.location}<#else>请选择上课地点</#if></span><span class="icon"></span></center>
+									<ul>
+							<#if location?size gt 0>
+							    <#list location as e>
+										<li item="${e.location}">${e.location}</li>
+								</#list>
+							</#if>
+									</ul>
+								</div>	
+								<#else>
+								<input type="text" id="locationReplace" name="locationReplace" style=" width : 308px" class="input xl" value="${course.location}">
+								</#if>						
+							</td>
+						</tr>
+
+                        <tr>
+							<td>上课时间：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" id="couTimeVal" name="couTimeVal" value="${couWeekday}" />
+								<input type="hidden" id="couTime" name="couTime" value="${couWeekday?default(1)}" />
+								由
+								<input type="text" class="input sm Wdate" style="width: 100px" id="startDate" name="startDate" value="${dateStr}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+								起
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								<#if flag>
+								<div id="couTimeType" class="select" style = "width : 155px">
+									<center><span class="option text">请选择上课时间</span><span class="icon"></span></center>
+									<ul>
+										<li item="1">法定工作日</li>
+										<li item="2">每天</li>
+										<li item="3">另行设置</li>
+									</ul>
+								</div>
+								<#else>
+								    <#if couWeekday == 1>
+									    <input type="text" class="input xl" style="width : 145px"  value="法定工作日" />
+									</#if>	
+									<#if couWeekday == 2>
+									    <input type="text" class="input xl" style="width : 145px"  value="每天" />
+									</#if>
+									<#if couWeekday == 3>
+									    <input type="text" class="input xl" style="width : 145px"  value="另行设置" />
+									</#if>							
+								</#if>
+							</td>
+						</tr>   
+
+                        <tr id = "timeRiver">
+							<td>时间段：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" style="width: 145px" class="input sm Wdate" readonly="readonly" onclick="WdatePicker({dateFmt:'HH:mm'})" id="startTime" name="startTime" value="${startTime}">								
+								-
+								<input type="text" style="width: 145px" class="input sm Wdate" readonly="readonly" onclick="WdatePicker({dateFmt:'HH:mm'})" id="endTime" name="endTime" value="${endTime}">
+							</td>
+						</tr>
+
+                        <tr id = "timeRiver1">
+							<td>星期一：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" style="width: 145px" class="input sm Wdate" readonly="readonly" onclick="WdatePicker({dateFmt:'HH:mm'})" id="startTime1" name="startTime1" value="${startTime1}">
+								-
+								<input type="text" style="width: 145px" class="input sm Wdate" readonly="readonly" onclick="WdatePicker({dateFmt:'HH:mm'})" id="endTime1" name="endTime1" value="${endTime1}">
+							</td>
+						</tr>
+
+                        <tr id = "timeRiver2">
+							<td>星期二：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" style="width: 145px" class="input sm Wdate" readonly="readonly" onclick="WdatePicker({dateFmt:'HH:mm'})" id="startTime2" name="startTime2" value="${startTime2}">
+								-
+								<input type="text" style="width: 145px" class="input sm Wdate" readonly="readonly" onclick="WdatePicker({dateFmt:'HH:mm'})" id="endTime2" name="endTime2" value="${endTime2}">
+							</td>
+						</tr>
+                          
+                        <tr id = "timeRiver3">
+							<td>星期三：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" style="width: 145px" class="input sm Wdate" readonly="readonly" onclick="WdatePicker({dateFmt:'HH:mm'})" id="startTime3" name="startTime3" value="${startTime3}">
+								-
+								<input type="text" style="width: 145px" class="input sm Wdate" readonly="readonly" onclick="WdatePicker({dateFmt:'HH:mm'})" id="endTime3" name="endTime3" value="${endTime3}">
+							</td>
+						</tr>  
+                        
+                        <tr id = "timeRiver4">
+							<td>星期四：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" style="width: 145px" class="input sm Wdate" readonly="readonly" onclick="WdatePicker({dateFmt:'HH:mm'})" id="startTime4" name="startTime4" value="${startTime4}">
+								-
+								<input type="text" style="width: 145px" class="input sm Wdate" readonly="readonly" onclick="WdatePicker({dateFmt:'HH:mm'})" id="endTime4" name="endTime4" value="${endTime4}">
+							</td>
+						</tr>
+                        
+                        <tr id = "timeRiver5">
+							<td>星期五：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" style="width: 145px" class="input sm Wdate" readonly="readonly" onclick="WdatePicker({dateFmt:'HH:mm'})" id="startTime5" name="startTime5" value="${startTime5}">
+								-
+								<input type="text" style="width: 145px" class="input sm Wdate" readonly="readonly" onclick="WdatePicker({dateFmt:'HH:mm'})" id="endTime5" name="endTime5" value="${endTime5}">
+							</td>
+						</tr>
+                         
+                        <tr id = "timeRiver6">
+							<td>星期六：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" style="width: 145px" class="input sm Wdate" readonly="readonly" onclick="WdatePicker({dateFmt:'HH:mm'})" id="startTime6" name="startTime6" value="${startTime6}">
+								-
+								<input type="text" style="width: 145px" class="input sm Wdate" readonly="readonly" onclick="WdatePicker({dateFmt:'HH:mm'})" id="endTime6" name="endTime6" value="${endTime6}">
+							</td>
+						</tr> 
+                        
+                        <tr id = "timeRiver7">
+							<td>星期日：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" style="width: 145px" class="input sm Wdate" readonly="readonly" onclick="WdatePicker({dateFmt:'HH:mm'})" id="startTime7" name="startTime7" value="${startTime7}">
+								-
+								<input type="text" style="width: 145px" class="input sm Wdate" readonly="readonly" onclick="WdatePicker({dateFmt:'HH:mm'})" id="endTime7" name="endTime7" value="${endTime7}">
+							</td>
+						</tr>
+                                                    
+                        <tr>
+							<td>课时数量：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input xl" id="couCount" name="couCount" value="${course.couCount}">节
+							</td>
+						</tr>
+                                                                                                  
+                        <tr>
+							<td>分成方式：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" id="gainSharingTypeVal" name="gainSharingTypeVal" value="${course.gainSharingType?default(1)}" />
+								<input type="hidden" name="gainSharingType" value="${course.gainSharingType?default(1)}" />
+								<#if flag>
+								<div id="gainSharingType" style="width: 157px" class="select">
+									<center><span class="option text">分成方式</span><span class="icon"></span></center>
+									<ul>
+										<li item="1">按学生绝对值分成</li>
+										<li item="2">按学生比例值分成</li>
+										<li item="3">按课时绝对值分成</li>
+								<!--	<li item="4">按课时比例值分成</li>  -->
+									</ul>
+								</div>
+								<#else>
+								<#if course.gainSharingType == 1>	
+								    <input type="text" style="width: 150px" class="input" value="按学生绝对值分成">
+								</#if>
+								<#if course.gainSharingType == 2>
+								    <input type="text" style="width: 150px" class="input" value="按学生比例值分成">
+								</#if>
+								<#if course.gainSharingType == 3>
+								    <input type="text" style="width: 150px" class="input" value="按课时绝对值分成">
+								</#if>
+								<#if course.gainSharingType == 4>
+								    <input type="text" style="width: 150px" class="input" value="按课时比例值分成">
+								</#if>
+								</#if>
+								<input type="text" style="width: 148px" class="input" id="gainSharingNum" name="gainSharingNum" value="${course.gainSharingNum}">
+								
+							</td>
+							<td>
+							<div id = "percent">%</div>
+							<div id = "studentNum">元/个</div>
+							<div id = "lessonNum">元/节</div>
+							</td>
+						</tr>                        
+                        
+                        <#if flag>
+						<tr>
+							<td>状态：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="status" value="${course.status?default(1)}" />
+								<div id="status" class="select xl">
+									<center><span class="option text">启用</span><span class="icon"></span></center>
+									<ul>
+										<li item="0">禁用</li>
+										<li item="1">启用</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						</#if>
+	                    <tr>
+							<td>描述：</td>
+							<td class="required"></td>
+							<td>
+								<input type="hidden" id="coudesc" name="coudesc" value="${course.coudesc}" />
+								<textarea class="xl" rows="5" name="desc" id="desc"></textarea>
+							</td>
+						</tr>
+						
+						<tr>
+							<td colspan="2"></td>
+							<td><button id="submitButton" type="button" onclick="firm()" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<div id="subject_pop" class="pop bind" style="display: none; width: 318px;">
+		<div class="pop_content">
+			<div class="auto_height sm">
+				<ul id="tree" class="ztree"></ul>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		var nodes = [
+		<#list nodes as e>
+		<#if e.type != "课程">
+			    {id: "${e.id}", pId: "${e.parentId}", name: "${e.name}",couType:"${e.type}"}<#if e_has_next>,</#if>
+		</#if>
+	    </#list>
+		];
+		
+		var setting = {
+			data: { simpleData: { enable: true } },
+			view: { showIcon: false },
+			callback: { onClick: getNode }
+		};				
+		
+		
+		function firm() {  
+	        //利用对话框返回的值 （true 或者 false）  
+	        if (confirm("一旦提交课程将无法再次修改!请确认数据无误以后再点击确定!")) {  
+	            $("#submitForm").submit();
+	        }  
+	        else {  
+	            
+	        }  
+	  
+	    }  
+		
+		$(document).ready(function(){
+		
+			var id = $("#id").val();
+			var editFlag = $("#editFlag").val();
+			var editFlag2 = $("#editFlag2").val();
+			var editFlag3 = $("#editFlag3").val();
+			var coopTypeVal = $("#coopTypeVal").val();
+			
+			
+//			if(!editFlag || editFlag2 == 0 || !editFlag3)
+//			{
+	            if(id != 0 && id != null)
+	            {
+		  			$("#gainSharingType").unbind("click");
+		  			$("#parentName").unbind("click");
+		  			$("#locationType").unbind("click");
+		    	    $("#couTimeType").unbind("click");
+		    	    $("#startDate").unbind("click");
+		    	    $("#startTime").unbind("click");
+		  			$("#endTime").unbind("click");
+
+					var form = document.forms[0]; 
+					for (var i = 0; i < form.length; i++) 
+					{ 
+						var element = form.elements[i]; 
+						element.disabled = "true"; 
+					}
+					$("#submitButton").hide();
+	            }	
+//			}
+
+			var coopflag = $("#coopTypeVal").val();
+			
+			var teacherflag = $("#teacherName").val();
+			if(teacherflag == null || teacherflag == '')
+			{
+				$("#teacherName").val("请先选择课程开展方式");
+			}
+								
+			$("#percent").hide();
+			$("#studentNum").hide();
+			$("#lessonNum").hide();
+			
+            var flag = $("#gainSharingTypeVal").val();
+			if(flag == 1)
+			{
+				$("#studentNum").show();
+				$("#percent").hide();
+				$("#lessonNum").hide();
+			}
+			else if(flag == 2 || flag == 4)
+			{
+				$("#percent").show();
+				$("#studentNum").hide();
+				$("#lessonNum").hide();
+			}
+			else
+			{
+				$("#lessonNum").show();
+				$("#percent").hide();
+				$("#studentNum").hide();
+			}
+						
+			if($("#couTimeVal").val() == 3)
+			{
+				$("#timeRiver").hide();
+				$("#timeRiver1").show();
+				$("#timeRiver2").show();
+				$("#timeRiver3").show();
+				$("#timeRiver4").show();
+				$("#timeRiver5").show();
+				$("#timeRiver6").show();
+				$("#timeRiver7").show();
+			}
+			else
+			{
+				$("#timeRiver").show();
+				$("#timeRiver1").hide();
+				$("#timeRiver2").hide();
+				$("#timeRiver3").hide();
+				$("#timeRiver4").hide();
+				$("#timeRiver5").hide();
+				$("#timeRiver6").hide();
+				$("#timeRiver7").hide();
+			}
+							
+			if(coopflag != "合作")
+			{
+				$("#coopId").hide();
+				$("#coopCourseName").hide();
+			}
+			else
+			{
+				$("#coopId").show();
+				$("#coopCourseName").show();
+				
+	    	    $("#teacherName").attr("readonly", true);
+	    	    $("#couPrice").attr("readonly", true);
+	    	    $("#max").attr("readonly", true);
+	    	    $("#startDate").attr("readonly", true);
+	    	    $("#couTimeType").attr("readonly", true);
+	    	    $("#startTime").attr("readonly", true);
+	    	    $("#endTime").attr("readonly", true);
+	    	    $("#startTime1").attr("readonly", true);
+	    	    $("#endTime1").attr("readonly", true);
+	    	    $("#startTime2").attr("readonly", true);
+	    	    $("#endTime2").attr("readonly", true);
+	    	    $("#startTime3").attr("readonly", true);
+	    	    $("#endTime3").attr("readonly", true);
+	    	    $("#startTime4").attr("readonly", true);
+	    	    $("#endTime4").attr("readonly", true);
+	    	    $("#startTime5").attr("readonly", true);
+	    	    $("#endTime5").attr("readonly", true);
+	    	    $("#startTime6").attr("readonly", true);
+	    	    $("#endTime6").attr("readonly", true);
+	    	    $("#startTime7").attr("readonly", true);
+	    	    $("#endTime7").attr("readonly", true);
+	    	    $("#couCount").attr("readonly", true);
+	    	    $("#desc").attr("readonly", true);
+	    	    $("#gainSharingNum").attr("readonly", true);
+	    	    
+	    	    $("#gainSharingType").unbind("click");
+	  			$("#parentName").unbind("click");
+	  			$("#locationType").unbind("click");
+	    	    $("#couTimeType").unbind("click");
+	    	    $("#startDate").unbind("click");
+	    	    $("#startTime").unbind("click");
+	  			$("#endTime").unbind("click");
+	  			
+	    	    $("#startDate").removeAttr("onclick");
+	  			$("#startTime").removeAttr("onclick");
+	  			$("#endTime").removeAttr("onclick");
+	  			$("#startTime1").removeAttr("onclick");
+	  			$("#endTime1").removeAttr("onclick");
+	  			$("#startTime2").removeAttr("onclick");
+	  			$("#endTime2").removeAttr("onclick");
+	  			$("#startTime3").removeAttr("onclick");
+	  			$("#endTime3").removeAttr("onclick");
+	  			$("#startTime4").removeAttr("onclick");
+	  			$("#endTime4").removeAttr("onclick");
+	  			$("#startTime5").removeAttr("onclick");
+	  			$("#endTime5").removeAttr("onclick");
+	  			$("#startTime6").removeAttr("onclick");
+	  			$("#endTime6").removeAttr("onclick");
+	  			$("#startTime7").removeAttr("onclick");
+	  			$("#endTime7").removeAttr("onclick");
+
+			}
+			
+			$.fn.zTree.init($("#tree"), setting, nodes);
+			
+			$("#desc").val($("#coudesc").val());
+			type($("input[name=type]").val());
+  			
+  			$("#status").select({ "name": "status" });
+  			$("#coopId").select({ "name": "coopId" });
+  			$("#coopType").select({ "name": "coopType" });
+  			$("#couTimeType").select({ "name": "couTime" });
+  			$("#locationType").select({ "name": "location" });
+  			$("#gainSharingType").select({ "name": "gainSharingType" });
+ 			$("#type").select({ "name": "type" }); 			
+ 			
+ 			$("#location.select li").click(function() {
+				var t = $(this).attr("item");
+			});
+ 			
+ 			$("#gainSharingType.select li").click(function() {
+				var t = $(this).attr("item");
+				judgeSharing(t);
+			});
+ 			
+ 			$("#coopType.select li").click(function() {
+				var t = $(this).attr("item");
+				judgeCoop(t);
+                if(t != "合作")
+                {
+                	$.ajax
+                	({  
+  			          type:"post",  
+  			          url: "autoCompleteTeacher",  
+  			          dataType: "json",  
+  			          data: {"couType":t},
+  			          success:function(data){  
+  			            names = data;  
+  			            autoCompleteTeacher(data);  
+  			          }  
+  			        });
+                    $("#startDate").val("");
+                    $("#startTime").val("");
+                    $("#endTime").val("");
+                    $("#startTime1").val("");
+                    $("#endTime1").val("");
+                    $("#startTime2").val("");
+                    $("#endTime2").val("");
+                    $("#startTime3").val("");
+                    $("#endTime3").val("");
+                    $("#startTime4").val("");
+                    $("#endTime4").val("");
+                    $("#startTime5").val("");
+                    $("#endTime5").val("");
+                    $("#startTime6").val("");
+                    $("#endTime6").val("");
+                    $("#startTime7").val("");
+                    $("#endTime7").val("");
+                    $("#teacherName").val("");
+		    	    $("#desc").val("");
+		    	    $("#dependName").val("");
+		    	    $("#dependId").val("");
+		    	    $("#coopCourseName").hide();
+		    	    $("#couPrice").val(0);
+		    	    $("#onePrice").val(0);
+		    	    $("#max").val(0);
+		    	    $("#bookPrice").val(0);
+		    	    $("#gainSharingNum").val(0);
+		    	    $("#couCount").val(0);
+		    	    $("#couTime").val(1);
+		    	    
+		  			$("#startDate").click(function() {
+		  				WdatePicker({dateFmt:'yyyy-MM-dd'});
+					});
+		  			
+		  			$("#startTime").click(function() {
+		  				WdatePicker({dateFmt:'HH:mm'});
+					});
+		  			
+		  			$("#endTime").click(function() {
+		  				WdatePicker({dateFmt:'HH:mm'});
+					});
+		  			
+		  			$("#startTime1").click(function() {
+		  				WdatePicker({dateFmt:'HH:mm'});
+					});
+		  			
+		  			$("#endTime1").click(function() {
+		  				WdatePicker({dateFmt:'HH:mm'});
+					});
+		  			
+		  			$("#startTime2").click(function() {
+		  				WdatePicker({dateFmt:'HH:mm'});
+					});
+		  			
+		  			$("#endTime2").click(function() {
+		  				WdatePicker({dateFmt:'HH:mm'});
+					});
+		  			
+		  			$("#startTime3").click(function() {
+		  				WdatePicker({dateFmt:'HH:mm'});
+					});
+		  			
+		  			$("#endTime3").click(function() {
+		  				WdatePicker({dateFmt:'HH:mm'});
+					});
+		  			
+		  			$("#startTime4").click(function() {
+		  				WdatePicker({dateFmt:'HH:mm'});
+					});
+		  			
+		  			$("#endTime4").click(function() {
+		  				WdatePicker({dateFmt:'HH:mm'});
+					});
+		  			
+		  			$("#startTime5").click(function() {
+		  				WdatePicker({dateFmt:'HH:mm'});
+					});
+		  			
+		  			$("#endTime5").click(function() {
+		  				WdatePicker({dateFmt:'HH:mm'});
+					});
+		  			
+		  			$("#startTime6").click(function() {
+		  				WdatePicker({dateFmt:'HH:mm'});
+					});
+		  			
+		  			$("#endTime6").click(function() {
+		  				WdatePicker({dateFmt:'HH:mm'});
+					});
+		  			
+		  			$("#startTime7").click(function() {
+		  				WdatePicker({dateFmt:'HH:mm'});
+					});
+		  			
+		  			$("#endTime7").click(function() {
+		  				WdatePicker({dateFmt:'HH:mm'});
+					});
+		  			
+	    	    $("#teacherName").attr("readonly", false);
+	    	    $("#couPrice").attr("readonly", false);
+	    	    $("#max").attr("readonly", false);
+	    	    $("#couTimeType").attr("readonly", false);
+	    	    $("#couCount").attr("readonly", false);
+	    	    $("#gainSharingNum").attr("readonly", false);
+	    	    $("#desc").attr("readonly", false);
+	  			$("#couTimeType").select({ "name": "couTime" });
+	  			$("#locationType").select({ "name": "location" });
+	  			$("#gainSharingType").select({ "name": "gainSharingType" });
+	  				  			
+	 			$("#couTimeType.select li").click(function() {
+					var t = $(this).attr("item");
+					judgeTime(t);
+				});
+	 			
+	  			$("#parentName").click(function() {
+	 				open_pop(null, "#parentName", "#subject_pop", false);
+	 				return false;
+	 			});
+               	}
+                else
+                {
+			        autoCompleteTeacher(null);  
+               	}
+
+			});
+ 			
+ 			$("#coopId.select li").click(function() {
+				var t = $(this).attr("item");
+				
+				$.ajax({  
+			          type:"post",  
+			          url: "autoCompleteCourse",  
+			          dataType: "json",  
+			          data: {"coopId":t,"couType":"合作"},
+			          success:function(data){  
+			            names = data;  
+			            autoCompleteCourse(data,t);  
+			          }  
+			        });
+				
+				$("#teacherName").val("");
+				$("#coopCourseName").show();
+				$("#gainSharingType").select({"name":"type_"+ t});
+				$("#gainSharingNum").val($("#num_" + t).val());
+			});
+ 			
+ 			$("#couTimeType.select li").click(function() {
+				var t = $(this).attr("item");
+				judgeTime(t);
+			});
+ 			
+			$("#type.select li").click(function() {
+				var t = $(this).attr("item");
+			});
+ 			
+ 			$("#parentName").click(function() {
+ 				open_pop(null, "#parentName", "#subject_pop", false);
+ 				return false;
+ 			});
+ 			
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.parentId, [RQ, N], "上级");
+						validate(form.couName, [RQ, RANGE, "{1,60}"], "课程名称");
+						validate(form.teacherName, [RQ, RANGE, "{1,60}"], "教师名称");
+						validate(form.location, [RQ, RANGE, "{1,60}"], "上课地点");
+						validate(form.coopType, [RQ, RANGE, "{1,60}"], "开展方式");
+						validate(form.couCount, [RQ, N], "课时数量");
+						validate(form.couPrice, [RQ, N], "标准价格");
+						validate(form.startDate, [RQ, RANGE, "{1,60}"], "开始日期");
+						validate(form.status, [RQ, N], "状态");
+						validate(form.couTime, [RQ, N], "上课时间");
+						validate(form.gainSharingType, [RQ, RANGE, "{1,60}"], "分成方式");
+						validate(form.gainSharingNum, [RQ, RANGE, "{1,60}"], "分成数");
+						if(form.coopType == "合作")
+						{
+							validate(form.coopId, [RQ, N], "合作机构Id");
+							validate(form.dependName, [RQ, RANGE, "{1,60}"], "原课程名称");
+						}
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+			
+			if(coopTypeVal == "合作")
+			{
+				
+				$.ajax({  
+			          type:"post",  
+			          url: "autoCompleteCourse",  
+			          dataType: "json",  
+			          data: {"coopId":t,"couType":"合作"},
+			          success:function(data){  
+			            names = data;  
+			            autoCompleteCourse(data,t);  
+			          }  
+			        });
+				
+	    	    $("#teacherName").attr("readonly", true);
+	    	    $("#couPrice").attr("readonly", true);
+	    	    $("#max").attr("readonly", true);
+	    	    $("#startDate").attr("readonly", true);
+	    	    $("#couTimeType").attr("readonly", true);
+	    	    $("#startTime").attr("readonly", true);
+	    	    $("#endTime").attr("readonly", true);
+	    	    $("#startTime1").attr("readonly", true);
+	    	    $("#endTime1").attr("readonly", true);
+	    	    $("#startTime2").attr("readonly", true);
+	    	    $("#endTime2").attr("readonly", true);
+	    	    $("#startTime3").attr("readonly", true);
+	    	    $("#endTime3").attr("readonly", true);
+	    	    $("#startTime4").attr("readonly", true);
+	    	    $("#endTime4").attr("readonly", true);
+	    	    $("#startTime5").attr("readonly", true);
+	    	    $("#endTime5").attr("readonly", true);
+	    	    $("#startTime6").attr("readonly", true);
+	    	    $("#endTime6").attr("readonly", true);
+	    	    $("#startTime7").attr("readonly", true);
+	    	    $("#endTime7").attr("readonly", true);
+	    	    $("#couCount").attr("readonly", true);
+	    	    $("#desc").attr("readonly", true);
+	    	    $("#gainSharingNum").attr("readonly", true);
+
+	  			$("#parentName").unbind("click");
+	  			$("#locationType").unbind("click");
+	    	    $("#couTimeType").unbind("click");
+	    	    $("#gainSharingType").unbind("click");
+
+			}
+
+			
+		});
+		
+		function judgeSharing(t)
+		{
+			if(t == 1)
+			{
+				$("#studentNum").show();
+				$("#percent").hide();
+				$("#lessonNum").hide();
+			}
+			else if(t == 2 || t == 4)
+			{
+				$("#percent").show();
+				$("#studentNum").hide();
+				$("#lessonNum").hide();
+			}
+			else
+			{
+				$("#lessonNum").show();
+				$("#percent").hide();
+				$("#studentNum").hide();
+			}
+		}
+		
+		function judgeCoop(t)
+		{
+			if(t != "合作")
+			{
+				$("#coopId").hide();
+			}
+			else
+			{
+				$("#coopId").show();
+			}
+		}
+		
+		function judgeTime(t)
+		{
+			if(t == 3)
+			{
+				$("#timeRiver").hide();
+				$("#timeRiver1").show();
+				$("#timeRiver2").show();
+				$("#timeRiver3").show();
+				$("#timeRiver4").show();
+				$("#timeRiver5").show();
+				$("#timeRiver6").show();
+				$("#timeRiver7").show();
+			}
+			else
+			{
+				$("#timeRiver").show();
+				$("#timeRiver1").hide();
+				$("#timeRiver2").hide();
+				$("#timeRiver3").hide();
+				$("#timeRiver4").hide();
+				$("#timeRiver5").hide();
+				$("#timeRiver6").hide();
+				$("#timeRiver7").hide();
+			}
+		}
+		
+		function autoCompleteTeacher(data)
+		{
+			$("#teacherName").autocomplete({
+				minLength: 0,
+			    source: data
+			}).focus(function() {
+			    $(this).autocomplete("search", "");
+			});
+		}
+		
+		function autoCompleteCourse(data,t)
+		{
+			$("#dependName").autocomplete({
+				minLength: 0,
+			    source: data,
+			    close: function() { 
+			    	
+					$.ajax({  
+				          type:"post",  
+				          url: "matchCourse",  
+				          dataType: "json",  
+				          data: {"couName":$("#dependName").val(),"coopId":t},
+				          success:function(data){  
+				            
+				        	$("#gainSharingNum").attr("readonly", true);
+				    	    $("#teacherName").attr("readonly", true);
+				    	    $("#couPrice").attr("readonly", true);
+				    	    $("#max").attr("readonly", true);
+				    	    $("#startDate").attr("readonly", true);
+				    	    $("#couTimeType").attr("readonly", true);
+				    	    $("#startTime").attr("readonly", true);
+				    	    $("#endTime").attr("readonly", true);
+				    	    $("#startTime1").attr("readonly", true);
+				    	    $("#endTime1").attr("readonly", true);
+				    	    $("#startTime2").attr("readonly", true);
+				    	    $("#endTime2").attr("readonly", true);
+				    	    $("#startTime3").attr("readonly", true);
+				    	    $("#endTime3").attr("readonly", true);
+				    	    $("#startTime4").attr("readonly", true);
+				    	    $("#endTime4").attr("readonly", true);
+				    	    $("#startTime5").attr("readonly", true);
+				    	    $("#endTime5").attr("readonly", true);
+				    	    $("#startTime6").attr("readonly", true);
+				    	    $("#endTime6").attr("readonly", true);
+				    	    $("#startTime7").attr("readonly", true);
+				    	    $("#endTime7").attr("readonly", true);
+				    	    $("#couCount").attr("readonly", true);
+				    	    $("#desc").attr("readonly", true);
+				    	    
+                            if(data.couWeekday != 3)
+                            {
+                            	$("#startTime").val(data.startTime);
+    				    	    $("#endTime").val(data.endTime);
+
+								$("#timeRiver").show();
+								$("#timeRiver1").hide();
+								$("#timeRiver2").hide();
+								$("#timeRiver3").hide();
+								$("#timeRiver4").hide();
+								$("#timeRiver5").hide();
+								$("#timeRiver6").hide();
+								$("#timeRiver7").hide();
+    				    	    
+                           	}
+                            else
+                           	{
+
+								$("#timeRiver").hide();
+								$("#timeRiver1").show();
+								$("#timeRiver2").show();
+								$("#timeRiver3").show();
+								$("#timeRiver4").show();
+								$("#timeRiver5").show();
+								$("#timeRiver6").show();
+								$("#timeRiver7").show();
+
+    				    	    $("#endTime2").val(data.endTime2);
+    				    	    $("#startTime3").val(data.startTime3);
+    				    	    $("#endTime3").val(data.endTime3);
+    				    	    $("#startTime4").val(data.startTime4);
+    				    	    $("#endTime4").val(data.endTime4);
+    				    	    $("#startTime5").val(data.startTime5);
+    				    	    $("#endTime5").val(data.endTime5);
+    				    	    $("#startTime6").val(data.startTime6);
+    				    	    $("#endTime6").val(data.endTime6);
+    				    	    $("#startTime7").val(data.startTime7);
+    				    	    $("#endTime7").val(data.endTime7); 
+                            	$("#startTime1").val(data.startTime1);
+    				    	    $("#endTime1").val(data.endTime1);
+    				    	    $("#startTime2").val(data.startTime2);
+    				    	    $("#endTime2").val(data.endTime2);
+    				    	    $("#startTime3").val(data.startTime3);
+    				    	    $("#endTime3").val(data.endTime3);
+    				    	    $("#startTime4").val(data.startTime4);
+    				    	    $("#endTime4").val(data.endTime4);
+    				    	    $("#startTime5").val(data.startTime5);
+    				    	    $("#endTime5").val(data.endTime5);
+    				    	    $("#startTime6").val(data.startTime6);
+    				    	    $("#endTime6").val(data.endTime6);
+    				    	    $("#startTime7").val(data.startTime7);
+    				    	    $("#endTime7").val(data.endTime7); 
+                           	}
+                            $("#startDate").val(data.dateStr);
+                            $("#teacherName").val(data.teacherName);
+				    	    $("#desc").val(data.course.coudesc);
+				    	    $("#dependId").val(data.course.id);
+				    	    $("#couPrice").val(data.course.price);
+				    	    $("#gainSharingNum").val(data.course.gainSharingNum);
+				    	    $("#couCount").val(data.course.couCount);
+				    	    $("#couTime").val(data.couWeekday);
+				    	    $("#location").val(data.course.location);
+				    	    $("#gainSharingTypeVal").val(data.course.gainSharingType);
+				    	    $("#parentName").val(data.parentName);
+				    	    $("#max").val(data.course.max);
+				    	    $("#parentId").val(data.course.eduClassifyId);
+				  			$("#couTimeType").select({ "name": "couTime" });
+				  			$("#locationType").select({ "name": "location" });
+				  			$("#gainSharingType").select({ "name": "gainSharingTypeVal" });
+				  			
+				  			$("#gainSharingType").unbind("click");
+				  			$("#parentName").unbind("click");
+				  			$("#locationType").unbind("click");
+				    	    $("#couTimeType").unbind("click");
+				    	    $("#startDate").unbind("click");
+				    	    $("#startTime").unbind("click");
+				  			$("#endTime").unbind("click");
+				  			
+				    	    $("#startDate").removeAttr("onclick");
+				  			$("#startTime").removeAttr("onclick");
+				  			$("#endTime").removeAttr("onclick");
+				  			$("#startTime1").removeAttr("onclick");
+				  			$("#endTime1").removeAttr("onclick");
+				  			$("#startTime2").removeAttr("onclick");
+				  			$("#endTime2").removeAttr("onclick");
+				  			$("#startTime3").removeAttr("onclick");
+				  			$("#endTime3").removeAttr("onclick");
+				  			$("#startTime4").removeAttr("onclick");
+				  			$("#endTime4").removeAttr("onclick");
+				  			$("#startTime5").removeAttr("onclick");
+				  			$("#endTime5").removeAttr("onclick");
+				  			$("#startTime6").removeAttr("onclick");
+				  			$("#endTime6").removeAttr("onclick");
+				  			$("#startTime7").removeAttr("onclick");
+				  			$("#endTime7").removeAttr("onclick");
+				          }  
+				        });
+			    	
+			    	}
+			}).focus(function() {
+			    $(this).autocomplete("search", "");
+			});
+		}
+		
+		function getNode(event, id, node) {
+			$("input[name=parentId]").val(node.id);
+			$("#parentName").val(node.name);
+			$("#parentType").val(node.couType);
+			if($("#parentType").val() != "学科")
+			{
+				danger(1, "课程只能添加在学科下面!您现在选择的是" + $("#parentType").val() + "!");
+				disabled_off();
+				$("#submitButton").attr("disabled", true);
+			}
+			else
+			{
+				success();
+				$("#submitButton").attr("disabled", false);
+			}
+			return true;
+		}
+		
+		function type(t) {
+			$(".menu").hide();
+			$(".url").hide();
+			$(".action").hide();
+			if (t == "0") {
+				$(".menu").show();
+				$(".url").show();
+				$(".url .required").text("");
+				$("input[name=action]").val("");
+			} else if (t == "1") {
+				$(".url").show();
+				$(".url .required").text("*");
+				$("input[name=position]").val("");
+				$("input[name=action]").val("");
+			} else if (t == "2") {
+				$(".action").show();
+				$("input[name=position]").val("");
+				$("input[name=url]").val("");
+			}
+		}
+		
+		
+		
+	</script>
+</body>
+</html>

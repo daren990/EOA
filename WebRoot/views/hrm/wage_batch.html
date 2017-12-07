@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 批量修改工资</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit auto_height">
+			<div id="form" class="clearfix" style="width: 480px;">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="type" value="${type}">
+					<table class="table">
+						<tr>
+							<td class="pos">使用说明：</td>
+							<td class="pos required"></td>
+							<td colspan="4" style="background:#fff;padding:10px;border:1px solid #ccc;">
+								<strong>先选定公司(多选)才能选择用户(多选)</strong>,
+								<br />
+								如果不选定用户则表示修改该公司下所有用户的信息
+								<br /><br />
+								<strong>请在填写需要修改的工资(保留两位小数)</strong>,
+								<br />
+								如果不填写则表示不修改该处的工资
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">公司：</td>
+							<td class="pos required">*</td>
+							<td colspan="4">
+								<textarea class="xl" id="orgNames" rows="4" readonly="readonly">${oList}</textarea>
+								<input type="hidden" name="modelOrgs" value="">
+							</td>
+						</tr>
+						
+						<tr>
+							<td class="pos">用户：</td>
+							<td class="pos required"></td>
+							<td colspan="4">
+								<textarea class="xl" id="trueNames" rows="4" readonly="readonly">${uList}</textarea>
+								<input type="hidden" name="modelUsers" value="">
+							</td>
+						</tr>
+						<tr>
+							<td>基本工资（<span class="required">元</span>）：</td>
+							<td class="required"></td>
+							<td><input type="text" class="input xl" name="standardSalary" value=""></td>
+						</tr>
+						<tr>
+							<td>岗位工资（<span class="required">元</span>）：</td>
+							<td class="required"></td>
+							<td><input type="text" class="input xl" name="postSalary" value=""></td>
+						</tr>
+						<tr>
+							<td>绩效工资（<span class="required">元</span>）：</td>
+							<td class="required"></td>
+							<td><input type="text" class="input xl" name="performSalary" value=""></td>
+						</tr>
+						<tr>
+							<td>奖励工资（<span class="required">元</span>）：</td>
+							<td class="required"></td>
+							<td><input type="text" class="input xl" name="rewardSalary" value=""></td>
+						</tr>
+						<tr>
+							<td>工龄奖（<span class="required">元</span>）：</td>
+							<td class="required"></td>
+							<td><input type="text" class="input xl" name="serviceAward" value=""></td>
+						</tr>
+						<tr>
+							<td>通信补贴（<span class="required">元</span>）：</td>
+							<td class="required"></td>
+							<td><input type="text" class="input xl" name="communicationAllowance" value=""></td>
+						</tr>
+						<tr>
+							<td>油费补贴（<span class="required">元</span>）：</td>
+							<td class="required"></td>
+							<td><input type="text" class="input xl" name="oilAllowance" value=""></td>
+						</tr>
+						<tr>
+							<td>高温津贴（<span class="required">元</span>）：</td>
+							<td class="required"></td>
+							<td><input type="text" class="input xl" name="heatingAllowance" value=""></td>
+						</tr>
+						<tr>
+							<td>伙食津贴（<span class="required">元</span>）：</td>
+							<td class="required"></td>
+							<td><input type="text" class="input xl" name="mealAllowance" value=""></td>
+						</tr>
+						<tr>
+							<td>加班补贴（<span class="required">元&nbsp;/&nbsp;小时</span>）：</td>
+							<td class="required"></td>
+							<td><input type="text" class="input xl" name="overtimeAllowance" value=""></td>
+						</tr>
+						<tr>
+							<td>生育险（<span class="required">元</span>）：</td>
+							<td class="required"></td>
+							<td><input type="text" class="input xl" name="maternityInsurance" value=""></td>
+						</tr>
+						<tr>
+							<td>住房补贴（<span class="required">元</span>）：</td>
+							<td class="required"></td>
+							<td><input type="text" class="input xl" name="housingSubsidies" value=""></td>
+						</tr>
+						<tr>
+							<td>个人所得税（<span class="required">元</span>）：</td>
+							<td class="required"></td>
+							<td><input type="text" class="input xl" name="tax" value=""></td>
+						</tr>
+						<tr>
+							<td>社保补贴（<span class="required">元</span>）：</td>
+							<td class="required"></td>
+							<td><input type="text" class="input xl" name="socialSecurity" value=""></td>
+						</tr>
+						<tr>
+							<td>社保扣除（<span class="required">元</span>）：</td>
+							<td class="required"></td>
+							<td><input type="text" class="input xl" name="socialSecurityDeduction" value=""></td>
+						</tr>						
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div id="user_pop" class="pop bind" style="display: none; width: 318px;">
+		<div class="pop_content" style="padding: 0;">
+			<div class="auto_height sm">
+		   		<ul class="checked">
+					<#list users as u>
+						<li><input type="checkbox" name="checkedIds" value="${u.userId}" title="${u.trueName}" ><span>${u.trueName}</span></li>
+					</#list>
+		   		</ul>
+			</div>
+		</div>
+		<div class="pop_btn">
+			<input type="checkbox" id="checkedIds">
+		</div>
+	</div>
+
+	<div id="org_pop" class="pop bind" style="display: none; width: 318px;">
+		<div class="pop_content" style="padding: 0;">
+			<div class="auto_height sm">
+		   		<ul class="checked">
+		   		<#list orgs as o>
+					<li><input type="checkbox" name="orgIds" value="${o.orgId}" title="${o.orgName}" ><span>${o.orgName}</span></li>
+				</#list>
+				
+		   		</ul>
+			</div>
+		</div>
+		<div class="pop_btn">
+			<input type="checkbox" id="orgIds">
+		</div>
+	</div>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#trueNames").click(function() {
+ 				open_pop(null,"#trueNames","#user_pop",false);
+ 				return false;
+ 			});
+			$("#checkedIds").click(function() { checkedIds(); });
+			/* $("input[name=checkedIds]").click(function() {
+				checkedIds();
+			}); */
+			$("input[name=checkedIds]").live("click",function(){
+				checkedIds();
+			});
+			$("#orgNames").click(function() {
+ 				open_pop(null,"#orgNames","#org_pop",false);
+ 				return false;
+ 			});
+			$("#orgIds").click(function() { 
+				if (this.checked) {
+					$("input[name='orgIds']").each(function() {
+						this.checked = true;
+					});
+					} else {
+					$("input[name='orgIds']").each(function() {
+						this.checked = false;
+					});
+				}
+				orgIds(); 
+				changeuser();
+			});
+			$("input[name=orgIds]").click(function() {
+				orgIds();
+				changeuser();
+			});
+			$("form").ajaxForm({
+				url: "batch",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+		function orgIds() {
+			var ids = "";
+			var names = "";
+			$("input[name='orgIds']").each(function() {
+				if ($(this).prop("checked") == true) {
+					ids += $(this).val() + ",";
+					names += $(this).attr("title") + ",";
+				}
+			});
+			$("input[name=modelOrgs]").val(ids);
+			$("#orgNames").val(names);
+		}
+		function checkedIds() {
+			var ids = "";
+			var names = "";
+			$("input[name='checkedIds']").each(function() {
+				if ($(this).prop("checked") == true) {
+					ids += $(this).val() + ",";
+					names += $(this).attr("title") + ",";
+				}
+			});
+			$("input[name=modelUsers]").val(ids);
+			$("#trueNames").val(names);
+		}
+		function changeuser(){
+				var org = $("input[name='modelOrgs']").val();				
+				$.ajax({
+					url: "change?modelOrgs="+org,
+					type: "post",
+					resetForm: false,
+					dataType: "json",
+					beforeSubmit: function(formData, jqForm, options) {
+						
+					}, success: function(data) {
+						$("#trueNames").val("");
+	 					$("input[name='modelUsers']").val("");
+						if (data.code == 1) { 						
+	 						var user = "";
+							for(var i=0;i<data.users.length;i++){
+	 							user += "<li><input type=\"checkbox\" name=\"checkedIds\" value=\""+data.users[i].userId+"\" title=\""+data.users[i].trueName+"\"><span>"+data.users[i].trueName+"</span></li>";
+	 						}
+	 						$("#user_pop ul").html(user);
+	 						$("#user_pop ul").addClass("checked");
+	 						/* $("#user_pop").addClass("pop");
+	 						$("#user_pop").addClass("bind"); */
+						} else {
+							$("#user_pop ul").html("");
+							danger_callback(data);
+						}
+					}
+				});
+		}
+	</script>
+</body>
+</html>

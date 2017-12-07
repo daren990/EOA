@@ -1,0 +1,114 @@
+<div class="pop_close">X</div>
+<div class="pop_limit">
+	<div class="pop_title">考勤核对</div>
+	<div class="pop_tips">
+		<div class="error">
+			<span class="icons icon_danger hide"></span>
+			<label></label>
+		</div>
+	</div>
+	<form action="add" method="post">
+		<input type="hidden" name="token" value="${token}">
+		<input type="hidden" name="userId" value="${attendance.userId}">
+		<input type="hidden" name="workDate" value="${attendance.workDate?date}">
+		<div class="pop_content blank auto_height sm">
+			<table class="form">
+				<tr>
+					<td>姓名：</td>
+					<td class="required"></td>
+					<td><input type="text" class="input" value="${attendance.trueName}" readonly="readonly"></td>
+				</tr>
+				<tr>
+					<td>考勤日期：</td>
+					<td class="required"></td>
+					<td><input type="text" class="input" value="${attendance.workDate?date}" readonly="readonly"></td>
+				</tr>
+				<tr>
+					<td>上午：</td>
+					<td class="required">*</td>
+					<td>
+						<input type="text" class="input xs" value="${attendance.remarkIn}" readonly="readonly">
+						<input type="hidden" name="remarkedIn" value="" />
+						<div id="remarkedIn" class="select sm">
+							<span class="option text">请选择</span><span class="icon"></span>
+							<ul>
+								<li item="">请选择</li>
+								<li item="已补录">补录</li>
+								<li item="旷工">旷工</li>
+								<!-- <li item="未打卡">未打卡</li> -->
+							</ul>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td>下午：</td>
+					<td class="required">*</td>
+					<td>
+						<input type="text" class="input xs" value="${attendance.remarkOut}" readonly="readonly">
+						<input type="hidden" name="remarkedOut" value="" />
+						<div id="remarkedOut" class="select sm">
+							<span class="option text">请选择</span><span class="icon"></span>
+							<ul>
+								<li item="">请选择</li>
+								<li item="已补录">补录</li>
+								<li item="旷工">旷工</li>
+								<!-- <li item="未打卡">未打卡</li> -->
+							</ul>
+						</div>
+					</td>
+				</tr>
+				
+			</table>
+			
+		</div>
+		<div class="pop_btn">
+			<button type="submit" class="btn primary xs">确定</button>
+			<button type="button" class="btn default xs" onclick="close_pop()">取消</button>
+		</div>
+	</form>
+</div>
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		$("#remarkedIn").select({ "name": "remarkedIn" });
+		$("#remarkedOut").select({ "name": "remarkedOut" });
+		$("#remarkedOut").children("ul").css({
+			"border-top": "1px solid #c5cfd7", "top": "-49px", "bottom": "24px"
+		});
+		
+		$("form").ajaxForm({
+			url: "add",
+			type: "post",
+			resetForm: false,
+			dataType: "json",
+			beforeSubmit: function(formData, jqForm, options) {
+				error(0);
+				disabled_on();
+				var form = jqForm[0];
+				try {
+					validate(form.remarkedIn, [RANGE, "{1,20}"], "上午状态");
+					validate(form.remarkedOut, [RANGE, "{1,20}"], "下午状态");
+				} catch(err) {
+					error(1, err);
+					disabled_off();
+					return false;
+				}
+			},
+			success: function(data) {
+				if (data.code == 1) {
+					var href = "page2";
+					href += "?startTime=" + $("input[name=startTime]").val();
+					href += "&endTime=" + $("input[name=endTime]").val();
+					href += "&corpId=" + $("input[name=corpId]").val();
+					href += "&userId=${attendance.userId}";
+					href += "&remarkIn=" + $("input[name=remarkIn]").val();
+					href += "&remarkOut=" + $("input[name=remarkOut]").val();
+					close_pop();
+					success_callback(data, href);
+				} else {
+					error_callback(data);
+				}
+			}
+		});
+	});
+</script>

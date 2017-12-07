@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>我的分享</title>
+	<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;" name="viewport" />
+	<link rel="stylesheet" type="text/css" href="/jw_js_css_img/swipebox/src/css/swipebox.min.css" />
+	<link rel="stylesheet" type="text/css" href="/jw_js_css_img/css/album_share.css" />
+	<script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
+	<script type="text/javascript" src="/jw_js_css_img/swipebox/src/js/jquery.swipebox.js"></script>
+	<script type="text/javascript" src="/jw_js_css_img/js/jqthumb.min.js"></script>
+	<script type="text/javascript" src="/jw_js_css_img/layer.m/layer.m.js"></script>
+	<script type="text/javascript" src="/jw_js_css_img/js/album_share.js"></script>
+</head>
+<body>
+	<div class="touxiangDiv">
+		<div class="txDiv" style="background: url(${imgUrl});background-size:cover">
+			<!-- <img src="${imgUrl}" width="100%" class="headImg" /> -->
+		</div>
+	</div>
+	<div class="titleDiv">
+		<span class="titleSpan">分享空间</span>
+		<div style="float: left;" class="return">返回</div>
+		<div class="cancenShare"></div>
+	</div>
+	<#if albList?size gt 0>
+		<#list albList as a>
+			<div class="imgDiv ${a.userId}">
+				<div class="titleP" style="background: url(${a.headImg});background-size:cover"></div>
+				<div class="nameAndTime">
+					<div class="nameDiv">${a.username} 《${a.albumTitle}》</div>
+					<div class="time">${a.createTime?date}</div>
+				</div>
+				<div class="clear"></div>
+				<div class="descriptionDiv">
+					${a.description}
+				</div>
+				<ul>
+					<#list a.imgList as img>
+						<li>
+							<a href="${img.imgUrl}" class="swipebox" title="${img.imgName}">
+								<img src="${img.imgUrl}" width="300" height="300" id="${img.id}" />
+							</a>
+						</li>
+					</#list>
+				</ul>
+				<div class="clear"></div>
+				<div class="commomDiv">
+					<#list a.commomList as commom>
+						<#if commom.toUserId=="">
+							<div><img src="${commom.imgUrl}" /><span class="nameSpan">${commom.username}</span><input type="hidden" value="${commom.userId}" /> ${commom.content}</div>
+						<#else>
+							<div><img src="${commom.imgUrl}" /><span class="nameSpan">${commom.username}</span><input type="hidden" value="${commom.userId}" /> 回复 <span class="nameSpan">${commom.toUserName}</span><input type="hidden" value="${commom.toUserId}" /> ${commom.content}</div>
+						</#if>
+					</#list>
+				</div>
+				<input type="text" placeholder="我也说一句...." class="commomText" /><input type="hidden" class="toUserId" /><input type="button" value="评论" class="commomBtn" />
+				<input type="hidden" value="${a.id}" />
+				<input type="hidden" class="username" value="${trueName}"  />
+				<input type="hidden" class="toUserName" />
+				<input type="hidden" class="userId" value="${trueId}" />
+				<input type="hidden" class="imgUrl" />
+			</div>
+		</#list>
+		<#else>
+			<div class="nonePeopleDiv">暂时还没有共享照片哦！</div>
+	</#if>
+	
+</body>
+</html>

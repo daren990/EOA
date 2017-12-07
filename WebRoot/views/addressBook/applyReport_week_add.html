@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if report.reportId??>编辑<#else>新建</#if>周报</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/css/applyReport_day_add.css" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/select2/select2.css" />
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/ueditor1_4_3/ueditor.config.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/ueditor1_4_3/ueditor.all.min.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/js/applyReport_week_add.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/select2/select2.min.js"></script>
+</head>
+  
+  <body>
+  	<div id="path"></div>
+	<div id="header" class="blank">
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit auto_height">
+		
+		<#if page.result?size gt 0>
+			<!-- 时间轴 -->
+	  	<div class="timeline" style="left: 50px;">
+		  	<input type="text" value="${startStr}" class="input xl Wdate" onclick="WdatePicker({dateFmt:'yyyy-MM',onpicking:function(dp){var startDate = dp.cal.getNewDateStr();changeDate(startDate);}})" style="width: 95px;" placeholder="选择时间" id="changeDate">
+			<div class="timeline-date" style="top: 10px;">
+				<#list yearMonthList as yearMonth>
+					<ul>
+						<h2 class="second" style="position: relative;">
+							<span>${yearMonth}</span>
+						</h2>
+						<#if page.result?size gt 0>
+							<#list page.result as e>
+								<#if yearMonth == e.yearMonth>
+									<li>
+										<h3 style="position:relative;">
+											<#if e.approve == 1>已阅<#else>
+												<#if e.approve == 0>
+													<p style="color: #4e96d0">未阅</p>
+												<#else>
+													退回
+												</#if>
+											</#if>
+											<div style="position:absolute;left:-10px;width:60px;margin-top: 5px;">
+												<#if e.shareNumber != "">
+													分享${e.shareNumber}人
+												<#else>
+													分享0人
+												</#if>
+												<br/>
+											</div>
+										</h3>
+
+										<dl class="right">
+											<span class="detailReport" id="${e.reportId}">${e.startDate}至${e.endDate}${e.title} (${e.count}评)</span>
+											<input type="hidden" value="${e.reportId}" />
+										</dl>
+									</li>
+								</#if>
+							</#list>
+						</#if>
+					</ul>
+				</#list>
+			</div>
+		</div>
+		<!-- 时间轴结束 -->
+		<#else>
+			<div class="noneInfoDiv">暂无记录</div>
+		</#if>
+	
+		<div class="editor" id="editor" style="left: 320px;position: relative;width: 50px">
+			<div id="form" class="clearfix"  >
+			<form action="add" method="post" id="addPost" >
+		  	<input type="hidden" name="reportId" value="${report.reportId}" id="replayId">
+		  	<input type="hidden" name="token" value="${token}">
+		  	<input type="hidden" name="type" value=${type}>
+		  	<div class="title">
+	  		<div class="supcontain"> 
+	  			<div class="check">
+		  			<input name="approveActor" type="hidden" type="text" class="input xl" value="${managerId}" readonly="readonly">	  				
+		  		</div>
+		  		<div class="date" style="position: absolute;">
+		  			<span class="required">* </span>开始日期: <input type="text" class="input xl Wdate" id="start_yyyyMMdd" name="start_yyyyMMdd" value="${report.startDate}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})" style="width: 95px">
+		  		</div>
+		  		<div class="date" style="position: absolute;left: 320px;">
+		  			<span class="required">* </span>结束日期: <input type="text" class="input xl Wdate" id="end_yyyyMMdd" name="end_yyyyMMdd" value="${report.endDate}	" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})" style="width: 95px">
+		  		</div>
+	  		</div>
+	  		
+	  		<div class="schedule">
+	  			<span class="prompt"><img src="${ctx}/jw_js_css_img/img/today.png" class="editorImg" />请在下面输入本周进度......<span class="required">(必填)</span></span>
+	  			<div><script type="text/plain" id="today" name="content1">${report.content1}</script></div>
+	  		</div>
+	  		
+	  		<div class="schedule">
+	  			<span class="prompt"><img src="${ctx}/jw_js_css_img/img/tomorrow.png" class="editorImg" />请在下面输入总结心得......</span>
+	  			<div><script type="text/plain" id="summary" name="summary">${report.summary}</script></div>
+	  		</div>
+	  		
+	  		<div class="schedule">
+	  			<span class="prompt"><img src="${ctx}/jw_js_css_img/img/summary.png" class="editorImg" />请在下面输入下周计划......</span>
+	  			<div><script type="text/plain" id="tomorrow" name="content2">${report.content2}</script></div>
+	  		</div>
+	  		<div class="share">
+	  		<div class="shreDiv">共 享:</div>
+	  		<div class="addPeoDiv">
+	  			<ul>
+	  			<#list sharePage as a>
+	  			<li class='addLi'><input type='checkbox' checked='checked' name='shareto' style="display:none;" value='${a.touserId}' />${a.trueName}<img src='${ctx}/jw_js_css_img/img/fork.png' class='fork' /></li>
+	  			</#list>
+	  			</ul>
+	  		</div> 	  		
+	  		<select class="peopleSel">
+	  			<option selected="selected">--请选择--</option>
+	  			<!-- <option value="all">全体员工</option> -->
+	  		<#list sharePeople as o>
+	  			<option value="${o.userId}" id="${o.userId}">${o.trueName}</option>
+	  		</#list>
+	  		</select>
+	  	</div>
+	  	</div>
+	  		<div class="sub"><button type="submit" class="btn primary xs">提交</button></div>
+	  	  	</form>
+			<div class="replayCommom" style="position: relative;width: 400px;font-size:20px;">
+		  		<#list jobReply as j>
+		  			<p class="pName">${j.trueName}</p>
+					<p class="pContent">${j.replyContent}</p>
+					<p class="pTime">${j.reportTime}</p>
+					<span class="replaySpan">
+						<#if j.replyTooUser??>
+						来自@ ${j.replyTooUser}&nbsp的回复:&nbsp ${j.replyToo}
+						</#if>
+					</span>
+					<div class="areply">
+						<span class="${j.replyId}"></span>回复(${j.replyCount})
+						<div class="rel" style="display:none;">
+							<form action="add" method="post"  id="sharePost${j.replyId}">
+							<input type="hidden" id="replyId" name="replyId" value="${j.replyId}" />
+								<textarea rows="5" cols="70%" name = "contenttoo" id="contenttoo"></textarea>
+								<br/>
+								<button type="submit" class="btn primary xs" style="float: none;">回复</button>
+							</form>
+						</div>
+					</div>
+					<br />
+				</#list>
+			</div>
+	  	<div class="plugin_container"></div>
+	  	</div>
+	 	</div>
+	 		<div class="see" style="display: none">
+	 			<div class="see_title">
+		 			开始日期: <input type="text" class="input xl Wdate" id="see_start_yyyyMMdd" name="see_start_yyyyMMdd" style="width: 95px">
+		 			&nbsp;&nbsp;
+		 			结束日期: <input type="text" class="input xl Wdate" id="see_end_yyyyMMdd" name="see_end_yyyyMMdd" style="width: 95px">
+		 			
+		 			<div class="applyDate">
+		 				<ul>
+		 					<li>
+		 						<a href="add" class="applyEdit">
+									<span class="icons icon_add"></span>
+									<span class="icons_text">申请</span>
+								</a>
+		 					</li>
+		 					<li>
+		 						<a href="javascript:;" class="applyEdit" id="applyEdit">
+									<span class="icons icon_edit"></span>
+									<span class="icons_text">编辑</span>
+								</a>
+		 					</li>
+		 				</ul>
+					</div>
+					
+					<div class="see_speed">
+						<p class="see_titleP"><img src="/jw_js_css_img/img/today.png"><span class="see_speed_startTime">2014-02-02 </span>至 <span class="see_speed_endTime">2014-03-03</span>周报</p>
+						<p class="see_content_speed"></p>
+					</div>
+					
+					<div class="see_speed">
+						<p class="see_titleP"><img src="/jw_js_css_img/img/tomorrow.png"><span class="see_speed_startTime">2014-02-02 </span>至 <span class="see_speed_endTime">2014-03-03</span>计划</p>
+						<p class="see_content_plan"></p>
+					</div>
+					
+					<div class="see_speed">
+						<p class="see_titleP"><img src="/jw_js_css_img/img/summary.png"><span class="see_speed_startTime">2014-02-02 </span>至 <span class="see_speed_endTime">2014-03-03</span>心得</p>
+						<p class="see_content_summary"></p>
+					</div>
+					
+					分享：<span class="see_share_people"></span>
+					
+				</div>
+	 		</div>
+	 	</div>
+	 	</div>
+  	
+  	<div id="submitDiv" class="pop" style="display: none; width: 280px;z-index: 999">
+		<div class="pop_close"></div>
+		<div class="pop_limit">
+			<div class="pop_title">正在提交</div>
+			<div class="pop_content blank"><img src="/jw_js_css_img/img/submitImg.jpg" width="22px" height="22px;" class="submitImg" />正在提交，请稍后....</div>
+		</div>				
+	</div>
+  	
+  	<div id="successDiv" class="pop" style="display: none; width: 280px;z-index: 999;">
+		<div class="pop_close"></div>
+		<div class="pop_limit">
+			<div class="pop_title">提示信息</div>
+			<div class="pop_content blank" id="submitInfo"></div>
+			<button type="button" class="btn default xs" onclick="close_pop()" style="margin: 0">确定</button>
+		</div>				
+	</div>
+	
+  	<input type="hidden" id="markIds"/>
+  </body>
+  <script type="text/javascript">
+  $(document).ready(function(){
+  
+  	var markId = "${markId}";
+  	$("#"+markId+"").addClass("spanBgColor");
+  	
+  	$("#addPost").ajaxForm({
+		url: "add",
+		type: "post",
+		resetForm: false,
+		dataType: "json",
+		beforeSubmit: function(formData, jqForm, options) {
+			open_pop(null,null,"#submitDiv",true);
+		},				
+		success: function(data) {
+			if (data.code == 1) {
+				$("#submitInfo").html(data.message);
+					open_pop(null,null,"#successDiv",true);
+					success_callback(data, "add?reportId="+data.reportId);
+			} else {
+				$("#submitInfo").html(data.message);
+					open_pop(null,null,"#successDiv",true);
+					danger_callback(data);
+			}
+		}
+	});
+	<#list jobReply as j>
+	$("#sharePost${j.replyId}").ajaxForm({
+		url: "share",
+		type: "post",
+		resetForm: false,
+		dataType: "json",				
+		success: function(data) {
+				if (data.code == 1) {
+ 						success_callback(data, "add?reportId=${report.reportId}");
+					} else {
+						danger_callback(data);
+					}
+		}
+	});	
+  	</#list>
+  		$(".areply").live("click",function(){
+  			$(this).children(".rel").css("display","block");
+ 		 	$(this).siblings().children(".rel").css("display","none");
+			var id = $(this).children("span").attr("class");
+			$("#replyId").val(id);
+  		});
+  		
+  	var ary = new Array();
+  	$(".peopleSel").change(function(){
+  	
+  		var addLi = $(".peopleSel option:selected").text();
+  		
+  		var id = $(".peopleSel option:selected").attr("id");
+  		
+  		if(addLi == "--请选择--"){
+  			return;
+  		}
+  		
+  		for(var i=0;i<ary.length;i++){
+  			if(addLi == ary[i]){
+  				return;
+  			}
+  		}
+  		
+  		if(addLi != "全体员工"){
+  			for(var i=0;i<ary.length;i++){
+  				if(ary[i] == "全体员工"){
+  					$(".addLi").remove();
+  					ary.splice($.inArray(ary[i],ary),1);
+  				}
+  			}
+  			$(".addPeoDiv ul").append("<li class='addLi'><input type='checkbox' checked='checked' name='shareto' style='display:none;' value='"+id+"' />"+addLi+"<img src='${ctx}/jw_js_css_img/img/fork.png' class='fork' alt='"+addLi+"' /></li>");
+  		}
+  		
+  		ary.push(addLi);
+  		
+  		for(var i=0;i<ary.length;i++){
+  			if(ary[i] == "全体员工"){
+  				$(".addLi").remove();
+  				$(".addPeoDiv ul").append("<li class='addLi'><input type='checkbox' checked='checked' name='shareto' style='display:none;' value='"+id+"' />"+ary[i]+"<img src='${ctx}/jw_js_css_img/img/fork.png' class='fork' alt='"+ary[i]+"' /></li>");
+  				for(var j=0;j<ary.length;j++){
+  					if(ary[j] != "全体员工"){
+  						ary.splice($.inArray(ary[j],ary));
+  					}
+  				}
+  			}
+  		}
+  		
+  		
+  	});
+  	
+  	$(".fork").live("click",function(){
+  		var value = $(this).attr("alt");
+  		for(var i=0;i<ary.length;i++){
+  			if(ary[i] == value){
+  				ary.splice($.inArray(value,ary),1);
+  			}
+  		}
+  		$(this).parent().remove();
+  	});
+  });
+  </script>
+</html>

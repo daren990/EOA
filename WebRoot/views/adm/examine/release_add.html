@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if release.releaseId??>编辑<#else>新建</#if>绩效发布</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit">
+			<div id="form" class="clearfix" style="width: 400px;">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="releaseId" value="${release.releaseId}">
+					<table class="table">
+						<tr>
+							<td>所属公司：</td>
+							<td class="required">*</td>
+							<td colspan="4">
+								<input type="text" class="input xl" name="corpName" value="${release.corpName}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>发布人：</td>
+							<td class="required">*</td>
+							<td colspan="4">
+								<input type="text" class="input xl" value="${release.trueName?default(currentUser.trueName)}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>发布名称：</td>
+							<td class="required">*</td>
+							<td colspan="4">
+								<input type="text" class="input xl" name="releaseName" maxlength="20" value="${release.releaseName}">
+							</td>
+						</tr>
+						<tr>
+							<td>开始日期：</td>
+							<td class="required">*</td>
+							<td>
+								<#if release.startDate??><#assign start_yyyyMMdd = release.startDate?date /></#if>
+								<input type="text" class="input sm Wdate" name="start_yyyyMMdd" value="${start_yyyyMMdd?default('')}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							</td>
+							<td>结束日期：</td>
+							<td class="required">*</td>
+							<td>
+								<#if release.endDate??><#assign end_yyyyMMdd = release.endDate?date /></#if>
+								<input type="text" class="input sm Wdate" name="end_yyyyMMdd" value="${end_yyyyMMdd?default('')}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							</td>
+						</tr>
+						<tr>
+							<td>考核范围：</td>
+							<td class="required">*</td>
+							<td>
+								<#if release.releaseStartDate??><#assign releaseStart_yyyyMMdd = release.releaseStartDate?date /></#if>
+								<input type="text" class="input sm Wdate" name="releaseStart_yyyyMMdd" value="${releaseStart_yyyyMMdd?default('')}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							</td>
+							<td>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp到</td>
+							<td class="required"></td>
+							<td>
+								<#if release.releaseEndDate??><#assign releaseEnd_yyyyMMdd = release.releaseEndDate?date /></#if>
+								<input type="text" class="input sm Wdate" name="releaseEnd_yyyyMMdd" value="${releaseEnd_yyyyMMdd?default('')}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							</td>
+						</tr>
+						
+						<tr>
+							<td>步骤：</td>
+							<td class="required">*</td>
+							<td colspan="4">
+								<input type="hidden" name="version" value="${release.version?default(0)}" />
+								<div id="version" class="select xl">
+									<span class="option text">填写绩效目标</span><span class="icon"></span>
+									<ul>
+										<li item="0">填写绩效目标</li>
+										<li item="1">考核评分</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>状态：</td>
+							<td class="required">*</td>
+							<td colspan="4">
+								<input type="hidden" name="status" value="${release.status?default(1)}" />
+								<div id="status" class="select xl">
+									<span class="option text">启用</span><span class="icon"></span>
+									<ul>
+										<li item="0">禁用</li>
+										<li item="1">启用</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div id="coll_pop" class="pop" style="display: none; width: 318px;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<div class="pop_title">正在提交</div>
+			<div class="pop_content blank"></div>
+			<div class="pop_btn">
+				<span class="loading hide"><img src="/img/loading.gif" /></span>
+				<span>正在发送邮件...</span>
+			</div>
+		</div>				
+	</div>
+	<script type="text/javascript">
+		$(document).ready(function() {
+  			$("#version").select({ "name": "version" });
+  			$("#status").select({ "name": "status" });
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.releaseName, [RQ], "发布名称");
+						validate(form.start_yyyyMMdd, [RQ], "开始日期");
+						validate(form.end_yyyyMMdd, [RQ], "结束日期");
+						validate(form.releaseStart_yyyyMMdd, [RQ], "考核范围");
+						validate(form.releaseEnd_yyyyMMdd, [RQ], "考核范围");
+						validate(form.version, [RQ], "版本");
+						validate(form.status, [RQ], "状态");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+
+					var status = form.status.value;
+					if(status == 1){
+					var text = "信息正在处理中,请稍候";
+					$("#coll_pop .pop_content").empty();
+					$("#coll_pop .pop_content").prepend(text);
+					$(".loading").show();
+					open_pop(null,null,"#coll_pop",true);
+					}
+				},
+				success: function(data) {
+					close_pop();
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+	</script>
+</body>
+</html>

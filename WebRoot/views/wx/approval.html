@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+<#include "/views/meta.html" />
+	<title>${pageTitle} :: 待办事项</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<#assign isPerform = "false" />
+<#if views.hasAnyRole("perform.manager", roleNames)><#assign isPerform = "true" /></#if>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script type="text/javascript" src="${ctx}/jw_js_css_img/js/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="${ctx}/jw_js_css_img/js/jquery.mobile-1.4.3.min.js"></script>
+<link type="text/css" rel="stylesheet" href="${ctx}/jw_js_css_img/css/jquery.mobile-1.4.3.min.css" />
+<style type="text/css">
+body{
+ margin:0px;
+ padding:0px;
+}
+#head{
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 40px;
+	background-image:url("${ctx}/jw_js_css_img/img/header_bg.png")
+}
+#head h1{
+	font-size:20px;
+	margin:0;
+	padding:0;
+	color:#666;
+	height:40px;
+	line-height:40px;
+	float:left;
+	padding:0 25%
+}
+#menu #menu_right a {
+	color: #F00;
+	text-decoration: none;
+}
+#menu_left {
+	float: left;
+}
+#menu {
+    position:fixed;
+	height: 25px;
+	width: 100%;
+	margin-right: auto;
+	margin-left: auto;
+	margin-top: 40px;
+	padding-top: 5px;
+	background-color: #CCC;
+}
+#menu #menu_left a {
+	color: #F00;
+	text-decoration: none;
+}
+#menu_right {
+	float: right;
+}
+#content {
+	width: 100%;
+	height: auto;
+}
+.content_head {
+	height: 20px;
+	width: 100%;
+}
+.name_time {
+	margin-left: 25px;
+}
+.content_content {
+	margin-top: 20px;
+	margin-left: 25px;
+	margin-right: 45px;
+	margin-bottom: 20px;
+	border-bottom: 1px #CCC solid;
+}
+</style>
+<script type="text/javascript">
+</script>
+</head>
+<body>
+<div data-role="page" id="pageone">
+<div data-role="header">
+   <h1>未审批</h1>
+</div><br/>
+<#if leaves?size gt 0>
+<#assign len = len + leaves?size />
+<#list leaves as e>
+<div onclick="window.location.href = '/adm/salary/leave/approve/leave?leaveId=${e.leaveId}'">
+  <div class="content_head">
+     <div class="name_time">申请人：${e.trueName}</div>
+     <div class="name_time">时间：<#if e.createTime??>${e.createTime?datetime}</#if></div>
+  </div>
+  <div class="content_content">内容：${e.subject}</div>
+</div>
+  <#assign i = i + 1 />
+	</#list>
+</#if>
+
+<#if errands?size gt 0>
+<#assign len = len + errands?size />
+<#list errands as e>
+  <div class="content_head" onclick="window.location.href = '/adm/salary/errand/approve/errand?errandId=${e.errandId}'">
+     <div class="name_time">申请人：${e.trueName}</div>
+     <div class="name_time">时间：<#if e.createTime??>${e.createTime?datetime}</#if></div>
+  </div>
+  <div class="content_content">内容：${e.subject}</div>
+  <#assign i = i + 1 />
+	</#list>
+</#if>
+
+<#if outworks?size gt 0>
+<#assign len = len + outworks?size />
+<#list outworks as e>
+  <div class="content_head" onclick="window.location.href = '/adm/salary/outwork/approve/outwork?outworkId=${e.outworkId}'">
+     <div class="name_time">申请人：${e.trueName}</div>
+     <div class="name_time">时间：<#if e.createTime??>${e.createTime?datetime}</#if></div>
+  </div>
+  <div class="content_content">内容：${e.subject}</div>
+  <#assign i = i + 1 />
+	</#list>
+</#if>
+
+<#if overtimes?size gt 0>
+<#assign len = len + overtimes?size />
+<#list overtimes as e>
+  <div class="content_head" onclick="window.location.href = '/adm/salary/overtime/approve/overtime?overtimeId=${e.overtimeId}'">
+     <div class="name_time">申请人：${e.trueName}</div>
+     <div class="name_time">时间：<#if e.createTime??>${e.createTime?datetime}</#if></div>
+  </div>
+  <div class="content_content">内容：${e.subject}</div>
+  <#assign i = i + 1 />
+	</#list>
+</#if>
+
+<#if performs?size gt 0>
+<#assign len = len + performs?size />
+<#list performs as e>
+  <div class="content_head">
+     <div class="name_time">申请人：${e.trueName}</div>
+     <div class="name_time">时间：<#if e.createTime??>${e.createTime?datetime}</#if></div>
+  </div>
+  <div class="content_content">内容：${e.subject}</div>
+  <#assign i = i + 1 />
+	</#list>
+</#if>
+
+<#if reimburses?size gt 0>
+<#assign len = len + reimburses?size />
+<#list reimburses as e>
+  <div class="content_head">
+     <div class="name_time">申请人：${e.trueName}</div>
+     <div class="name_time">时间：<#if e.createTime??>${e.createTime?datetime}</#if></div>
+  </div>
+  <div class="content_content">内容：${e.subject}</div>
+ <#assign i = i + 1 />
+	</#list>
+</#if>
+
+<#if borrows?size gt 0>
+<#assign len = len + borrows?size />
+<#list borrows as e>
+  <div class="content_head">
+     <div class="name_time">申请人：${e.trueName}</div>
+     <div class="name_time">时间：<#if e.createTime??>${e.createTime?datetime}</#if></div>
+  </div>
+  <div class="content_content">内容：${e.subject}</div>
+ <#assign i = i + 1 />
+	</#list>
+</#if>
+
+<#if tickets?size gt 0>
+<#assign len = len + tickets?size />
+<#list tickets as e>
+  <div class="content_head">
+     <div class="name_time">申请人：${e.trueName}</div>
+     <div class="name_time">时间：<#if e.createTime??>${e.createTime?datetime}</#if></div>
+  </div>
+  <div class="content_content">内容：${e.subject}</div>
+ <#assign i = i + 1 />
+	</#list>
+</#if>
+
+<#if works?size gt 0>
+<#assign len = len + works?size />
+<#list works as e>
+  <div class="content_head">
+     <div class="name_time">申请人：${userMap[e.creator]}</div>
+     <div class="name_time">时间：${e.orderCreateTime?substring(0,16)}</div>
+  </div>
+  <div class="content_content">内容：${e.processName}_${e.orderNo}</div>
+ <#assign i = i + 1 />
+	</#list>
+</#if>
+</div>
+</body>
+</html>

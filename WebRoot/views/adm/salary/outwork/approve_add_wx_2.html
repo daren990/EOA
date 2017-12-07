@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<#include "${ctx}/views/meta.html" />
+	<title>${pageTitle} :: <#if outwork.outworkId??>编辑<#else>新建</#if>外勤审批</title>
+	<#include "${ctx}/views/js.html" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/bootstrap-3.3.4/css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/bootstrap-3.3.4/css/bootstrap-theme.min.css" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/bootstrap-3.3.4/css/bootstrap-datetimepicker.min.css" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/css/add_wx.css" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/select2/select2.css" />
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/bootstrap-3.3.4/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/bootstrap-3.3.4/js/bootstrap-datetimepicker.min.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/bootstrap-3.3.4/js/bootstrap-datetimepicker.fr.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/select2/select2.min.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/select2/select2_locale_zh-CN.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/layer.m/layer.m.js"></script>
+	<style type="text/css">
+	.table{width: 100%;}
+	</style>
+</head>
+<body>
+
+	<div class="headerDiv"><a href="wxpage" class="btn btn-default" id="return"><img src="${ctx}/jw_js_css_img/img/return.png" />返回</a><#if outwork.outworkId??>编辑<#else>新建</#if>外勤申请</div>
+	<div class="contentDiv">
+		<form action="add" method="post" class="form-horizontal">
+			<input type="hidden" name="token" value="${token}">
+			<input type="hidden" name="outworkId" value="${outwork.outworkId}">
+			<div class="form-group">
+				<label class="col-xs-5 control-label">申请人</label>
+				<div class="col-xs-6">
+					${outwork.trueName}
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-5 control-label">申请时间：</label>
+				<div class="col-xs-6">
+					<#assign createTime = now?date /><#if outwork.createTime??><#assign createTime = outwork.createTime?date /></#if>${createTime}
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-5 control-label">外勤时间：</label>
+				<div class="col-xs-6">
+					<#if outwork.startTime??><#assign work_yyyyMMdd = outwork.startTime?date /></#if>
+					<#if outwork.type == "0"><#assign type = "上午" /></#if>
+					${work_yyyyMMdd?default('')}&nbsp;${type?default('下午')}
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-5 control-label">外勤原因：</label>
+				<div class="col-xs-6">
+					${outwork.reason}
+				</div>
+			</div>
+			
+	
+			<div class="form-group">
+				<label class="col-xs-5 control-label">${outwork.operator}</label>
+				<div class="col-xs-6">
+					
+		
+						<input type="hidden" name="approve" value="${outwork.approve}" />
+						<select class="selectOpetor" id="selectOpetor">
+							<option selected="selected" value="">请选择</option>
+							<option value="1" <#if outwork.approve == 1>selected="selected"</#if>>已批准</option>
+							<option value="-1" <#if outwork.approve == -1>selected="selected"</#if>>未批准</option>
+						</select>
+		
+				</div>
+			</div>
+	
+
+			<div class="form-group">
+				<label class="col-xs-5 control-label">审批意见</label>
+				<div class="col-xs-6">
+					<textarea  name="opinion" id="opinion" style="resize:none" class="form-control">${outwork.opinion}</textarea>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-5 control-label"></label>
+				<div class="col-xs-6">
+					<button class="btn btn-primary">提交</button>
+				</div>
+			</div>
+		</form>
+	</div>
+	<script type="text/javascript">
+		$("li").click(function(){
+			if($(this).attr("value") == 1){
+				if($(".addtr").length == 0){
+					$("#end").after("<tr class='addtr'><td>上级审批</td><td></td><td><input type='text' value='' class='input xl' readonly='readonly' /></td></tr>");
+				}
+			}
+			else{
+				$(".addtr").remove();
+			}
+		});
+			
+		$(document).ready(function() {
+		
+			$("#refererDiv").hide();
+			$("#selectOpetor").select2({
+				width:"130px",
+				minimumResultsForSearch:-1
+			});
+			$("#refererId").select2({
+				width:"130px",
+				minimumResultsForSearch:-1
+			});
+			$("#selectOpetor").change(function(){
+				var approveVal = $(this).val();
+				$("input[name='approve']").val(approveVal);
+				if(approveVal == 1){
+					$("#refererDiv").show();
+				}else{
+					$("#refererDiv").hide();
+				}
+			});
+			$("#refererId").change(function(){
+				var refererId = $(this).val();
+				$("input[name='refererId']").val(refererId);
+			});
+			
+			$("#approve").select({ "name": "approve" });
+			$("#refererId").select({ "name": "refererId" });
+			
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSend: function() {
+					layer.open({
+						content:"正在提交，请稍后...",
+						shadeClose:false
+					});
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						layer.open({
+ 							content:data.message,
+ 							time:3
+ 						});
+ 						setTimeout(function(){
+ 							window.location.href="wxpage";
+ 						},5);
+					} else {
+						layer.open({
+							content:data.message
+						});
+					}
+				}
+			});
+		});
+	</script>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 绩效考核查询</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+		<#if release?? && release.version == 0>
+			<div id="left" class="left">
+				<a href="add"><span class="icons icon_add"></span><span class="icons_text">新建</span></a>
+			</div>
+			</#if>
+	  			    
+			
+			
+			
+			
+			<div id="right" class="right">
+				<form id="search" action="page" method="get">
+					<input type="hidden" name="pageSize" value="${page.pageSize}">
+					<input type="hidden" name="pageNo" value="${page.pageNo}">
+					<ul>
+						<li class="text">创建时间</li>
+						<li>
+							<input type="text" class="input sm Wdate" name="startTime" value="${mb.startTime}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							<span>至</span>
+							<input type="text" class="input sm Wdate" name="endTime" value="${mb.endTime?default('')}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+						</li>
+						<li class="text">审批状态</li>
+						<li>
+							<input type="hidden" name="approve" value="${mb.approve}" />
+							<div id="approve" class="select sm">
+								<span class="option text">请选择</span><span class="icon"></span>
+								<ul>
+									<li item="">请选择</li>
+									<li item="0">待审批</li>
+									<li item="99">已批准</li>
+									<li item="-1">未批准</li>
+								</ul>
+							</div>
+						</li>
+						<li><button type="button" class="btn primary xxs" onclick="search()">搜索</button></li>
+					</ul>
+				</form>
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+			<div class="table_head">
+				<table class="table">
+					<thead>
+						<tr>
+							<th width="40"><input type="checkbox" id="checkedIds"></th>
+							<th width="">标题</th>
+							<th width="15%">创建时间</th>
+							<th width="10%">流程日志</th>
+							<th width="10%">绩效状态</th>
+							<th width="20%">操作</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+			<div class="table_body auto_height">
+				<table class="table">
+					<tbody>
+						<#if page.result?size gt 0>
+							<#assign i = 0 />
+							<#list page.result as e>
+						<tr>
+							<td width="26"><input type="checkbox" name="checkedIds" value="${e.performId}"></td>
+							<td width="">${e.subject}</td>
+							<td width="15%">${e.createTime?datetime}</td>
+							<td width="10%">
+								<a href="javascript: void(0)" id="${i}" class="actors" item="${e.performId}" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a>
+							</td>
+							<td width="10%">
+								<#if e.version == 1>考核评分<#else>绩效目标填写</#if>
+							</td>
+							<td width="20%">
+								<a href="javascript: void(0)" id="${i}" class="nodes" item="${e.performId}" title="考核目标"><span id="nodes_${i}" class="icons icon_many"></span></a>
+								<#if !["2"]?seq_contains(e.approved?string)>
+								<a href="add?performId=${e.performId}" title="编辑"><span class="icons icon_edit"></span></a>
+								</#if>
+								<a href="javascript:open_del('${e.performId}');" title="删除"><span class="icons icon_del"></span></a>
+								<#if (e.version == 0 && e.approved == 3) || ["2"]?seq_contains(e.approved?string)>
+								<a href="/adm/examine/perform/approve/add?performId=${e.performId}" title="核对"><span class="icons icon_approve"></span></a>
+								</#if>
+								<#if e.version == 1 && e.approved == 3>
+								<a href="/adm/examine/perform/apply/add?performId=${e.performId}" title="评分"><span class="icons icon_approve"></span></a>
+								</#if>
+							</td>
+						</tr>
+							<#assign i = i + 1 />
+							</#list>
+						</#if>
+					</tbody>
+				</table>
+			</div>
+			<#if page.result?size lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<@fm.page page=page />
+		</div>
+	</div>
+	
+	<div id="del_apply" class="pop" style="display: none; width: 280px;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<div class="pop_title">删除绩效考核</div>
+			<div class="pop_content blank">确定要删除所选绩效考核吗？</div>
+			<div class="pop_btn ">
+				<button type="button" class="btn primary xs" onclick="del()">确定</button>
+				<button type="button" class="btn default xs" onclick="close_pop()">取消</button>
+			</div>
+		</div>				
+	</div>
+	
+	<div id="nodes_pop" class="pop bind" style="display: none; width: 378px;">
+		<div class="pop_content" style="padding: 0;">
+			<div class="auto_height xl">
+		   		<table class="table">
+		   		</table>
+			</div>
+		</div>
+	</div>
+	
+	<div id="actors_pop" class="pop bind" style="display: none; width: 278px;">
+		<div class="pop_content" style="padding: 0;">
+			<div class="auto_height xl">
+		   		<table class="table">
+		   		</table>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#approve").select({ "name": "approve" });
+			$("a.nodes").click(function() {
+				close_pop();
+				var id = $(this).attr("item");
+				var _id = "#nodes_"+$(this).attr("id");
+				nodes(id);
+				open_pop(null,_id,"#nodes_pop",false);
+				return false;
+ 			});
+			$("a.actors").click(function() {
+				close_pop();
+				var id = $(this).attr("item");
+				var _id = "#actors_"+$(this).attr("id");
+				actors(id);
+				open_pop(null,_id,"#actors_pop",false);
+				return false;
+ 			});
+		});
+		
+		function open_del(id) {
+			if (id) {
+				get_checked(id);
+			}
+			open_pop(null,null,"#del_apply",true);
+		}
+		
+		function del() {
+			ajax_checked("请选择需要删除的绩效考核", "del?token=${token}");
+			close_pop();
+		}
+		
+		function nodes(id) {
+			$.ajax({
+				url: "/adm/examine/perform/apply/nodes?performId=" + id + "&token=${token}",
+				type: "post",
+				dataType: "json",
+				success: function(data) {
+					if (data.code == 1) {
+						$("#nodes_pop .table").empty();
+						var text = "";
+						text += "<tr>";
+						text += "<th width=\"20%\">本人评分</th><th width=\"20%\">本人评价</th><th width=\"20%\">第一审评人评分</th><th width=\"20%\">第一审评人评价</th><th width=\"20%\">第二审评人评分</th><th width=\"20%\">第二审评人评价</th>";
+						text += "</tr>";
+						$.each(data.nodes, function(idx, obj) {
+							var my_score = "-";
+							var my_score_grade = "-";
+							var score = "-";
+							var score_grade = "-";
+							var manscore = "-";
+							var manscore_grade = "-";
+							if (obj.version == "1") {
+								my_score = obj.my_score;
+								my_score_grade = obj.my_score_grade;
+							}
+							if (obj.version == "1" && obj.approved != 0) {
+								score = obj.score;
+								score_grade = obj.score_grade;
+							}
+							if (obj.version == "1" && obj.approved != 0) {
+								manscore = obj.manscore;
+								manscore_grade = obj.manscore_grade;
+							}
+							text += "<tr>";
+							text += "<td>" + my_score + "</td>";
+							text += "<td>" + my_score_grade + "</td>";
+							text += "<td>" + score + "</td>";
+							text += "<td>" + score_grade + "</td>";
+							text += "<td>" + manscore + "</td>";
+							text += "<td>" + manscore_grade + "</td>";
+							text += "</tr>";
+						});
+						$("#nodes_pop .table").append(text);
+					} else {
+						danger(1, data.message);
+					}
+				}
+			});
+		}
+		function actors(id) {
+			$.ajax({
+				url: "/adm/examine/perform/approve/actors?performId=" + id + "&token=${token}",
+				type: "post",
+				dataType: "json",
+				success: function(data) {
+					if (data.code == 1) {
+						$("#actors_pop .table").empty();
+						var text = "";
+						text += "<tr>";
+						text += "<th>操作人</th><th>操作内容</th><th>审批意见</th><th>操作时间</th>";
+						text += "</tr>";
+						if (data.actors.length == 0) {
+							text += "<tr>";
+							text += "<td colspan=\"3\">-</td>";
+							text += "</tr>";
+						} else {
+							$.each(data.actors, function(idx, obj) {
+								var approve = "";
+								var modifyTime = obj.modifyTime.substring(0, 16);
+								if (obj.approve == 1) {
+									if (obj.variable == "self") approve = "同意";
+									else approve = "已批准";
+								} else if (obj.approve == -1) {
+									if (obj.variable == "self") approve = "不同意";
+									else approve = "未批准";
+								} else {
+									if (obj.variable == "self") approve = "待处理";
+									else approve = "待审批";
+									modifyTime = "-";
+								}
+								
+								text += "<tr>";
+								text += "<td>" + obj.actorName + "</td>";
+								text += "<td>" + approve + "</td>";
+								text += "<td>" + obj.opinion + "</td>";
+								text += "<td>" + modifyTime + "</td>";
+								text += "</tr>";
+							});
+						}
+						$("#actors_pop .table").append(text);
+					} else {
+						danger(1, data.message);
+					}
+				}
+			});
+		}
+	</script>
+</body>
+</html>

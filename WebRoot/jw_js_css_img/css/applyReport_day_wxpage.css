@@ -1,0 +1,10 @@
+.left{margin-top: 5px;}
+.searchDiv ul{list-style-type: none}
+.searchDiv ul li{float: left;}
+.searchTable{width: 100%;text-align: center;margin: auto;}
+.right{list-style-type: none}
+.right li{float: left;width: 75px;}
+.go{display: none}
+
+.listinfo ul li{list-style-type: none;height: 40px;line-height: 40px;}
+.plan{margin-top: 20px;}

@@ -1,0 +1,65 @@
+<form id="2" action="${ctx}/flow/form/leave/2" method="post">
+	<input type="hidden" name="token" value="${token}">
+	<input type="hidden" name="orderId" value="<#if order??>${order.id}</#if>">
+	<input type="hidden" name="taskId" value="<#if task??>${task.id}</#if>">
+	<table class="table">
+		<tr>
+			<td width="120">上级经理审批结果：</td>
+			<td class="required">*</td>
+			<td>
+				<#assign checked_on = "checked='checked'" />
+				<#assign checked_off = "" />
+				<#if variable_approveManager?? && variable_approveManager['approveManager.result'] == "-1">
+				<#assign checked_on = "" />
+				<#assign checked_off = "checked='checked'" />
+				</#if>
+				<input type="radio" id="approveManager.result_on" name="approveManager.result" value="1" ${checked_on}>&nbsp;<label for="approveManager.result_on">同意</label>
+				&nbsp;&nbsp;
+				<input type="radio" id="approveManager.result_off" name="approveManager.result" value="-1" ${checked_off}>&nbsp;<label for="approveManager.result_off">不同意</label>
+			</td>
+		</tr>
+		<tr>
+			<td class="pos">上级经理审批意见：</td>
+			<td class="pos required"></td>
+			<td>
+				<textarea class="xl" name="approveManager.suggest" rows="4"><#if variable_approveManager??>${variable_approveManager['approveManager.suggest']}</#if></textarea>
+			</td>
+		</tr>
+		<#if active>
+		<tr>
+			<td colspan="2"></td>
+			<td><button type="submit" class="btn primary xs">提交</button></td>
+		</tr>
+		</#if>
+	</table>
+</form>
+<#if active>
+<script type="text/javascript">
+	$(document).ready(function() {
+		$("#2").ajaxForm({
+			url: "${ctx}/flow/form/leave/2",
+			type: "post",
+			resetForm: false,
+			dataType: "json",
+			beforeSubmit: function(formData, jqForm, options) {
+				danger(0);
+				disabled_on();
+				var form = jqForm[0];
+				try {
+				} catch(err) {
+					danger(1, err);
+					disabled_off();
+					return false;
+				}
+			},
+			success: function(data) {
+				if (data.code == 1) {
+					success_callback(data, "${ctx}/coll/done/page");
+				} else {
+					danger_callback(data);
+				}
+			}
+		});
+	});
+</script>
+</#if>

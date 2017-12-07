@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 已办任务</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<div id="left" class="left">
+				<a href=""><span class="edits icon_add"></span><span class="edits_text">撤回</span></a>
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+			<div class="auto_height">
+			<table class="table">
+				<thead>
+					<tr>
+						<th class="">流程编号</th>
+						<th class="">流程名称</th>
+						<th class="">发起时间</th>
+						<th class="">任务名称</th>
+						<th class="">任务创建时间</th>
+						<th class="">操作</th>
+					</tr>
+				</thead>
+				<tbody>
+					<#if page.result?size gt 0>
+						<#list page.result as e>
+					<tr>
+						<td>${e.orderNo}</td>
+						<td>${e.processName}</td>
+						<td>${e.orderCreateTime?datetime}</td>
+						<td>${e.taskName}</td>
+						<td>${e.taskCreateTime?datetime}</td>
+						<td>
+							<a href="javascript:open_execute('/flow/task/undo?processId=${e.processId}&taskId=${e.taskId}&orderId=${e.orderId}')">撤回</a>
+						</td>
+					</tr>
+						</#list>
+					</#if>
+				</tbody>
+			</table>
+			</div>
+			<#if page.result?size lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<@fm.page page=page />
+		</div>
+	</div>
+	
+	<div id="footer"></div>
+	
+	<div id="execute_task" class="pop" style="display: none; width: 280px;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<div class="pop_title">撤回任务</div>
+			<div class="pop_content blank">确定要撤回所选任务吗？</div>
+			<div class="pop_btn">
+				<input type="hidden" id="instanceUrl" value="">
+				<button type="button" class="btn primary xs" onclick="execute()">确定</button>
+				<button type="button" class="btn default xs" onclick="close_pop()">取消</button>
+			</div>
+		</div>				
+	</div>
+	
+	<script type="text/javascript">
+		function execute() {
+			ajax_post($("#instanceUrl").val());
+			close_pop();
+		}		
+		function open_execute(url) {
+			$("#instanceUrl").val(url);
+			open_pop(null,null,"#execute_task",true);
+		}
+	</script>
+</body>
+</html>

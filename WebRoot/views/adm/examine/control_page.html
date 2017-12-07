@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 绩效进度查询</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<div id="right" class="right">
+				<form id="search" action="page" method="get">
+					<input type="hidden" name="pageSize" value="${page.pageSize}">
+					<input type="hidden" name="pageNo" value="${page.pageNo}">
+					<ul>
+						<li class="text">绩效名称</li>
+						<li>
+							<input type="hidden" name="releaseId" value="${mb.releaseId}" />
+							<div id="releaseId" class="select sm" style="width: 200px">
+								<span class="option text">请选择</span><span class="icon"></span>
+								<ul class="auto_height sm">
+									<li item="">请选择</li>
+									<#list release as e>
+									<li item="${e.releaseId}">${e.releaseName}</li>
+									</#list>
+								</ul>
+							</div>
+						</li>
+						<li><button type="button" class="btn primary xxs" onclick="search()">搜索</button></li>
+					</ul>
+				</form>
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+			<div class="table_head">
+				<table class="table">
+					<thead>
+						<tr>
+							<th width="4%"><input type="checkbox" id="checkedIds"></th>
+							<th width="40%">绩效名称</th>
+							<th width="15%">绩效步骤</th>
+							<th width="15%">考核人姓名</th>
+							<th width="15%">综合得分</th>
+							<th width="">操作</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+			<div class="table_body auto_height">
+				<table class="table">
+					<tbody>
+							<#list page.result as e>
+						<tr>
+							<td width="19%"><input type="checkbox" name="checkedIds" value="${e.releaseId}"></td>
+							<td width="30%">${e.releaseName}</td>
+							<td width="15%"><#if e.version == 1>考核评分<#else>填写绩效目标</#if></td>
+							<td width="16%">${e.trueName}</td>
+							<td width="15%">${e.score}</td>
+							<td width="">
+								<a href="javascript: void(0)" id="${i}" class="actors" item="${e.performId}" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a>
+							</td>
+						</tr>
+							</#list>
+						
+					</tbody>
+				</table>
+			</div>
+
+			<#if page.result?size lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<@fm.page page=page />
+		</div>
+	</div>	
+	
+	<div id="actors_pop" class="pop bind" style="display: none; width: 278px;">
+		<div class="pop_content" style="padding: 0;">
+			<div class="auto_height xl">
+		   		<table class="table">
+		   		</table>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#releaseId").select({ "name": "releaseId" });
+			$("#status").select({ "name": "status" });
+			$("a.actors").click(function() {
+				close_pop();
+				var id = $(this).attr("item");
+				var _id = "#actors_"+$(this).attr("id");
+				actors(id);
+				open_pop(null,_id,"#actors_pop",false);
+				return false;
+ 			});
+		});
+		function actors(id) {
+			$.ajax({
+				url: "/adm/examine/control/actors?performId=" + id + "&token=${token}",
+				type: "post",
+				dataType: "json",
+				success: function(data) {
+					if (data.code == 1) {
+						$("#actors_pop .table").empty();
+						var text = "";
+						text += "<tr>";
+						text += "<th>操作人</th><th>操作内容</th><th>审批意见</th><th>操作时间</th>";
+						text += "</tr>";
+						$.each(data.actors, function(idx, obj) {
+							var approve = "";
+							var modifyTime = obj.modifyTime.substring(0, 16);
+							if (obj.approve == 1) {
+								if (obj.variable == "self") approve = "同意";
+								else approve = "已批准";
+							} else if (obj.approve == -1) {
+								if (obj.variable == "self") approve = "不同意";
+								else approve = "未批准";
+							} else {
+								if (obj.variable == "self") approve = "待处理";
+								else approve = "待审批";
+								modifyTime = "-";
+							}
+							
+							text += "<tr>";
+							text += "<td>" + obj.actorName + "</td>";
+							text += "<td>" + approve + "</td>";
+							text += "<td>" + obj.opinion + "</td>";
+							text += "<td>" + modifyTime + "</td>";
+							text += "</tr>";
+						});
+						$("#actors_pop .table").append(text);
+					} else {
+						danger(1, data.message);
+					}
+				}
+			});
+		}
+		
+		function nodes(id) {
+			$.ajax({
+				url: "/adm/examine/perform/apply/nodes?performId=" + id + "&token=${token}",
+				type: "post",
+				dataType: "json",
+				success: function(data) {
+					if (data.code == 1) {
+						$("#nodes_pop .table").empty();
+						var text = "";
+						text += "<tr>";
+						text += "<th width=\"20%\">本人评分</th><th width=\"20%\">主管评分</th><th width=\"20%\">经理评分</th>";
+						text += "</tr>";
+						$.each(data.nodes, function(idx, obj) {
+							var myScore = "-";
+							var score = "-";
+							var manscore = "-";
+							if (obj.version == "1" && obj.approved != "0"){
+								myScore = obj.myScore;
+								score = obj.score;
+								manscore = obj.manscore
+								}
+							
+							text += "<tr>";
+							text += "<td>" + myScore + "</td>";
+							text += "<td>" + score + "</td>";
+							text += "<td>" + manscore + "</td>";
+							text += "</tr>";
+						});
+						$("#nodes_pop .table").append(text);
+					} else {
+						danger(1, data.message);
+					}
+				}
+			});
+		}
+	</script>
+</body>
+</html>

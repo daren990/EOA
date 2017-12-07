@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<#include "${ctx}/views/meta.html" />
+	<title>${pageTitle} :: 加班审批查询</title>
+	<#include "${ctx}/views/css.html" />
+	<#include "${ctx}/views/js.html" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.css" />
+	<link rel="stylsheet" type="text/css" href="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile.theme-1.4.5.min.css" />
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/layer.m/layer.m.js"></script>
+	<style type="text/css">
+	.go{display: none}
+	</style>
+</head>
+  <body>
+  	<div data-role="page">
+		<div data-role="header">
+			<h2>加班审批查询</h2>
+		</div>
+		<div id="wrapper" class="clearfix" style="margin-top: 0px;padding: 0px;">
+		<div class="content">
+			<div class="contentdata">
+				<#if page.result?size gt 0>
+					<#list page.result as e>
+						<ul data-role="listview" data-inset="true">
+							<li data-role="list-divider"><input type="hidden" name="checkedIds" value="${e.overtimeId}">申请时间: <#if e.createTime??>${e.createTime?datetime}</#if></li>
+							<li>
+								<a href="wxadd?overtimeId=${e.overtimeId}" data-ajax="false">
+									<h2>${e.subject}</h2>
+									<p><strong>上级审批:${e.operator}</strong></p>
+									<p><strong>审批状态:${views.approve(e.approve)}</strong></p>
+								</a>
+							</li>
+						</ul>
+					</#list>
+				</#if>
+			</div>
+			<#if page.result?size lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<@fm.page page=page />
+		</div>
+	</div>
+	</div>
+	
+	<script type="text/javascript">
+	$(document).ready(function() {
+		$("#approve").select({ "name": "approve" });
+	});
+	</script>
+</body>
+</html>

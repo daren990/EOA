@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 会议设置</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit">
+			<div id="form" class="clearfix" style="width: 420px;">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="meetId" value="${meet.meetId}">
+					<table class="table">
+						<tr>
+							<td>会议室：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" value="${meet.roomName}" readonly="readonly" />
+							</td>
+						</tr>
+						<tr>
+							<td>预订人：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" value="${meet.trueName}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>联系电话：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" value="${meet.phone}" readonly="readonly" />
+							</td>
+						</tr>
+						<tr>
+							<td>会议时间：</td>
+							<td class="required"></td>
+							<td>
+								<#if meet.startTime??><#assign meet_yyyyMMdd = meet.startTime?date /></#if>
+								<input type="text" class="input sm" value="${meet_yyyyMMdd}" readonly="readonly" />
+								<#if meet.startTime??>
+									<#assign start_HHmm = meet.startTime?string("HH:mm") />
+								</#if>
+								<#if meet.endTime??>
+									<#assign end_HHmm = meet.endTime?string("HH:mm") />
+								</#if>
+								<input type="text" class="input xs" value="${start_HHmm}" readonly="readonly" />
+								<span>至</span>
+								<input type="text" class="input xs" value="${end_HHmm}" readonly="readonly" />
+							</td>
+						</tr>
+						<tr>
+							<td>计划：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" value="${views.cron(meet.cron, meet.startTime, meet.endTime)}" readonly="readonly" />
+							</td>
+						</tr>
+						<tr>
+							<td>用途：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" value="${meet.content}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>状态：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="completed" value="${meet.status?default(1)}" />
+								<div id="completed" class="select xl">
+									<span class="option text"></span><span class="icon"></span>
+									<ul>
+										<li item="0">未结束</li>
+										<li item="1">已结束</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#completed").select({ "name": "completed" });
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.completed, [RQ], "状态");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+	</script>
+</body>
+</html>

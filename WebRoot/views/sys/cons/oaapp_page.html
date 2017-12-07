@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 配置打卡机</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<div id="left" class="left">
+				<a href="add"><span class="icons icon_add"></span><span class="icons_text">新建</span></a>
+			</div>
+			<div id="right" class="right">
+				<form id="search" action="page" method="get">
+					<input type="hidden" name="pageSize" value="${page.pageSize}">
+					<input type="hidden" name="pageNo" value="${page.pageNo}">
+					<!-- <ul>
+						<li class="text">公司名</li>
+						<li>
+							<input type="text" class="input xl" name="orgName" value="${mb.orgName}" />
+						</li>
+
+
+						<li><button type="button" class="btn primary xxs" onclick="search()">搜索</button></li>
+					</ul> -->
+				</form>
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+			<div class="table_head">
+				<table class="table">
+					<thead>
+						<tr>
+							<th width="40"><input type="checkbox" id="checkedIds"></th>
+							<!-- <th width="">公司名称</th> -->
+							<th width="10%">机器号</th>
+							<th width="">IP地址</th>
+							<th width="15%">端口</th>
+							
+							<th width="20%">操作</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+			<div class="table_body auto_height">
+				<table class="table">
+					<tbody>
+						<#if page.result?size gt 0>
+							<#assign i = 0 />
+							<#list page.result as e>
+						<tr>
+							<td width="26"><input type="checkbox" name="checkedIds" value="${e.zkemId}"></td>
+							<!-- <td width="">${e.orgName}</td> -->
+							<td width="10%">
+								${e.number}
+							</td>
+							<td width="">${e.address}</td>
+							<td width="15%">${e.port}</td>
+							
+							<td width="20%">
+								<a href="add?zkemId=${e.zkemId}" title="编辑"><span class="icons icon_edit"></span></a>
+								<a href="javascript:open_del('${e.zkemId}');" title="删除"><span class="icons icon_del"></span></a>
+							</td>
+						</tr>
+							<#assign i = i + 1 />
+							</#list>
+						</#if>
+					</tbody>
+				</table>
+			</div>
+			<#if page.result?size lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<@fm.page page=page />
+		</div>
+	</div>
+	
+	<div id="del_apply" class="pop" style="display: none; width: 280px;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<div class="pop_title">删除打卡机</div>
+			<div class="pop_content blank">确定要删除所选机器吗？</div>
+			<div class="pop_btn ">
+				<button type="button" class="btn primary xs" onclick="del()">确定</button>
+				<button type="button" class="btn default xs" onclick="close_pop()">取消</button>
+			</div>
+		</div>				
+	</div>
+	
+	<div id="actors_pop" class="pop bind" style="display: none; width: 278px;">
+		<div class="pop_content" style="padding: 0;">
+			<div class="auto_height xl">
+		   		<table class="table">
+		   		</table>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#approve").select({ "name": "approve" });
+			$("a.actors").click(function() {
+				close_pop();
+				var id = $(this).attr("item");
+				var _id = "#actors_"+$(this).attr("id");
+				actors(id);
+				open_pop(null,_id,"#actors_pop",false);
+				return false;
+ 			});
+		});
+		function open_del(id) {
+			if (id) {
+				get_checked(id);
+			}
+			open_pop(null,null,"#del_apply",true);
+		}
+		function del() {
+			ajax_checked("请选择需要删除的机器", "delete?token=${token}");
+			close_pop();
+			auto_width();
+		}
+		
+	</script>
+</body>
+</html>

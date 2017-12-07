@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 资产查询</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<div id="left" class="left">
+				<a href="add"><span class="icons icon_add"></span><span class="icons_text">新建</span></a>
+			</div>
+			<div id="right" class="right">
+				<form id="search" action="page" method="get">
+					<input type="hidden" name="pageSize" value="${page.pageSize}">
+					<input type="hidden" name="pageNo" value="${page.pageNo}">
+					<ul>
+						<li class="text">资产状况</li>
+						<li>
+							<input type="hidden" name="state" value="${mb.state}" />
+							<div id="state" class="select sm">
+								<span class="option text">请选择</span><span class="icon"></span>
+								<ul>
+									<li item="">请选择</li>
+									<li item="0">闲置</li>
+									<li item="1">在使用</li>
+									<li item="-1">报废</li>
+								</ul>
+							</div>
+						</li>
+						<li class="text assetMap">资产类型</li>
+						<li>
+							<input type="hidden" name="typeId" value="${mb.typeId}" />
+							<div id="typeId" class="select sm">
+								<span class="option text">请选择</span><span class="icon"></span>
+								<ul class="auto_height sm">
+									<li item="">请选择</li>
+										<#list assetMap?keys as e>
+										<li item="${e}">${assetMap[e]}</li>
+										</#list>
+								</ul>
+							</div>
+						</li>
+							<li class="text">资产名称</li>
+						<li>
+							<input type="text" class="input xl" style="width:120px"  name="assetName" value="${mb.assetName}" />
+						</li>
+							<li class="text">资产编号</li>
+						<li>
+							<input type="text" class="input xl" style="width:120px" name="assetNumber" value="${mb.assetNumber}" />
+						</li>
+						<li><button type="button" class="btn primary xxs" onclick="search()"  style="width:60px">搜索</button></li>
+					</ul>
+				</form>
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+			<div class="table_head">
+				<table class="table">
+					<thead>
+						<tr>
+							<th width="40"><input type="checkbox" id="checkedIds"></th>
+							<th width="15%">资产名称</th>
+							<th width="10%">资产型号</th>
+							<th width="10%">资产类型</th>
+							<th width="10%">资产编号</th>
+
+							<th width="6%">单位</th>
+							<th width="6%">单价<span class="required">(元)</span></th>
+							<th width="8%">资产状况</th>
+							<th width="8%">使用者</th>
+							<th width="7%">保管人</th>
+							<th width="5%">状态</th>
+							<th width="">操作</th>
+						</tr>
+					</thead>
+				<!-- </table>
+			</div>
+			<div class="table_body auto_height">
+				<table class="table"> -->
+					<tbody style="background:#fff">
+						<#if page.result?size gt 0>
+							<#list page.result as e>
+						<tr>
+							<td><input type="checkbox" name="checkedIds" value="${e.assetId}"></td>
+							<td><pre>${e.assetName}</pre></td>
+							<td>${e.model}</td>
+							<td>${assetMap[e.typeId?string]}</td>
+							<td>${e.assetNumber}</td>
+							
+							<td>${e.unit}</td>
+							<td class=price>${e.price}</td>
+							<td><#if e.state == 0>闲置</#if><#if e.state == 1>在使用</#if><#if e.state == -1>报废</#if></td>
+							<td>${e.trueName}</td>
+							<td>${e.custodian}</td>
+							<td><#if e.status == 1>启用<#else>禁用</#if></td>
+							<td>
+								<#if e.state == 0>
+								<a href="/res/change/assettransfer/add?assetId=${e.assetId}" title="移交"><span class="icons icon_enter"></span></a>
+								</#if>
+								<#if e.state == 1>
+								<a href="/res/change/assetallocate/add?assetId=${e.assetId}" title="调配"><span class="icons icon_attach"></span></a>
+								<a href="/res/change/assetscriap/add?assetId=${e.assetId}" title="报废"><span class="icons icon_danger"></span></a>
+								</#if>
+								<a href="add?assetId=${e.assetId}" title="编辑"><span class="icons icon_edit"></span></a>
+								<#assign able = 1 />
+								<#assign title = "启用" />
+								<#assign check = "icon_unlock" />
+								<#if e.status == 1>
+									<#assign able = 0 />
+									<#assign title = "禁用" />
+									<#assign check = "icon_lock" />
+								</#if>
+								<a href="javascript:open_able('${e.assetId}', '${able}');" title="${title}"><span class="icons ${check}"></span></a>
+							</td>
+						</tr>
+							</#list>
+						</#if>
+					</tbody>
+				</table>
+			</div>
+			<#if page.result?size lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<@fm.page page=page />
+		</div>
+	</div>
+	
+	<div id="able_asset" class="pop" style="display: none; width: 280px;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<div class="pop_title">启用资产</div>
+			<div class="pop_content blank">确定要启用所选资产吗？</div>
+			<div class="pop_btn">
+				<input type="hidden" id="status" value="1" />
+				<button type="button" class="btn primary xs" onclick="able()">确定</button>
+				<button type="button" class="btn deasset xs" onclick="close_pop()">取消</button>
+			</div>
+		</div>				
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			/* 资产单价显示小数 */
+			$(".price").each(function(){
+				var pr = $(this).text();
+				var point = pr.length-2;
+				var smallpart = pr.substr(point);
+				var intpart = pr.substr(0,point);
+				$(this).text(intpart+"."+smallpart);
+			});
+			$("#typeId").select({ "name": "typeId" });
+			$("#state").select({ "name": "state" });
+		});
+		function open_able(id, status) {
+			if (id) {
+				get_checked(id);
+			}
+			var before = status == 1 ? "禁用" : "启用";
+			var after = status == 1 ? "启用" : "禁用";
+			$(".pop_title").text($(".pop_title").text().replace(before, after));
+			$(".pop_content").text($(".pop_content").text().replace(before, after));
+			$("#status").val(status);
+			open_pop(null,null,"#able_asset",true);
+		}
+		function able() {
+			var status = $("#status").val();
+			ajax_checked("请选择需要" + (status == 1 ? "启用" : "禁用") + "的资产", "able?&status=" + status + "&token=${token}");
+			close_pop();
+		}
+	</script>
+</body>
+</html>

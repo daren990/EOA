@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if org.orgId??>编辑<#else>新建</#if>架构</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit">
+			<div id="form" class="clearfix" style="width: 400px;">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="orgId" value="${org.orgId}">
+					<table class="table">
+						<tr>
+							<td>上级架构：</td>
+							<td></td>
+							<td>
+								<input type="text" id="parentName" class="input xl" value="${parent.orgName?default('盛元集团')}" readonly="readonly">
+								<input type="hidden" name="parentId" value="${parent.orgId?default(0)}" />
+							</td>
+						</tr>
+						<tr>
+							<td>架构名称：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input xl" name="orgName" value="${org.orgName}">
+								<input type="hidden" name="orgOrgName" value="${org.orgName}">
+							</td>
+						</tr>
+						<tr>
+							<td>架构描述：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" name="orgDesc" value="${org.orgDesc}">
+							</td>
+						</tr>
+						<tr>
+							<td>类型：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="type" value="${org.type?default(0)}" />
+								<div id="type" class="select xl">
+									<span class="option text">默认</span><span class="icon"></span>
+									<ul>
+										<li item="0">默认</li>
+										<li item="1">子公司</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>状态：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="status" value="${org.status?default(1)}" />
+								<div id="status" class="select xl">
+									<span class="option text">启用</span><span class="icon"></span>
+									<ul>
+										<li item="0">禁用</li>
+										<li item="1">启用</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div id="footer"></div>
+	<div id="org_pop" class="pop" style="display: none; width: 318px;">
+		<div class="pop_close">X</div>
+		<div class="pop_tips"></div>
+		<div class="pop_content">
+			<ul id="tree" class="ztree lg" style="overflow: auto;"></ul>
+		</div>
+	</div>
+	<script type="text/javascript">
+		var nodes = [
+			{id: "0", pId: "", "name": "盛元科技公司", "open": true}<#if orgs?size gt 0>,</#if>
+   			<#list orgs as e>
+   			{id: "${e.orgId}", pId: "${e.parentId}", name: "${e.orgName}"}<#if e_has_next>,</#if>
+   			</#list>
+   		];
+   		var setting = {
+   			data: {
+   				simpleData: {
+   					enable: true
+   				}
+   			},
+   			view: {
+   				showIcon: false
+   			},
+   			callback: {
+   				onClick: getNode
+   			}
+   		};
+	
+	
+		$(document).ready(function() {
+			$.fn.zTree.init($("#tree"), setting, nodes);
+ 			$("#parentName").click(function() {
+ 				open_pop(null, "#parentName", "#org_pop");
+ 			});
+
+ 			$("#type").select({ "name": "type" });
+ 			$("#status").select({ "name": "status" });
+ 			
+ 			$("form").ajaxForm({
+ 				url: "add",
+ 				type: "post",
+ 				resetForm: false,
+ 				dataType: "json",
+ 				beforeSubmit: function(formData, jqForm, options) {
+ 					danger(0);
+ 					disabled_on();
+ 					var form = jqForm[0];
+ 					try {
+ 						validate(form.parentId, [RQ, N], "上级架构");
+ 						validate(form.orgName, [RQ, RANGE, "{1,20}"], "架构名称");
+						validate(form.orgDesc, [RANGE, "{1,60}"], "架构描述");
+ 						validate(form.type, [RQ, N], "类型");
+ 						validate(form.status, [RQ, N], "状态");
+ 					} catch(err) {
+ 						danger(1, err);
+ 						disabled_off();
+ 						return false;
+ 					}
+ 				},
+ 				success: function(data) {
+ 					if (data.code == 1) {
+ 						success_callback(data, "page");
+ 					} else {
+ 						danger_callback(data);
+ 					}
+ 				}
+ 			});
+		});
+		
+		function getNode(event, id, node) {
+			$("input[name=parentId]").val(node.id);
+			$("#parentName").val(node.name);
+			close_pop();
+			return true;
+		}
+	</script>
+</body>
+</html>

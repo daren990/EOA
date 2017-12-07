@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 通讯录</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.css" />
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.js"></script>
+</head>
+<body>
+	<div id="header">
+		<div class="message"></div>
+	</div>
+	<div class="headImg">
+		<img src="${ctx	}/jw_js_css_img/img/mailImg.png" width="100%"/>
+	</div>
+	<div class="contentMail">
+		<ul data-role="listview" data-inset="true" data-filter="true" data-filter-placeholder="姓名或电话号码......">
+		<#list org as c>
+			<li style="background: #CCC;color: #FFF;">${c.orgName}</li>
+			<#if page.result?size gt 0>
+				<#list page.result as e>
+					<#if c.orgId == e.corpId>
+						<li>
+							<a href="information?userId=${e.userId}&corpName=${c.orgName}">
+								<img src="${ctx}/jw_js_css_img/img/touxiang.png" width="63" height="63" style="margin: 10px;" />
+								<h2>${e.trueName}</h2>
+								<p>${e.phone}</p>
+							</a>
+						</li>
+					</#if>
+				</#list>
+			</#if>
+			
+		</#list>
+		
+		</ul>
+	</div>
+	
+	<script type="text/javascript">
+	$(document).ready(function(){
+	
+		var width = $(window).width();
+		if(width > 780){
+			$(".headImg").hide();
+		}
+		
+		 var nodes = [
+ 				<#list page.result as e>
+ 				{corpId: "${e.corpId}",corpName:"${e.corpName}", userId: "${e.userId}", userName: "${e.trueName}"}<#if e_has_next>,</#if>
+ 				</#list>
+ 			];
+ 			
+ 			var orgs = [
+ 				<#list org as e>
+ 				{corpId: "${e.orgId}",corpName:"${e.orgName}"}<#if e_has_next>,</#if>
+ 				</#list>
+ 			];
+		jQuery.mobile.ajaxEnabled = false;
+	});
+	</script>
+</body>
+</html>
+

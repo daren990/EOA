@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>登记信息</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="${ctx}/jw_js_css_img/mui/css/mui.min.css">
+<script src="${ctx}/jw_js_css_img/jquery-1.9.1/jquery.js"></script>
+<script src="${ctx}/jw_js_css_img/mui/js/mui.min.js"></script>
+<style type="text/css">
+body {
+	margin: 0px;
+	padding: 0px;
+}
+
+body p {
+	font-family: Verdana, Geneva, sans-serif;
+}
+</style>
+</head>
+
+<body>
+
+	<br/>
+	<form action="/wx/student/join" method="post" onsubmit="return check(this)">
+	<input type="hidden" id="org_id" name="org_id" value="${org_id}"/>
+	<div class="mui-input-group">
+		<div class="mui-input-row">
+			<label>学生姓名</label>
+			<input type="text" placeholder="学生姓名" name="studentName" id="studentName" value="${studentName}">
+		</div>
+		<div class="mui-input-row">
+			<label>家长电话</label>
+			<input type="text" placeholder="家长电话" name="clientPhone" id="clientPhone" value="${clientPhone}">
+		</div>
+		<div class="mui-button-row">
+			<button type="submit" class="mui-btn mui-btn-primary" >登记</button>
+		</div>
+	</div>
+	</form>
+</body>
+<script type="text/javascript">
+	<#if mb??>alert("${mb.msg}");</#if>
+	$(function() {
+	});
+	
+	function check(){
+		if(validate_client() && checkMobile($("#clientPhone").val())){
+			return true;
+		}else{
+			return false;
+		}
+
+	}
+	
+	var code ; //在全局定义验证码   
+	//产生验证码  
+	function createCode(){  
+	     code = "";   
+	     var codeLength = 4;//验证码的长度  
+	     var random = new Array(0,1,2,3,4,5,6,7,8,9);//随机数  
+	     for(var i = 0; i < codeLength; i++) {//循环操作  
+	        var index = Math.floor(Math.random()*10);//取得随机数的索引（0~35）  
+	        code += random[index];//根据索引取得随机数加到code上  
+	    }  
+		alert(code);
+	}  
+
+	//校验家长姓名电话
+	function validate_client(){
+		var name = $("#studentName").val();
+		if(name == null || name == "" || name.length <=0){
+			alert("请输入学生姓名");
+			return false;
+		}
+		return true;
+	}
+	
+	function checkMobile(str) {
+	    var re = /^1\d{10}$/
+	    if (re.test(str)) {
+	        return true;
+	    } else {
+	    	alert("请输入正确的手机号码");
+			return false;
+	    }
+	}
+	
+	
+	
+</script>
+</html>

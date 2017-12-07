@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/css/jquery.mobile-1.4.3.min.css"/>
+<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/css/mobiscroll.custom-2.5.0.min.css" />
+<script type="text/javascript" src="${ctx}/jw_js_css_img/js/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="${ctx}/jw_js_css_img/js/jquery.mobile-1.4.3.min.js"></script>
+<script type="text/javascript" src="${ctx}/jw_js_css_img/js/mobiscroll.custom-2.5.2.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style type="text/css">
+body {
+	margin: 0px;
+	padding: 0px;
+}
+body p {
+	font-family: Verdana, Geneva, sans-serif;
+}
+#content {
+	margin-top: 20px;
+}
+</style>
+</head>
+
+<body>
+<div data-role="page" id="pageone">
+        <form action="add" method="post">
+        <input type="hidden" name="token" value="${token}">
+		<input type="hidden" name="outworkId" value="${outwork.outworkId}">
+   <div data-role="header" data-position="fixed">
+     <h1>外勤申请</h1>
+   </div>
+		
+		<div align="center" id="content" data-role="content">
+		  <table>
+		    <tr>
+		      <td>申请人:</td>
+		      <td><input type="text" class="input xl" value="${outwork.trueName}" readonly="readonly"></td>
+		    </tr>
+		    <tr>
+		      <td>申请时间:</td>
+		      <td>
+		        <#assign createTime = now?date />
+				<#if outwork.createTime??><#assign createTime = outwork.createTime?date /></#if>
+				<input type="text" class="input xl" value="${createTime}" readonly="readonly">
+			  </td>
+		    </tr>
+		    <tr>
+		      <td>外勤时间:</td>
+		      <td>
+		      <#if outwork.startTime??><#assign work_yyyyMMdd = outwork.startTime?date /></#if>
+			  <#if outwork.type == "0"><#assign type = "上午" /></#if>
+			  <input type="text" class="input xl" value="${work_yyyyMMdd?default('')}&nbsp;${type?default('下午')}" readonly="readonly" />
+		      </td>
+		    </tr>
+		    <tr>
+		      <td>外勤原因:</td>
+		      <td>
+		        <textarea class="xl" rows="4" readonly="readonly">${outwork.reason}</textarea>
+			  </td>
+		    </tr>
+		    <tr>
+		      <td>上级审批:</td>
+		      <td>
+		      <input type="text" class="input xl" value="${outwork.operator}" readonly="readonly" />
+			  </td>
+		    </tr> 
+		    <tr>
+				<td>审批状态:</td>
+				<td>
+					<input type="hidden" name="approve1"  value="${outwork.outworkId}" />
+					<select  name="approve">
+					  <option value="1">已批准</option>
+					  <option value="-1">未批准</option>
+					  <option value="0">请选择</option>
+					</select>
+				</td>
+		  </tr>
+		    <tr><td colspan="2"><input type="submit" value="提交" /></td></tr>
+		  </table>
+		</div>
+		</form>
+</div>
+
+<script type="text/javascript">
+		$(document).ready(function() {
+			$("#approve").select({ "name": "approve" });
+			
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+			/*
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.approve, [RQ, N], "审批状态");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}		
+				},
+				*/
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+	</script>
+</body>
+</html>

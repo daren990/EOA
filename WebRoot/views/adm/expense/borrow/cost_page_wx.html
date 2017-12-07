@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 借支费用查询</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<div id="right" class="right" style="float: left">
+				<form id="search" action="page" method="get">
+					<input type="hidden" name="pageSize" value="${page.pageSize}">
+					<input type="hidden" name="pageNo" value="${page.pageNo}">
+					<table id="tableSearch">
+						<tr>
+							<td style="width: 50px;">借支编号</td>
+							<td><input type="text" class="input sm" name="number" value="${mb.number}"/></td>
+						</tr>
+						<tr>
+							<td>所属公司</td>
+							<td><input type="hidden" name="corpId" value="${mb.corpId}" />
+							<div id="corpId" class="select sm" style="width: 180px;">
+								<span class="option text">请选择</span><span class="icon"></span>
+								<ul class="auto_height sm">
+									<li item="">请选择</li>
+									<#list corps as e>
+									<li item="${e.orgId}">${e.orgName}</li>
+									</#list>
+								</ul>
+							</div></td>
+						</tr>
+						<tr>
+							<td>申请人</td>
+							<td><input type="hidden" name="userId" value="${mb.userId}" />
+							<div id="userId" class="select sm" style="width: 180px;">
+								<span class="option text">请选择</span><span class="icon"></span>
+								<ul class="auto_height sm">
+									<li item="">请选择</li>
+									<#list users as e>
+									<li item="${e.userId}">${e.trueName}</li>
+									</#list>
+								</ul>
+							</div></td>
+						</tr>
+						<tr>
+							<td>申请时间</td>
+							<td><input type="text" class="input sm Wdate" name="startTime" value="${mb.startTime}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})" style="width: 80px">
+							<span>至</span>
+							<input type="text" class="input sm Wdate" name="endTime" value="${mb.endTime}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})" style="width: 80px"></td>
+						</tr>
+						<tr>
+							<td colspan="2"><button type="button" class="btn primary xxs" onclick="search()">搜索</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+			<div class="table_head">
+				<table class="table">
+					<thead>
+						<tr>
+							<th width="40%">借支编号</th>
+							<th width="20%">申请人</th>
+							<th width="25%">借支金额</th>
+							<!-- <th width="20%">所属公司</th>
+							<th width="15%">申请时间</th> -->
+							<th width="">流程日志</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+			<div class="table_body">
+				<table class="table">
+					<tbody>
+						<#assign money = 0 />
+						<#if page.result?size gt 0>
+							<#list page.result as e>
+						<tr class="detail">
+							<td width="40%">${e.number}</td>
+							<td width="20%">${e.trueName}</td>
+							<td width="25%">${views.rmb(e.money)}</td>
+							<!-- <td width="20%">${e.corpName}</td>
+							<td width="15%">${e.createTime?datetime}</td> -->
+							<td style="text-align: center;">
+								<a href="javascript: void(0)" id="${i}" class="actors" item="${e.borrowId}" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a>
+							</td>
+						</tr><input type="hidden" value="${e.corpName}" /><input type="hidden" value="${e.createTime?datetime}" />
+							<#assign money = money + e.money />
+							</#list>
+						</#if>
+					</tbody>
+				</table>
+			</div>
+			<#if page.result?size gt 0>
+			<div style="padding: 6px 4px; border-bottom: 1px solid #c5cfd7; background-color: #eee;">
+				<span>合计：${views.rmb(money)}元&nbsp;&nbsp;总计：${views.rmb(sumMoney)}元</span>
+			</div>
+			</#if>
+			<#if page.result?size lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<@fm.page page=page />
+		</div>
+	</div>
+	
+	<div id="actors_pop" class="pop bind" style="display: none; width: 278px;">
+		<div class="pop_content" style="padding: 0;">
+			<div class="auto_height xl">
+		   		<table class="table">
+		   		</table>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#corpId").select({ "name": "corpId" });
+			$("#userId").select({ "name": "userId" });
+			$("a.actors").click(function() {
+				close_pop();
+				var id = $(this).attr("item");
+				var _id = "#actors_"+$(this).attr("id");
+				actors(id);
+				open_pop(null,_id,"#actors_pop",false);
+				return false;
+ 			});
+ 			
+ 			$(".detail").click(function(){
+ 				ymPrompt.alert("公司名称:"+$(this).next().val()+"<br/><br/>申请时间:"+$(this).next().next().val(),"300","100","详情");
+ 			});
+		});
+		
+		function actors(id) {
+			$.ajax({
+				url: "/adm/expense/borrow/approve/actors?borrowId=" + id + "&token=${token}",
+				type: "post",
+				dataType: "json",
+				success: function(data) {
+					if (data.code == 1) {
+						$("#actors_pop .table").empty();
+						var text = "";
+						text += "<tr>";
+						text += "<th>操作人</th><th>操作内容</th><th>操作时间</th>";
+						text += "</tr>";
+						$.each(data.actors, function(idx, obj) {
+							var approve = "";
+							var modifyTime = obj.modifyTime.substring(0, 16);
+							if (obj.approve == 1) {
+								approve = "已批准";
+							} else if (obj.approve == -1) {
+								approve = "未批准";
+							} else {
+								approve = "待批准";
+								modifyTime = "-";
+							}
+							
+							text += "<tr>";
+							text += "<td>" + obj.actorName + "</td>";
+							text += "<td>" + approve + "</td>";
+							text += "<td>" + modifyTime + "</td>";
+							text += "</tr>";
+						});
+						$("#actors_pop .table").append(text);
+					} else {
+						danger(1, data.message);
+					}
+				}
+			});
+		}
+	</script>
+</body>
+</html>

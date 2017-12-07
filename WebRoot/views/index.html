@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "views/meta.html" />
+	<title>${pageTitle} :: 首页</title>
+	<link href="${ctx}/css/base.css?${version}" rel="stylesheet">
+	<link href="${ctx}/css/layout.css?${version}" rel="stylesheet">
+	<link rel="icon" href="${ctx}/img/logo.ico" type="image/x-icon" />
+	<link rel="shortcut icon" href="${ctx}/img/logo.ico" type="image/x-icon" />
+	<link rel="Bookmark" href="${ctx}/img/logo.ico">
+	<script type="text/javascript" src="${ctx}/js/jquery-1.7.2.min.js"></script>
+	<script type="text/javascript" src="${ctx}/js/common.js?${version}"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/js/jquery.jrumble.1.3.min.js"></script>
+	<script type="text/javascript">
+		window.onload = window.onresize = function() {
+			var all = $(window).height();
+			var a = $("#header").height();
+			var b = int($("#header").css("margin-top"));
+			var c = int($("#header").css("margin-bottom"));
+			var d = int($("#header").css("border-top-width"));
+			var e = int($("#header").css("border-bottom-width"));
+			$("#left").height(all - (a + b + c + d + e) - 3);
+			$("#right").height(all - (a + b + c + d + e) - 3);
+			if ($.browser.msie) {
+				if ($.browser.version == "7.0") {
+					$("#header #menu").css("padding-top", "43px");
+				} else if ($.browser.version == "8.0") {
+					$("#header #menu").css("padding-top", "44px");
+				} else if ($.browser.version == "9.0" || $.browser.version == "10.0") {
+					$("#header #menu").css("padding-top", "45px");
+				}
+			}
+		}
+		
+		$(document).ready(function(){
+			$("#msgDiv").jrumble();
+			var demoStop = function(){
+				$('#msgDiv').trigger('stopRumble');
+				setTimeout(demoStart, 3000);
+			};
+			var demoStart = function(){
+				$("#msgDiv").trigger("startRumble");
+				setTimeout(demoStop, 3000);
+			};
+			
+			demoStart();
+		});
+		
+		var getPathDoc = function()  
+	    {  
+			var pathDoc = {};
+			var a_text = "";
+			var active = $("#iframe_path").contents().find(".active");
+			if(active.text() != null && active.text() != ""){
+				if(active.attr("href").indexOf("javascript") == -1){
+					if(active.parent().parent().parent().parent().prev().hasClass('show')){
+						a_text += active.parent().parent().parent().parent().prev().text() + " > ";
+					}
+					if(active.parent().parent().parent().prev().hasClass('show')){
+						a_text += active.parent().parent().parent().prev().text() + " > ";
+					}
+					a_text += active.parent().parent().prev().text() + " > ";
+				}
+			}
+			a_text += active.text();
+			pathDoc['active'] = a_text;
+			return pathDoc;
+	   	} 
+		
+	</script>
+</head>
+<body>
+	<div id="header">
+		<div id="logo" class="left">
+			<a href="" title="和德集团"><img src="${ctx}/img/logo.png"><strong>和德集团</strong></a>
+		</div>
+		<div id="meta" class="right">
+			<div id="msgDiv" style="float: left;">
+				<!-- <a href="javascript:;"><img src="${ctx}/jw_js_css_img/img/msg.png" />
+					<span style="position: absolute;color: red;left: 6px;top:1px;font-weight: bolder;">5</span>
+				</a> -->
+			</div>
+			<span>当前用户：<b>${currentUser.trueName}</b></span>&nbsp;|
+			<a href="/hrm/profile/add" target="content"><span>个人设置</span></a>&nbsp;|
+			<a href="/sys/password/add" target="content"><span>修改密码</span></a>&nbsp;|
+			<a href="/logout"><span>退出登录</span></a>
+		</div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div id="left" class="left">
+			<iframe id="iframe_path" name="path" src="/?view=path" width="100%" height="100%"></iframe>
+		</div>
+		<div id="right">
+			<iframe id="content" name="content" src="/?view=content" width="100%" height="100%"></iframe>
+		</div>
+	</div>
+</body>
+</html>

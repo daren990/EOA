@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 编辑工资</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit auto_height xl">
+			<div id="form" class="clearfix" style="width: 480px;">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="userId" value="${wage.userId}">
+					<table class="table">
+						<tr>
+							<td>姓名：</td>
+							<td class="required"></td>
+							<td><input type="text" class="input xl" value="${wage.trueName}" readonly="readonly"></td>
+						</tr>
+						<tr>
+							<td>标准工资（<span class="required">元</span>）：</td>
+							<td class="required">*</td>
+							<td><input type="text" class="input xl" name="standardSalary" value="${views.rmb(wage.standardSalary)?string('0.##')}"></td>
+						</tr>
+						<tr>
+							<td>岗位工资（<span class="required">元</span>）：</td>
+							<td class="required">*</td>
+							<td><input type="text" class="input xl" name="postSalary" value="${views.rmb(wage.postSalary)?string('0.##')}"></td>
+						</tr>
+						<tr>
+							<td>浮动工资（<span class="required">元</span>）：</td>
+							<td class="required">*</td>
+							<td><input type="text" class="input xl" name="floatingSalary" value="${views.rmb(wage.floatingSalary)?string('0.##')}"></td>
+						</tr>
+						<tr>
+							<td>通信津贴（<span class="required">元</span>）：</td>
+							<td class="required">*</td>
+							<td><input type="text" class="input xl" name="communicationAllowance" value="${views.rmb(wage.communicationAllowance)?string('0.##')}"></td>
+						</tr>
+						<tr>
+							<td>交通津贴（<span class="required">元</span>）：</td>
+							<td class="required">*</td>
+							<td><input type="text" class="input xl" name="trafficAllowance" value="${views.rmb(wage.trafficAllowance)?string('0.##')}"></td>
+						</tr>
+						<tr>
+							<td>高温津贴（<span class="required">元</span>）：</td>
+							<td class="required">*</td>
+							<td><input type="text" class="input xl" name="heatingAllowance" value="${views.rmb(wage.heatingAllowance)?string('0.##')}"></td>
+						</tr>
+						<tr>
+							<td>节日津贴（<span class="required">元</span>）：</td>
+							<td class="required">*</td>
+							<td><input type="text" class="input xl" name="holidayAllowance" value="${views.rmb(wage.holidayAllowance)?string('0.##')}"></td>
+						</tr>
+						<tr>
+							<td>提成津贴（<span class="required">元</span>）：</td>
+							<td class="required">*</td>
+							<td><input type="text" class="input xl" name="percentageAllowance" value="${views.rmb(wage.percentageAllowance)?string('0.##')}"></td>
+						</tr>
+						<tr>
+							<td>伙食津贴（<span class="required">元</span>）：</td>
+							<td class="required">*</td>
+							<td><input type="text" class="input xl" name="mealAllowance" value="${views.rmb(wage.mealAllowance)?string('0.##')}"></td>
+						</tr>
+						<tr>
+							<td>税（<span class="required">元</span>）：</td>
+							<td class="required">*</td>
+							<td><input type="text" class="input xl" name="tax" value="${views.rmb(wage.tax)?string('0.##')}"></td>
+						</tr>
+						<tr>
+							<td>社保（<span class="required">元</span>）：</td>
+							<td class="required">*</td>
+							<td><input type="text" class="input xl" name="socialSecurity" value="${views.rmb(wage.socialSecurity)?string('0.##')}"></td>
+						</tr>
+						<tr>
+							<td>公积金（<span class="required">元</span>）：</td>
+							<td class="required">*</td>
+							<td><input type="text" class="input xl" name="accumulationFund" value="${views.rmb(wage.accumulationFund)?string('0.##')}"></td>
+						</tr>
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<div id="footer"></div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.standardSalary, [RQ, N], "标准工资");
+						validate(form.postSalary, [RQ, N], "岗位工资");
+						validate(form.floatingSalary, [RQ, N], "浮动工资");
+						validate(form.communicationAllowance, [RQ, N], "通信津贴");
+						validate(form.trafficAllowance, [RQ, N], "交通津贴");
+						validate(form.heatingAllowance, [RQ, N], "高温津贴");
+						validate(form.holidayAllowance, [RQ, N], "节日津贴");
+						validate(form.percentageAllowance, [RQ, N], "提成津贴");
+						validate(form.mealAllowance, [RQ, N], "伙食津贴");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+	</script>
+</body>
+</html>

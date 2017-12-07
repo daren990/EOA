@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if errand.errandId??>编辑<#else>新建</#if>出差申请</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/bootstrap-3.3.4/css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/bootstrap-3.3.4/css/bootstrap-theme.min.css" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/bootstrap-3.3.4/css/bootstrap-datetimepicker.min.css" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/css/add_wx.css" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/select2/select2.css" />
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/bootstrap-3.3.4/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/bootstrap-3.3.4/js/bootstrap-datetimepicker.min.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/bootstrap-3.3.4/js/bootstrap-datetimepicker.fr.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/select2/select2.min.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/select2/select2_locale_zh-CN.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/layer.m/layer.m.js"></script>
+</head>
+<body>
+	<div class="headerDiv"><a href="wxpage" class="btn btn-default" id="return"><img src="${ctx}/jw_js_css_img/img/return.png" />返回</a><#if errand.errandId??>编辑<#else>新建</#if>出差申请</div>
+			<div class="contentDiv" id="form">
+				<form action="add" method="post" class="form-horizontal">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="errandId" value="${errand.errandId}">
+				<div class="form-group">
+					<label class="col-xs-4 control-label">申请人</label>
+			   		 <div class="col-xs-7">
+			    		<input type="text" class="form-control" value="${currentUser.trueName}" readonly="readonly" name="titleName" />
+			    	 </div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 control-label">申请时间</label>
+			    	<div class="col-xs-7">
+			    		<#assign createTime = now?date />
+						<#if errand.createTime??><#assign createTime = errand.createTime?date /></#if>
+						<input type="text" class="form-control" value="${createTime}" readonly="readonly">
+			    	</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 control-label">开始时间</label>
+			    	<div class="col-xs-7">
+			    		<#if errand.startTime??><#assign start_yyyyMMdd = errand.startTime?date /></#if>
+						<input type="text" class="form-control" id="start_yyyyMMdd" value="${start_yyyyMMdd} ${mTime}" placeholder="请选择开始时间" readonly/>
+						<input type="hidden" name="start_yyyyMMdd" id="start_yyyyMMdd2" value="${start_yyyyMMdd}"/>
+						<input type="hidden" name="startType" id="startType" value="${mTime}"/>
+			    	</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 control-label">结束时间</label>
+			    	<div class="col-xs-7">
+			    		<#if errand.endTime??><#assign end_yyyyMMdd = errand.endTime?date /></#if>
+						<input type="text" class="form-control" id="end_yyyyMMdd" value="${end_yyyyMMdd} ${nTime}" placeholder="请选择结束时间" readonly/>
+						<input type="hidden" name="end_yyyyMMdd" id="end_yyyyMMdd2" value="${end_yyyyMMdd}"/>
+						<input type="hidden" name="endType" id="endType" value="${nTime}" />
+			    	</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 control-label">出差地点</label>
+			    	<div class="col-xs-7">
+			    		<input type="text" class="form-control" name="place" value="${errand.place}" style="width: 173px" placeholder="请输入出差地点">
+			    	</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 control-label">出差地点</label>
+			    	<div class="col-xs-7">
+			    		<input type="text" class="form-control" name="equipment" value="${errand.equipment}" style="width: 173px" placeholder="请输入需要设备">
+			    	</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 control-label">所需项目</label>
+			    	<div class="col-xs-7">
+			    		<input type="text" class="form-control" name="project" value="${errand.project}" style="width: 173px" placeholder="请输入所需项目">
+			    	</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 control-label">出差描述</label> 
+			    	<div class="col-xs-7">
+			    		<textarea name="content" class="form-control" rows="3" style="resize:none" placeholder="请输入出差描述">${errand.content}</textarea>
+			    	</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 control-label">备注</label>
+			    	<div class="col-xs-7">
+			    		<textarea name="remark" rows="3" class="form-contr  ol" style="resize:none" placeholder="请输入备注">${errand.remark}</textarea>
+			    	</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 control-label">上级审批</label>
+			    	<div class="col-xs-7">
+			    		<input type="hidden" name="operatorId" id="operatorId" value="${errand.actorId?default(currentUser.managerId)}">
+						<select class="opetorSelect" id="opetorSelect">
+							<!-- <option value="" selected="selected">请选择</option> -->
+							<#list operators as e>
+								<option value="${e.userId}">${e.trueName}</option>
+								<!-- <input type="hidden" value="${e.username}" name="${e.userId}" /> -->
+							</#list>
+						</select>
+			    	</div>
+			    <div class="col-xs-3"></div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 control-label"></label>
+					<div class="col-xs-7">
+						<button type="submit" class="btn btn-primary" id="submit">提交</button>
+					</div>
+				</div>
+			</form>
+		</div>
+		
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$(".selectOpetor").select2({
+				width:"160px",
+				minimumResultsForSearch:-1
+			});
+			$(".opetorSelect").select2({
+				width:"160px",
+				minimumResultsForSearch:-1
+			});
+			
+			$("#start_yyyyMMdd").datetimepicker({
+				autoclose:true //选择日期后自动关闭 
+			});
+			$("#end_yyyyMMdd").datetimepicker({
+				autoclose:true //选择日期后自动关闭
+			});
+			
+			$(".selectOpetor").change(function(){
+				var typeIdVal = $(this).val();
+				$("#typeId").val(typeIdVal);
+			});
+			$(".opetorSelect").change(function(){
+				var operatorId = $(this).val();
+				$("#operatorId").val(operatorId);
+			});
+			/* var opt = {
+		        preset: 'date', //日期
+		        display: 'modal', //显示方式 
+		        dateFormat: 'yy-mm-dd', // 日期格式
+		        setText: '确定', //确认按钮名称
+		        cancelText: '取消',//取消按钮名籍我
+		        dateOrder: 'yymmdd', //面板中日期排列格式
+		        dayText: '日', monthText: '月', yearText: '年', //面板中年月日文字
+		        endYear:2020 //结束年份
+		    };
+			
+			$('input:jqmData(role="datebox")').mobiscroll().date(opt); */
+		
+			$("#workTime").select({ "name": "workTime" });
+			$("#typeId").select({ "name": "typeId" });
+			$("#operatorId").select({ "name": "operatorId" });
+			$("#startType").select({ "name": "startType" });
+			$("#endType").select({ "name": "endType" });
+			
+			$("#submit").click(function(){
+				var arr1 = new Array();
+				var arr2 = new Array();
+				var startDate = $("#start_yyyyMMdd").val();
+				var endDate = $("#end_yyyyMMdd").val();
+				arr1 = startDate.split(" ");
+				arr2 = endDate.split(" ");
+				$("#start_yyyyMMdd2").val(arr1[0]);
+				$("#startType").val(arr1[1]);
+				$("#end_yyyyMMdd2").val(arr2[0]);
+				$("#endType").val(arr2[1]);
+			});
+			
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSend:function(){
+					layer.open({
+						content:"正在提交，请稍后...",
+						shadeClose:false
+					});
+				},
+				success: function(data) {
+					if (data.code == 1) {
+							layer.open({
+								content:data.message,
+								time:2,
+								shadeClose:false
+							});
+							setTimeout(function(){
+								window.location.href="wxpage";
+							},5);
+					} else {
+						$("#submit").removeAttr("disabled");
+						layer.open({
+								content:data.message
+							});
+					}
+				}
+			});
+		});
+	</script>
+</body>
+</html>

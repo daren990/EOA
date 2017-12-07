@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 编辑个人档案</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit auto_height">
+			<div id="form" class="clearfix" style="width: 430px;">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="userId" value="${archive.userId}">
+					<table class="table">
+						<tr>
+							<td>姓名：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" value="${archive.trueName}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>性别：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="gender" value="${archive.gender?default(0)}" />
+								<div id="gender" class="select xl">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<li item="0">女</li>
+										<li item="1">男</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>身份证：</td>
+							<td class="required">*</td>
+							<td>
+								<input id="idcard" type="text" class="input xl" name="idcard" value="${archive.idcard}">
+							</td>
+						</tr>
+						<tr>
+							<td>出生年月日：</td>
+							<td class="required">*</td>
+							<td>
+								<#if archive.birthday??>
+								<#assign birthday_yyyyMMdd = archive.birthday?date />
+								</#if>
+								<input id="birthday" type="text" class="input xl Wdate" name="birthday_yyyyMMdd" value="${birthday_yyyyMMdd?default('')}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							</td>
+						</tr>
+						<tr>
+							<td>籍贯：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" name="place" value="${archive.place}">
+							</td>
+						</tr>
+						<tr>
+							<td>户口性质：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="hukou" value="${archive.hukou?default(0)}" />
+								<div id="hukou" class="select xl">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<li item="0">本地非农业户口</li>
+										<li item="1">本地农业户口</li>
+										<li item="2">外地非农业户口</li>
+										<li item="3">外地农业户口</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>曾经购买社保：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="socialSecurity" value="${archive.socialSecurity?default(0)}" />
+								<div id="socialSecurity" class="select xl">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<li item="0">是</li>
+										<li item="1">否</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>婚否：</td>
+							<td class="required"></td>
+							<td>
+								<input type="hidden" name="marry" value="${archive.marry?default(0)}" />
+								<div id="marry" class="select xl">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<li item="0">未婚</li>
+										<li item="1">已婚</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>最高学历：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" name="degree" value="${archive.degree}">
+							</td>
+						</tr>
+						<tr>
+							<td>所学专业：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" name="major" value="${archive.major}">
+							</td>
+						</tr>
+						<tr>
+							<td>毕业院校：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" name="school" value="${archive.school}">
+							</td>
+						</tr>
+						<tr>
+							<td>联系电话：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input xl" name="phone" value="${archive.phone}">
+							</td>
+						</tr>
+						<tr>
+							<td>联系地址：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" name="address" value="${archive.address}">
+							</td>
+						</tr>
+						<tr>
+							<td>QQ：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" name="QQ" value="${archive.QQ}">
+							</td>
+						</tr>
+						<tr>
+							<td>紧急联系人：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" name="exigencyName" value="${archive.exigencyName}">
+							</td>
+						</tr>
+						<tr>
+							<td>紧急联系电话：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" name="exigencyPhone" value="${archive.exigencyPhone}">
+							</td>
+						</tr>
+						<tr>
+							<td>邮箱：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" name="email" value="${archive.email}">
+							</td>
+						</tr>
+						<tr>
+							<td>合同开始时间：</td>
+							<td class="required"></td>
+							<td>
+								<#if archive.contractStart??>
+								<#assign contractStart_yyyyMMdd = archive.contractStart?date />
+								</#if>
+								<input type="text" class="input xl Wdate" name="contractStart_yyyyMMdd" value="${contractStart_yyyyMMdd?default('')}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							</td>
+						</tr>
+						<tr>
+							<td>合同结束时间：</td>
+							<td class="required"></td>
+							<td>
+								<#if archive.contractEnd??>
+								<#assign contractEnd_yyyyMMdd = archive.contractEnd?date />
+								</#if>
+								<input type="text" class="input xl Wdate" name="contractEnd_yyyyMMdd" value="${contractEnd_yyyyMMdd?default('')}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							</td>
+						</tr>
+						<tr>
+							<td>签约次数：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" name="amount" value="${archive.amount}">
+							</td>
+						</tr>
+						<tr>
+							<td>入职日期：</td>
+							<td class="required">*</td>
+							<td>
+								<#if archive.entryDate??>
+								<#assign entry_yyyyMMdd = archive.entryDate?date />
+								</#if>
+								<input type="text" class="input sm Wdate" name="entry_yyyyMMdd" value="${entry_yyyyMMdd?default('')}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							</td>
+						</tr>
+						<tr>
+							<td>转正日期：</td>
+							<td class="required"></td>
+							<td>
+								<#if archive.fullDate??>
+								<#assign full_yyyyMMdd = archive.fullDate?date />
+								</#if>
+								<input type="text" class="input sm Wdate" name="full_yyyyMMdd" value="${full_yyyyMMdd?default('')}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							</td>
+						</tr>
+						<tr>
+							<td>职务：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" name="position" value="${archive.position}">
+							</td>
+						</tr>
+						<tr>
+							<td>在职状态：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="onPosition" value="${archive.onPosition?default(1)}" id="abcd" />
+								<div id="onPosition" class="select xl">
+									<span class="option text">在职</span><span class="icon"></span>
+									<ul>
+										<li item="0">离职</li>
+										<li item="1">在职</li>
+										<li item="3">停薪</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr class="next hide" id="quit">
+							<td>离职日期：</td>
+							<td class="required"></td>
+							<td>
+								<#if archive.quitDate??>
+								<#assign quitDate_yyyyMMdd = archive.quitDate?date />
+								</#if>
+								<input type="text" class="input sm Wdate" name="quitDate_yyyyMMdd"  value="${quitDate_yyyyMMdd?default('')}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+  			$("#gender").select({ "name": "gender" });
+  			$("#marry").select({ "name": "marry" });
+  			$("#onPosition").select({ "name": "onPosition" });
+  			$("#hukou").select({ "name": "hukou" });
+  			$("#socialSecurity").select({ "name": "socialSecurity" });
+  			
+  			//自动根据身份证填性别和生日
+  			$("#idcard").blur(function(){
+  				var idcard = $(this).val();
+  				if(idcard != ""){
+  					//15位身份证
+  					if(idcard.length == 15){
+	  					var year = idcard.slice(6,8);
+	  					var month = idcard.slice(8,10);
+	  					var day = idcard.slice(10,12);
+	  					$("#birthday").val("19"+year+"-"+month+"-"+day);
+	  					var sex = idcard.charAt(14) % 2;
+	  					if(sex == 0){
+	  						$("#gender").prev().val("女");
+	  						$("#gender>span").eq(0).text("女");
+	  					}else{
+	  						$("#gender").prev().val("男");
+	  						$("#gender>span").eq(0).text("男");
+	  					}
+	  				//18位身份证
+  					}else if(idcard.length == 18){
+						var year = idcard.slice(6,10);
+						var month = idcard.slice(10,12);
+						var day = idcard.slice(12,14);
+						$("#birthday").val(year+"-"+month+"-"+day);
+						var sex = idcard.charAt(16) % 2;
+						if(sex == 0){
+							$("#gender").prev().val("0");
+	  						$("#gender>span").eq(0).text("女");
+	  					}else{
+	  						$("#gender").prev().val("1");
+	  						$("#gender>span").eq(0).text("男");
+	  					}
+  					}
+  				}
+  		
+  			});
+  			
+  			var t = $("#abcd").val();
+			$("#quit").hide();
+			if (t == "0") {
+				$("#quit").show();
+			}
+  			
+  			$("#onPosition.select li").click(function() {
+				var t = $(this).attr("item");
+				$("#quit").hide();
+				if (t == "0") {
+					$("#quit").show();
+				}
+			});
+			
+  			
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.hukou, [RQ], "户口性质");
+						validate(form.socialSecurity, [RQ], "是否曾经购买社保");
+						validate(form.gender, [RQ], "性别");
+						validate(form.idcard, [RQ, RANGE, "{1,20}"], "身份证");
+						validate(form.birthday_yyyyMMdd, [RQ], "出生年月");
+						validate(form.phone, [RQ, RANGE, "{1,20}"], "联系电话");
+						validate(form.entry_yyyyMMdd, [RQ], "入职日期");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "/sys/user/page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+	</script>
+</body>
+</html>

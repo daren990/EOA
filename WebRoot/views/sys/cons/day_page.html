@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>排班</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/jw_js_css_img/css/day_page.css">
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/js/day_page.js"></script>
+	<style type="text/css">
+		.bord{border-right: none !important}
+	</style>
+</head>
+<body>
+	<div id="loadingR" style="display:none;position:fixed;z-index:999;left:0px;right:0px;top:0px;bottom:0px;background:url(${ctx}/img/loading.jpg) no-repeat 50% 50%;"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<form action="add" method="post" id="form">
+	<div class="headDiv"  style="position:fixed;left:0px;right:0px;top:-20px;bottom:0px;opacity:1;z-index:1;">		
+		<span class="companyTitle" style="position:absolute;left:20px;margin-bottom:10px;width: 300px;">
+			<select id="corpChange" name="corpId" style="background-color:rgba(233,233,233,1);width: 200px;border:1px solid #000000;" >
+			<#list corps as corp1>
+				<#if corp == corp1.orgName>
+				<option value ="${corp1.orgId}" selected="selected">${corp1.orgName}</option>
+				<#else>
+				<option value ="${corp1.orgId}">${corp1.orgName}</option>
+				</#if>
+				
+			 </#list>
+			</select>
+			(<#if shiftCorp??><span style="color:#3E74AE;">已启用<#else><span style="color:red;">未启用</#if></span>)
+		</span> 
+<!-- 		<span class="companyTitle" style="position:absolute;left:200px;margin-bottom:10px;width: 160px;"> -->
+		<h3 class="timeH3" style="position:absolute;left:310px;">本周 ( <span class="startSpan" style="color:#3E74AE;">${startStr}
+		<input type="hidden" id="startdate" value="${startStr}" />
+		</span> 至 <span class="endSpan" style="color:#3E74AE;">${endStr}</span> ) 排班表</h3>
+					<input name="workDate" type="hidden" id="endStr" value="${endStr}" />
+					<input type="hidden" id="token" name="token" value="${token}">
+		<div class="condition" style="width:620px;">
+			<ul>
+			
+				<li><div style="padding-top:5px;padding-right:10px;cursor:hand;">
+				<span style="padding:0px 5px 0px 5px">
+				<img id="lweek" src="${ctx}/img/lweek.png" style="cursor:pointer;" title="上一周" />
+				</span>
+				<span style="padding:0px 5px 0px 5px">
+				<img id="rweek" src="${ctx}/img/rweek.png" style="cursor:pointer;" title="下一周" />
+				</span>
+				</div>
+				</li>	
+				<li><div style="padding-top:3px;padding-right:10px;">
+				<img id="import" src="${ctx}/img/importlast.png" style="cursor:pointer" title="导入上一周排班" />
+				</div>
+				</li>		
+				<li>
+					<input value="${startStr}" class="input xl Wdate" style="width:100px;" type="text" id="startDate" onFocus="WdatePicker({disabledDays:[0,2,3,4,5,6],onpicked:function(dp){chooseDate();}})"/> &nbsp;至&nbsp; 
+					<input value="${endStr}" type="text" style="width:100px;" class="input xl Wdate" readonly="readonly"  id="endDate" name="end_yyyyMMdd" readonly="readonly">
+				</li>
+				<li>
+					<button type="button" class="searchSpan" id="search">刷新</button>
+				</li>
+				<li>
+					<span class="startEdit">开始编辑</span>
+					<button type="submit" class="endEdit">保存编辑</button>
+				</li>
+			</ul>
+		</div>
+		
+	</div>
+
+	
+	<div class="dateDiv" style="position:fixed;left:0px;right:0px;top:40px;opacity:1;z-index:1;background-color:rgba(233,233,233,1);" >
+		<ul class="day">
+			<li class="0"></li>
+			<li class="1 dayli" <#list shiftHolidays as sh><#if sh.day == 1>style="background:#3E74AE;color:#fff;" title="${sh.remarks}"</#if></#list>>16</li>
+			<li class="2 dayli" <#list shiftHolidays as sh><#if sh.day == 2>style="background:#3E74AE;color:#fff;" title="${sh.remarks}"</#if></#list>>17</li>
+			<li class="3 dayli" <#list shiftHolidays as sh><#if sh.day == 3>style="background:#3E74AE;color:#fff;" title="${sh.remarks}"</#if></#list>>18</li>
+			<li class="4 dayli" <#list shiftHolidays as sh><#if sh.day == 4>style="background:#3E74AE;color:#fff;" title="${sh.remarks}"</#if></#list>>19</li>
+			<li class="5 dayli" <#list shiftHolidays as sh><#if sh.day == 5>style="background:#3E74AE;color:#fff;" title="${sh.remarks}"</#if></#list>>20</li>
+			<li class="6 dayli" <#list shiftHolidays as sh><#if sh.day == 6>style="background:#3E74AE;color:#fff;" title="${sh.remarks}"</#if></#list>>21</li>
+			<li class="7 dayli bord"  <#list shiftHolidays as sh><#if sh.day == 7>style="background-color:#3E74AE;color:#fff;" title="${sh.remarks}"</#if></#list>>22</li>
+		</ul>
+		<ul class="week">
+			<li>姓名</li>
+			<li class="1 weekli">星期一</li>
+			<li class="2 weekli">星期二</li>
+			<li class="3 weekli">星期三</li>
+			<li class="4 weekli">星期四</li>
+			<li class="5 weekli">星期五</li>
+			<li class="6 weekli">星期六</li>
+			<li class="7 weekli" style="border-right: none">星期日</li>
+		</ul>
+	</div>
+	
+	<div class="schedul" style="position:relative;left:0px;right:0px;top:108px;opacity:1;background-color:rgba(233,233,233,1);" >
+	<#if page?size gt 0>
+		<#assign i = 0 />
+		<#list page as e>
+		<ul userId="${e.userId}">
+			<li class="nameLi">${e.trueName}</li>
+			
+			<li class="workLi" index="0" <#list shifts as s><#if s.sort == 1 && s.userId == e.userId> style="background-color:${s.shiftClass.color};" </#if></#list>>
+				<input type="hidden" value="<#list shifts as n><#if n.userId == e.userId && n.sort == 1>${n.classes}</#if></#list>" class="formHiden" name="mon${e.userId}" />				
+				<span class="msgSpan">
+				<#list shifts as s>
+					<#if s.userId == e.userId && s.sort == 1>
+						<span style="padding:5px 2px 5px 2px;margin-right:2px;" class="workSpan">
+							${s.shiftClass.className}<img src="/jw_js_css_img/img/delete.png" class="circulImg" />
+							<input type="hidden" value="${s.shiftClass.classId}" />
+						</span>
+					</#if>
+				</#list>
+				</span>
+			</li>
+			
+			<li class="workLi" index="1" <#list shifts as s><#if s.sort == 2 && s.userId == e.userId> style="background-color:${s.shiftClass.color};" </#if></#list>>
+				<input type="hidden" value="<#list shifts as n><#if n.userId == e.userId && n.sort == 2>${n.classes}</#if></#list>" class="formHiden" name="tue${e.userId}"/>
+					<span class="msgSpan">
+			<#list shifts as s>
+				<#if s.userId == e.userId && s.sort == 2>			
+					<span style="padding:5px 2px 5px 2px;margin-right:2px;" class="workSpan">
+						${s.shiftClass.className}<img src="/jw_js_css_img/img/delete.png" class="circulImg" />
+						<input type="hidden" value="${s.shiftClass.classId}" />
+					</span>
+				</#if>
+			</#list>
+				</span>
+			</li>
+			
+			<li class="workLi" index="2" <#list shifts as s><#if s.sort == 3 && s.userId == e.userId> style="background-color:${s.shiftClass.color};" </#if></#list>>
+				<input type="hidden" value="<#list shifts as n><#if n.userId == e.userId && n.sort == 3>${n.classes}</#if></#list>" class="formHiden" name="wen${e.userId}" />
+				<span class="msgSpan">
+				<#list shifts as s>
+					<#if s.userId == e.userId && s.sort == 3>
+						<span style="padding:5px 2px 5px 2px;margin-right:2px;" class="workSpan">
+							${s.shiftClass.className}<img src="/jw_js_css_img/img/delete.png" class="circulImg" />
+							<input type="hidden" value="${s.shiftClass.classId}" />
+						</span>
+					</#if>
+				</#list>
+				</span>
+			</li>
+
+		<li class="workLi" index="3" <#list shifts as s><#if s.sort == 4 && s.userId == e.userId> style="background-color:${s.shiftClass.color};" </#if></#list>>
+			<input type="hidden" value="<#list shifts as n><#if n.userId == e.userId && n.sort == 4>${n.classes}</#if></#list>" class="formHiden" name="thu${e.userId}" />
+				<span class="msgSpan">
+				<#list shifts as s>
+					<#if s.userId == e.userId && s.sort == 4>
+						<span style="padding:5px 2px 5px 2px;margin-right:2px;" class="workSpan">
+							${s.shiftClass.className}<img src="/jw_js_css_img/img/delete.png" class="circulImg" />
+							<input type="hidden" value="${s.shiftClass.classId}" />
+						</span>
+					</#if>
+				</#list>
+				</span>
+			</li>
+			
+			<li class="workLi" index="4" <#list shifts as s><#if s.sort == 5 && s.userId == e.userId> style="background-color:${s.shiftClass.color};" </#if></#list>>
+				<input type="hidden" value="<#list shifts as n><#if n.userId == e.userId && n.sort == 5>${n.classes}</#if></#list>" class="formHiden" name="fri${e.userId}" />
+					<span class="msgSpan">
+					<#list shifts as s>
+						<#if s.userId == e.userId && s.sort == 5>			
+						<span style="padding:5px 2px 5px 2px;margin-right:2px;" class="workSpan">
+							${s.shiftClass.className}<img src="/jw_js_css_img/img/delete.png" class="circulImg" />
+							<input type="hidden" value="${s.shiftClass.classId}" />
+						</span>
+						</#if>
+					</#list>
+				</span>
+			</li>
+			
+			<li class="workLi" index="5" <#list shifts as s><#if s.sort == 6 && s.userId == e.userId> style="background-color:${s.shiftClass.color};" </#if></#list>>
+				<input type="hidden" value="<#list shifts as n><#if n.userId == e.userId && n.sort == 6>${n.classes}</#if></#list>" class="formHiden" name="sat${e.userId}" />
+				<span class="msgSpan">
+				<#list shifts as s>
+					<#if s.userId == e.userId && s.sort == 6>
+						<span style="padding:5px 2px 5px 2px;margin-right:2px;" class="workSpan">
+							${s.shiftClass.className}<img src="/jw_js_css_img/img/delete.png" class="circulImg" />
+							<input type="hidden" value="${s.shiftClass.classId}" />
+						</span>
+					</#if>
+				</#list>
+				</span>
+			</li>
+			
+			<li class="workLi lastLi" index="6" <#list shifts as s><#if s.sort == 7 && s.userId == e.userId> style="background-color:${s.shiftClass.color};border-right: none;" </#if></#list>>
+				<input type="hidden" value="<#list shifts as n><#if n.userId == e.userId && n.sort == 7>${n.classes}</#if></#list>" class="formHiden" name="sun${e.userId}" />
+				<span class="msgSpan">		
+				<#list shifts as s>
+					<#if s.userId == e.userId && s.sort == 7>
+						<span style="padding:5px 2px 5px 2px;margin-right:2px;" class="workSpan">
+							${s.shiftClass.className}<img src="/jw_js_css_img/img/delete.png" class="circulImg" />
+							<input type="hidden" value="${s.shiftClass.classId}" />
+						</span>
+					</#if>
+				</#list>
+				</span>
+			</li>
+		</ul>
+		<#assign i = i + 1 />
+		</#list>
+	</#if>
+	</div>
+	</form>
+	
+	<div style="clear: both;"></div>
+	
+	<div class="workColorInfo" style="position:relative;left:0px;right:0px;top:108px;">
+		<div class="contantColorInfo" style="border:1px #ddd solid;">
+			<span class="Explain" style="background:#3E74AE;border:1px #999 solid;"></span>
+			<span>法定节假日</span>
+		</div>
+		<#list classes as cs>
+			<div class="contantColorInfo" style="border:1px #ddd solid;">
+				<span class="Explain" style="background:${cs.color};border:1px #999 solid;" title=${cs.color}></span>
+				<span><#if cs.night == 1>日班</#if><#if cs.night == 0>夜班</#if></span>
+				${cs.firstMorning}~${cs.firstNight}
+				<#if cs.second == 1>,
+						${cs.secondMorning}~${cs.secondNight}
+				</#if>
+			</div>
+		</#list>
+	</div>
+	
+	<div id="del_apply" class="pop" style="display: none; width: 280px;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<div class="pop_title">日期不能为空</div>
+			<div class="pop_content blank">日期不能为空</div>
+			<div class="pop_btn ">
+				<button type="button" class="btn primary xs" onclick="close_pop()">取消</button>
+			</div>
+		</div>				
+	</div>
+	
+	<div id="load" class="pop" style="display: none; width: 280px;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<div class="pop_title">保存数据</div>
+			<div class="pop_content blank">正在保存数据，请稍后...</div>
+			<div class="pop_btn ">
+			</div>
+		</div>				
+	</div>
+	
+	<div id="workInfo" class="pop" style="display: none; width: 280px;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<div class="pop_title">提示信息</div>
+			<div class="pop_content blank">最多只能加一个班次</div>
+			<div class="pop_btn ">
+				<button type="button" class="btn primary xs" onclick="close_pop()">确定</button>
+			</div>
+		</div>				
+	</div>
+<script type="text/javascript">
+
+	$(document).ready(function(){
+		$("#lweek").click(function(){
+			var selected = $("#corpChange").children('option:selected').val();
+			var startTime = $("#startdate").val();		
+			var url = "page?startTime="+startTime+"&shortcut=0"+"&corpId="+selected;
+			location.href=url;
+		});
+		$("#corpChange").change(function(){
+			var selected = $(this).children('option:selected').val();
+/* 			alert(selected); */
+			var location = window.location.href;
+			if(location.indexOf("?") > 0){
+				var corpId = GetQueryString("corpId");
+				if(corpId != null){
+					location = location.replace("corpId="+corpId, "corpId="+selected);
+				}else{
+					location = location + "&corpId=" + selected;
+				}
+/* 				alert(corpId); */
+			}else{
+				location = location + "?corpId=" + selected;
+			}
+/* 			alert(location); */
+			window.location.href = location;
+		});
+		
+		function GetQueryString(name){
+		     var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+		     var r = window.location.search.substr(1).match(reg);
+		     if(r!=null)return  unescape(r[2]); return null;
+		}
+		
+		
+		$("#rweek").click(function(){
+			var startTime = $("#startdate").val();
+			var selected = $("#corpChange").children('option:selected').val();	
+			var url = "page?startTime="+startTime+"&shortcut=1"+"&corpId="+selected;
+			location.href=url;
+		});
+		
+		$("#import").click(function(){
+			var startTime = $("#startdate").val();
+			var selected = $("#corpChange").children('option:selected').val();
+			$.ajax({
+				url:"getShiftStatus?startTime="+startTime+"&token=${token}",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				success: function(data) {
+					if (data.code == 1) {
+						$("#loadingR").show();
+						$.ajax({
+							url:"importp?import="+startTime+"&corpId="+selected,
+							type: "post",
+							resetForm: false,
+							dataType: "json",
+							success: function(data) {
+								if (data.code == 1) {
+								success_callback(data, "page?startTime="+"${startStr}");
+								} else {
+								$("#loadingR").hide();
+								danger_callback(data);
+							}
+							}
+						});
+					} else {
+						danger(1, "抱歉，该段时间的排班已经被锁定，请联系人事部！");
+					}
+				}
+			});
+			
+		});
+		
+		$("#form").ajaxForm({
+		url: "add",
+		type: "post",
+		resetForm: false,
+		dataType: "json",
+		beforeSubmit: function(formData, jqForm, options) {
+			open_pop(null,null,"#load",true);
+		},
+		success: function(data) {
+			var selected = $("#corpChange").children('option:selected').val();
+			if (data.code == 1) {
+				success_callback(data, "page?startTime="+"${startStr}"+"&corpId="+selected);
+			} else {
+				danger_callback(data);
+			}
+		}
+	});
+	
+	$("#search").click(function(){
+		var selected = $("#corpChange").children('option:selected').val();
+		var startTime = $("#startDate").val();		
+		var url = "page?startTime="+startTime+"&shortcut=1"+"&corpId="+selected;
+		window.location.href=url;
+		
+	});
+	
+	chooseDate = function(){
+		var startTime = $("#startDate").val();		
+		var url = "page?startTime="+startTime;
+		window.location.href=url;
+	};
+	
+	$(".startEdit").click(function(){
+		$(".circulImg").show();
+		$(".startEdit").css("display","none");
+		$(".endEdit").css("display","block");
+		var appendDiv = "<div class='appendDiv'><#list classes as c><span class='statusSpan' style='background:${c.color}; height: 35px; width: auto;' title='${c.color}'>${c.className}</span><input type='hidden' value='${c.classId}' /></#list></div>";
+		$("li[class=workLi][index!=6]").append(appendDiv);
+		<#if (classes?size > 3)>
+			var appendDiv = "<div class='appendDiv' style='position:relative;right:120px;'><#list classes as c><span class='statusSpan' style='background:${c.color}; height: 35px; width: auto;' title='${c.color}'>${c.className}</span><input type='hidden' value='${c.classId}' /></#list></div>";
+			$(".lastLi").append(appendDiv);
+		<#else>
+			var appendDiv = "<div class='appendDiv'><#list classes as c><span class='statusSpan' style='background:${c.color}; height: 35px; width: auto;' title='${c.color}'>${c.className}</span><input type='hidden' value='${c.classId}' /></#list></div>";
+			$(".lastLi").append(appendDiv);
+		</#if>
+		
+	});
+	
+	});
+</script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if recording.recordingId??>编辑<#else>新建</#if>补录审批</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit">
+			<div id="form" class="clearfix" style="width: 600px;">
+				<form action="add" method="post">
+					<!-- <input type="hidden" name="token" value="${token}"> -->
+					<input type="hidden" name="recordingId" value="${recording.recordingId}">
+					<table class="table">
+						<tr>
+							<td>申请人：</td>
+							<td></td>
+							<td class="lg"><input type="text" class="input xl" value="${recording.trueName}" readonly="readonly"></td>
+						</tr>
+						<tr>
+							<td>申请时间：</td>
+							<td></td>
+							<td>
+								<#assign createTime = now?date />
+								<#if recording.createTime??><#assign createTime = recording.createTime?date /></#if>
+								<input type="text" class="input xl" value="${createTime}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>外勤时间：</td>
+							<td class="required"></td>
+							<td>
+								<#if recording.recordingTime??><#assign work_yyyyMMdd = recording.recordingTime?date /></#if>
+								<#if recording.recordingAM == "0"><#assign type = "上午" /></#if>
+								<input type="text" class="input xl" value="${work_yyyyMMdd?default('')}&nbsp;${type?default('下午')}" readonly="readonly" />
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">外勤原因：</td>
+							<td class="pos required"></td>
+							<td>
+								<textarea class="xl" rows="4" readonly="readonly">${recording.reason}</textarea>
+							</td>
+						</tr>
+						<tr>
+							<td>上级审批：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" value="${recording.operator}" readonly="readonly" />
+							</td>
+						</tr>
+						<tr>
+							<td>审批状态：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="approve" value="${recording.approve}" />
+								<div id="approve" class="select xl">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<li item="">请选择</li>
+										<li item="1">已批准</li>
+										<li item="-1">未批准</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">审批意见：</td>
+							<td class="pos required">*</td>
+							<td>
+								<textarea class="xl" rows="4" name="opinion" id="opinion">${recording.opinion}</textarea>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"></td>
+							<td>
+								<#if recording.approve != "99">
+									<button type="submit" class="btn primary xs">提交</button>
+								</#if>
+							</td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#approve").select({ "name": "approve" });
+			
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.approve, [RQ, N], "审批状态");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+	</script>
+</body>
+</html>

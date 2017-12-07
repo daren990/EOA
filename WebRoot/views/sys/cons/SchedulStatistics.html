@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/tablesorter/themes/blue/style.css">
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/Highcharts/js/highcharts.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/Highcharts/js/modules/exporting.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/tablesorter/jquery.tablesorter.min.js"></script>
+	<style type="text/css">
+	*{margin: 0;padding: 0;font-size: 14px;}
+	.workdate{width: 97%;margin: 20px auto auto;}
+	</style>
+</head>
+  
+  <body>
+<!--   	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div> -->
+	<div style="float:right;margin:3px 30px 2px 0px;">
+	
+	<span style="position:relative;top:10px;padding-top:5px;padding-right:10px;">
+				<span style="padding:0px 5px 0px 5px">
+				<img id="lweek" src="${ctx}/img/lweek.png" style="cursor:pointer;" title="上一周" />
+				</span>
+				<span style="padding:0px 5px 0px 5px">
+				<img id="rweek" src="${ctx}/img/rweek.png" style="cursor:pointer;" title="下一周" />
+				</span>
+	</span>
+	<span>
+	<input value="${monthStr}" type="text" class="input xl Wdate" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM'})" style="width: 95px;" placeholder="选择时间" id="changeDate">
+	<button style="margin-left:5px;position:relative;top:-2px;padding-top:2px;" class="btn primary xs" id="search">刷新</button>
+	</span>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit auto_height">
+			<div style="width: 97%;margin: 20px auto;" id="content"></div>
+			
+			<div class="workdate">
+			     <table id="alltable" class="tablesorter">   
+				    <thead>   
+					    <tr>   
+					        <th>姓名</th>   
+					        <th>上班时间</th>     
+					    </tr>   
+				    </thead>   
+				    <tbody>   
+					    	<#list page as u>
+					    	<tr>
+					    		<td>${u.trueName}</td> 
+					    		<td>${u.sumTime}</td> 
+					    	</tr>
+					    	</#list> 
+				    </tbody>   
+				 </table>  
+			</div>
+  		</div>
+  	</div>
+  	<script type="text/javascript">
+  	$(document).ready(function(){
+  		$("#lweek").click(function(){
+			var startTime = $("#changeDate").val();		
+			var url = "page?month="+startTime+"&shortcut=0";
+			location.href=url;
+		});
+		$("#rweek").click(function(){
+			var startTime = $("#changeDate").val();		
+			var url = "page?month="+startTime+"&shortcut=1";
+			location.href=url;
+		});
+		
+  		$("#search").click(function(){
+  			var month=$("#changeDate").val();
+  			window.location.href="page?month="+month;
+  		});
+  		$("#alltable").tablesorter();
+  		
+  		$("#content").highcharts({
+            chart: {
+                type: "bar"
+            },
+            title: {
+                text: "${org}:<span style=\"color:#3E74AE;\">${monthFirst}</span>到<span style=\"color:#3E74AE;\">${monthFinally}</span>排班统计"
+            },
+            xAxis: {
+            	categories: [<#list page as u>"${u.trueName}"<#if u_has_next>,</#if></#list>]
+               /*  categories: ["Apples", "Oranges", "Pears", "Grapes", "Bananas"] */
+            },
+            yAxis: {
+                title: {
+                    text: "上班时间(小时)"
+                },
+                tickPositions:[0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,210,220,230]
+            },
+            legend: {
+                reversed: true
+            },
+            plotOptions: {
+                series: {
+                    stacking: "normal"
+                },
+                 column : {
+		        // 设置每个柱自身的宽度
+		        pointPadding : 0.5,
+		        groupPadding : 0.5
+		    }
+            },
+                series: [{
+                name: "月上班总时长(小时)",
+                data: [<#list page as e>${e.sumTime}<#if e_has_next>,</#if></#list>]
+                /* data: [120, 160, 155, 180, 200] */
+            }],
+            credits: {
+	          enabled:false
+	        },
+	        lang:{
+	        	downloadJPEG: "下载JPEG 图片",
+				downloadPDF: "下载PDF文档",
+				downloadPNG: "下载PNG 图片",
+				downloadSVG: "下载SVG 矢量图",
+				exportButtsonTitle: "导出图片",
+				printChart:"打印报表"
+	        }
+        });
+  	});
+  	</script>
+  </body>
+</html>

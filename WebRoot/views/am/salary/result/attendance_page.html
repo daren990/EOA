@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 汇总查询</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<div id="right" class="right">
+				<form id="search" action="page" method="get">
+					<ul>
+						<li class="text">年份</li>
+						<li>
+							<input type="hidden" name="year" value="${mb.year?default(mb.years)}" />
+							<div id="year" class="select" style="width: 68px">
+								<span class="option text">请选择</span><span class="icon"></span>
+								<ul>
+									<#list (mb.years-3)..(mb.years+1) as e>
+										<li item="${e}">${e}年</li>
+									</#list>
+								</ul>
+							</div>
+						</li>
+						<li class="text">月份</li>
+						<li>
+							<input type="hidden" name="month" value="${mb.month?default(mb.months)}" />
+							<div id="month" class="select xs">
+								<span class="option text">请选择</span><span class="icon"></span>
+								<ul>
+									<#list ["01","02","03","04","05","06","07","08","09","10","11","12"] as e>
+										<li item="${e}">${e}月</li>
+									</#list>
+								</ul>
+							</div>
+						</li>
+						<li><button type="submit" class="btn primary xxs">搜索</button></li>
+					</ul>
+				</form>
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+			<div class="table_head">
+				<table class="table">
+					<thead>
+						<tr>
+							<th width="">汇总年月</th>
+							<th width="80">姓名</th>
+							<th width="7%">迟到</th>
+							<th width="7%">早退</th>
+							<th width="7%">旷工</th>
+							<th width="7%">事假</th>
+							<th width="7%">病假</th>
+							<th width="7%">婚假</th>
+							<th width="7%">年休假</th>
+							<th width="7%">工伤</th>
+							<th width="7%">加班补休</th>
+							<th width="7%">加班</th>
+							<th width="7%">出差</th>
+							<th width="7%">外勤</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+			<div class="table_body auto_height">
+				<table class="table">
+					<tbody>
+						<#if page.result?? && page.result?size gt 0>
+							<#list page.result as e>
+						<tr>
+							<td width="">${e.resultMonth}</td>
+							<td width="68">${e.trueName}</td>
+							<td width="7%">${e.lateMinTimes + e.lateMaxTimes}&nbsp;次</td>
+							<td width="7%">${e.earlyMinTimes + e.earlyMaxTimes}&nbsp;次</td>
+							<td width="7%">${e.absentTimes}&nbsp;次</td>
+							<td width="7%">${views.hour(e.unpaidLeaveMinute + e.paidLeaveMinute)?string("0.#")}&nbsp;小时</td>
+							<td width="7%">${views.hour(e.sickLeaveMinute)?string("0.#")}&nbsp;小时</td>
+							<td width="7%">${views.hour(e.maritalLeaveMinute)?string("0.#")}</td>
+							<td width="7%">${views.day(e.annualLeaveMinute, e.workMinute)?string("0.#")}&nbsp;天</td>
+							<td width="7%">${views.hour(e.injuryLeaveMinute)?string("0.#")}&nbsp;小时</td>
+							<td width="7%">${views.hour(e.deferredLeaveMinute)?string("0.#")}&nbsp;小时</td>
+							<td width="7%">${views.hour(e.overtimeMinute)?string("0.#")}&nbsp;小时</td>
+							<td width="7%">${views.hour(e.errandMinute)?string("0.#")}&nbsp;小时</td>
+							<td width="7%">${views.hour(e.outworkMinute)?string("0.#")}&nbsp;小时</td>
+						</tr>
+							</#list>
+						</#if>
+					</tbody>
+				</table>
+			</div>
+			<#if page.result?size lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<@fm.page page=page />
+		</div>
+	</div>
+	
+	<div id="footer"></div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#year").select({ "name": "year" });
+			$("#month").select({ "name": "month" });
+		});		
+		window.onload = window.onresize = function() {
+			auto_width();
+		}
+	</script>
+</body>
+</html>

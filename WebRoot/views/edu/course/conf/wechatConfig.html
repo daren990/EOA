@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if wechat.id??>编辑<#else>新建</#if>权限</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit">
+			<div id="form" class="clearfix" style="width: 450px;">
+					<input type="hidden" id="token" name="token" value="${token}">
+					<input type="hidden" id="id" name="id" value="${wechat.id}">
+					<table class="table">
+						<tr>
+							<td class="pos">AppId：</td>
+							<td class="required pos">*</td>
+							<td>
+							<input type="password" class="input xl" id="appid" name="appid" value="${wechat.appid}">
+							</td>
+						</tr>
+					
+					    <tr>
+							<td class="pos">Secret Key：</td>
+							<td class="required pos">*</td>
+							<td>
+							<input type="password" class="input xl" id="secret" name="secret" value="${wechat.secret}">
+							</td>
+						</tr>					
+						
+						<tr>
+							<td class="pos">Merchant Id：</td>
+							<td class="required pos">*</td>
+							<td>
+							<input type="password" class="input xl" id="merchantid" name="merchantid" value="${wechat.merchantid}">
+							</td>
+						</tr>					
+						
+						<tr>
+							<td class="pos">Merchant Secret：</td>
+							<td class="required pos">*</td>
+							<td>
+							<input type="password" class="input xl" id="merchantsecret" name="merchantsecret" value="${wechat.merchantsecret}">
+							</td>
+						</tr>
+					
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" id="submit" class="btn primary xs">提交</button></td>
+						</tr>
+						
+					</table>
+			</div>
+		</div>
+	</div>
+		
+		<script type="text/javascript">
+		$(document).ready(function() {
+						
+			
+			$("#submit").click(function(){
+			    var par = {};
+			    par['id'] = $("#id").val();
+				par['appid'] = $("#appid").val();
+				par['secret'] = $("#secret").val();
+				par['merchantid'] = $("#merchantid").val();
+				par['merchantsecret'] = $("#merchantsecret").val();
+
+				par['token'] = $("#token").val();
+				
+				$.ajax({
+					url: "add",
+					type: "post",
+		            data:par,
+					dataType: "json",
+					success: function(data) {
+						if (data.code == 1) {
+							success_callback(data, "add");
+						} else {
+							danger_callback(data);
+						}
+					}
+				});
+			});
+			
+			
+		});
+	</script>
+	
+</body>
+</html>

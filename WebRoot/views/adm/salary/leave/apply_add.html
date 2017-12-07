@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if leave.leaveId??>编辑<#else>新建</#if>请假申请</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/js/day_classes.js"></script>
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit auto_height">
+			<div id="form" class="clearfix" style="width: 400px;">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="leaveId" value="${leave.leaveId}">
+					<table class="table">
+						<tr>
+							<td>申请人：</td>
+							<td></td>
+							<td><input type="text" class="input xl" value="${currentUser.trueName}" readonly="readonly" name="titleName" /></td>
+						</tr>
+						<tr>
+							<td>申请时间：</td>
+							<td></td>
+							<td>
+								<#assign createTime = now?date />
+								<#if leave.createTime??><#assign createTime = leave.createTime?date /></#if>
+								<input type="text" class="input xl" value="${createTime}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>请假类型：</td>
+							<td class="required">*</td>
+							<td>
+								<input  type="hidden" name="typeId" value="${leave.typeId}" >
+								<div id="typeId" class="select xl">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<#list leaveMap?keys as e>
+										<li item="${e}" name="leaveTypeItem" >${leaveMap[e]}</li>
+										</#list>
+									</ul>
+								</div>
+							</td>
+						</tr>
+		
+						<tr name="applyWay1" style="display:none;">
+							<td>开始时间：</td>
+							<td class="required">*</td>
+							<td>
+								<#if leave.startTime??><#assign start_yyyyMMdd = leave.startTime?date /><#assign startTime = leave.startTime?string("HH:mm") /></#if>
+								<input type="text" id="start_yyyyMMdd" class="input sm Wdate" name="start_yyyyMMdd" value="${start_yyyyMMdd?default('')}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+								<input name="startType" class="Wdate" style="padding-left:5px;width:80px;height:24px;border: 1px solid #C5CFD7;" type="text" value="${startTime}" id="nighttimeStartDate" onFocus="WdatePicker({dateFmt:'HH:mm',onpicking:getNightHours($('#nighttimeStartDate').val(),$('#nighttimeEndDate').val())})"/> 
+							
+								<!-- <input type="hidden" name="startType" value="${leave.startType}" />
+								<div id="startType" class="select xs">
+									<span class="option text"></span><span class="icon"></span>
+									<ul>
+										<li item="0">上午</li>
+										<li item="1">下午</li>
+									</ul>
+								</div> -->
+								<!-- <@fm.time arr=["start_HH", "start_mm"] hour=start_HH?default("") minute=start_mm?default("") /> -->
+							</td>
+						</tr>
+						<tr name="applyWay1" style="display:none;">	
+							<td>结束时间：</td>
+							<td class="required">*</td>
+							<td>
+								<#if leave.endTime??>
+									<#assign end_yyyyMMdd = leave.endTime?date /><#assign endTime = leave.endTime?string("HH:mm") />
+								</#if>
+								<input type="text" class="input sm Wdate" name="end_yyyyMMdd" value="${end_yyyyMMdd?default('')}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+								<input name="endType" class="Wdate" style="padding-left:5px;width:80px;height:24px;border: 1px solid #C5CFD7;" type="text" value="${endTime}" id="nighttimeStartDate" onFocus="WdatePicker({dateFmt:'HH:mm',onpicking:getNightHours($('#nighttimeStartDate').val(),$('#nighttimeEndDate').val())})"/> 
+							
+								<!-- <input type="hidden" name="endType" value="${leave.endType}" />
+								<div id="endType" class="select xs">
+									<span class="option text"></span><span class="icon"></span>
+									<ul>
+										<li item="0">上午</li>
+										<li item="1">下午</li>
+									</ul>
+								</div> -->
+								<!-- <@fm.time arr=["end_HH", "end_mm"] hour=end_HH?default("") minute=end_mm?default("") /> -->
+							</td>
+						</tr>
+					
+						<tr name="applyWay2" style="display:none;">	
+							<td>开始日期：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input sm Wdate" name="date_yyyyMMdd" id="date_yyyyMMdd" value=""  onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})"/>
+							</td>
+
+						</tr>
+						<tr name="applyWay2" style="display:none;" id="changeStep">
+							<td>请假长度：</td>
+							<td class="required">*</td>
+							<td><input type="number" class="input xl" min="0.5" step="0.5" max="10" value="" name="timeInterval" id="timeInterval"/></td>
+						</tr>
+						
+						<tr>
+							<td class="pos">请假原因：</td>
+							<td class="pos required">*</td>
+							<td>
+								<textarea class="xl" name="reason" rows="4" >${leave.reason}</textarea>
+							</td>
+						</tr>
+						
+						
+				<!-- 		
+					销假的时候才显示	
+						
+						
+							<tr name="applyWay1"">
+							<td>销假开始时间：</td>
+							<td class="required">*</td>
+							<td>
+								<#if leave.disappear_startTime??><#assign start_yyyyMMdd = leave.disappear_startTime?date /><#assign disappear_startTime = leave.disappear_startTime?string("HH:mm") /></#if>
+								<input type="text" id="start_yyyyMMdd" class="input sm Wdate" name="disappear_start_yyyyMMdd" value="${disappear_start_yyyyMMdd?default('')}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+								<input name="disappear_startType" class="Wdate" style="padding-left:5px;width:80px;height:24px;border: 1px solid #C5CFD7;" type="text" value="${disappear_startTime}" id="nighttimeStartDate" onFocus="WdatePicker({dateFmt:'HH:mm',onpicking:getNightHours($('#nighttimeStartDate').val(),$('#nighttimeEndDate').val())})"/> 
+							</td>
+						</tr>
+						<tr name="applyWay1"">	
+							<td>销假结束时间：</td>
+							<td class="required">*</td>
+							<td>	
+								<input type="text" class="input sm Wdate" name="disappear_end_yyyyMMdd" value="${disappear_end_yyyyMMdd?default('')}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+								<input name="disappear_endType" class="Wdate" style="padding-left:5px;width:80px;height:24px;border: 1px solid #C5CFD7;" type="text" value="${disappear_endTime}" id="nighttimeStartDate" onFocus="WdatePicker({dateFmt:'HH:mm',onpicking:getNightHours($('#nighttimeStartDate').val(),$('#nighttimeEndDate').val())})"/> 
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">销假原因：</td>
+							<td class="pos required">*</td>
+							<td>
+								<textarea class="xl" name="disappear_reason" rows="4" >${leave.disappear_reason}</textarea>
+							</td>
+						</tr>
+						
+						  -->
+						
+						
+						
+						
+						
+						
+						
+						
+
+						
+						<tr>
+							<td>上级审批：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="operatorId" value="${leave.actorId?default(currentUser.managerId)}">
+								<div id="operatorId" class="select xl">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul class="auto_height sm">
+										<#list operators as e>
+										<li item="${e.userId}">${e.trueName}</li>
+										<input type="hidden" value="${e.username}" name="${e.userId}" />
+										</#list>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						
+						
+						
+						
+						
+						
+						
+					
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#typeId").select({ "name": "typeId" });
+			$("#operatorId").select({ "name": "operatorId" });
+			$("#startType").select({ "name": "startType" });
+			$("#endType").select({ "name": "endType" });
+			/*选择后执行getType方法*/
+			$('li[name="leaveTypeItem"]').click(getType);
+			
+			
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.typeId, [RQ, RANGE, "{1,20}"], "请假类型");
+	/* 					validate(form.start_yyyyMMdd, [RQ], "开始时间");
+						validate(form.startType, [RQ], "请假开始时段");
+						validate(form.end_yyyyMMdd, [RQ], "结束时间");
+						validate(form.endType, [RQ], "请假结束时段"); */
+						validate(form.reason, [RQ], "请假原因");
+						validate(form.operatorId, [RQ], "上级审批");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+		
+		function getType(){
+			/*设定参数与地址*/
+			var params = {"typeId":$(this).attr("item")};
+			var url = "leaveType";
+			$.post(url,params,function(result){
+				//console.log(result);
+				if(result!=0){
+					/*返回值达到条件情况下先清空此tr的内容*/
+					$('#changeStep').empty();
+					/*生成相对应的长度限制输入框*/
+					$('#changeStep').append(
+							'<td>请假长度：</td>'+
+							'<td class="required">*</td>'+
+							'<td><input type="number" class="input xl" min="0.5" step="0.5" max="10" value="" name="timeInterval" id="timeInterval"/></td>');	
+					$('tr[name="applyWay2"]').show();
+					$('tr[name="applyWay1"]').hide();
+				}else{
+					$('tr[name="applyWay1"]').show();
+					$('tr[name="applyWay2"]').hide();
+				}
+			});
+		}
+/* 		$("#startType").click(function(){
+				//alert(1);
+				$("#startType").html("");
+				$("form").ajaxSubmit({
+				url: "getTime?"+"mOrN=0",
+				type: "post",
+				dataType: "json",
+				success: function(data) {
+					if (data.code == 1) {
+ 						$("input [name='startType']").val("");
+ 						selt = "<span class=\"option text\"></span><span class=\"icon\"></span><span class=\"option text\"></span><span class=\"icon\"></span><ul><li item=\"0\">"+data.first+"</li>";
+ 						if(data.last != null){
+ 							selt += "<li item=\"1\">"+data.last+"</li>";
+ 						}
+ 						selt += "</ul>";
+ 						$("#startType").html(selt);
+					} else {
+						danger_callback(data);
+					}
+				}
+				});
+			});	 */	
+	</script>
+</body>
+</html>

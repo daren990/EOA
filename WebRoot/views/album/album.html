@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+  	<meta name="viewport" content="width=device-width, initial-scale=1" />
+  	<link rel="stylesheet" type="text/css" href="/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.css" />
+  	<link rel="stylesheet" type="text/css" href="/jw_js_css_img/jqm/jQueryMobile/jquery.mobile.theme-1.4.5.min.css" />
+  	<link rel="stylesheet" type="text/css" href="/jw_js_css_img/css/album.css" />
+  	<script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
+  	<script type="text/javascript" src="/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.js" ></script>
+    <title>我的相册</title>
+  </head>
+  
+  <body>
+  	<div data-role="page" id="pageAlbum">
+  		<div data-role="header">
+  			<a href="share" data-role="button" class="ui-btn-left lookShare" data-icon="heart">分享空间</a>
+  			<h1>我的相册</h1>
+  			<a href="#createAlbum" data-transition="slide" data-role="button" class="ui-btn-right" data-icon="arrow-r" data-iconpos="right">创建相册</a>
+  		</div>
+  		<div class="albumDiv">
+  			<ul data-role="listview" data-inset="true">
+  				<#if listAlbum?size gt 0>
+  					<#list listAlbum as l>
+  						<li>
+		  					<a href="album_list?id=${l.id}" data-transition="slide">
+		  						<#if l.count == 0>
+		  							<img src="/jw_js_css_img/img/noneAblum.jpg" />
+		  						<#else>
+		  							<img src="${l.imgUrl}" />
+		  						</#if>
+		  						<h2>${l.albumTitle}</h2>
+		  						<p>共${l.count}张</p>
+		  						<a href="javascript:;" class="aDeleteAlbum ui-icon-delete"></a>
+		  						<input type="hidden" value="${l.id}" />
+		  					</a>
+		  				</li>
+  					</#list>
+  				</#if>
+  			</ul>
+  		</div>
+  		
+  		<a href="#deleteAlbum" id="aDeleteAlbum" data-transition="slidedown" data-rel="popup" data-position-to="window"></a>
+		<div data-role="popup" id="deleteAlbum" class="ui-content" style="max-width:280px">
+			<p>确定要删除吗？</p>
+			<a href="javascript:;" class="ui-btn ui-corner-all ui-btn-inline" id="sureDelete">确定</a>
+			<input type="hidden" id="deleteAlbumId" />
+			<a href="javascript:;" class="ui-btn ui-corner-all ui-btn-inline" id="cancelDelete">取消</a>
+		</div>
+		
+		<a href="#createAlbumPopup" data-transition="slidedown" data-rel="popup"  data-position-to="window" id="aCreateAlbumPopup"></a>
+		<div data-role="popup" id="createAlbumPopup" class="ui-content"  data-dismissible="false" style="max-width:280px">
+			<p>正在删除相册....</p>
+		</div>
+		
+		<a href="#popupDeleteSuccess" data-transition="slidedown" data-rel="popup"  data-position-to="window" id="successPopup"></a>
+		<div data-role="popup" id="popupDeleteSuccess" class="ui-content" style="max-width:280px">
+			<p>删除成功</p>
+		</div>
+  	</div>
+  	
+  	<div data-role="page" id="createAlbum">
+  		<input type="hidden" value="" id="albumId" />
+  		<div data-role="header">
+  			<a href="#pageAlbum" data-transition="flip" data-role="button" class="ui-btn-left" data-icon="arrow-l">返回</a>
+  			<h1>创建相册</h1>
+  		</div>
+  		<div class="ui-body ui-body-a ui-corner-all" id="updateDiv">
+  			<h3><img src="/jw_js_css_img/img/uploadImg.jpg" /></h3>
+  			<p><input type="text" name="albumTitle" id="albumTitle" placeholder="请输入相册标题...." /></p>
+  			<p>
+  				<textarea style="resize:none" placeholder="请描述相册..." id="description"></textarea>
+  			</p>
+  			<p><button class="ui-btn ui-corner-all" id="createButtom">确定创建</button></p>
+		</div>
+		
+		<a href="#positionWindow" data-transition="slidedown" data-rel="popup" id="pop"  data-position-to="window"></a>
+		<div data-role="popup" id="positionWindow" class="ui-content" data-theme="a">
+			<p>相册标题不能为空</p>
+		</div>
+		
+		<a href="#transitionExample" data-transition="flow" data-rel="popup"  data-position-to="window" id="flow"></a>
+		<div data-role="popup" id="transitionExample" class="ui-content" data-theme="a">
+			<p>创建相册成功，现在去上传图片？</p>
+			<div class="">
+				<a href="javascript:;" class="ui-btn ui-btn-inline ui-corner-all" id="nowGo">现在就去</a>
+				<a href="javascript:;" class="ui-btn ui-btn-inline ui-corner-all" id="closeFlow">等下再去</a>
+			</div>
+		</div>
+		
+		<a href="#popupUndismissible" data-transition="slidedown" data-rel="popup"  data-position-to="window" id="createAblumPop"></a>
+		<div data-role="popup" id="popupUndismissible" class="ui-content"  data-dismissible="false" style="max-width:280px">
+			<p>正在新建相册....</p>
+		</div>
+		
+  	</div>
+ <script type="text/javascript">
+  	$(document).ready(function(){
+  		jQuery.mobile.ajaxEnabled = false;
+  		
+  		$("#createButtom").click(function(){
+  			var albumTitle = $("#albumTitle").val();
+  			var $albumTitleLength = $.trim($("#albumTitle").val());
+  			var description = $("#description").val();
+  			if($albumTitleLength.length == 0){
+  				$("#pop").click();
+  			}
+  			else{
+  				$.ajax({
+  					type:"post",
+  					url:"createAlbum",
+  					dataType:"json",
+  					data:{"albumTitle":albumTitle,"description":description},
+  					beforeSend:function(){
+  						$("#createAblumPop").click();
+  					},
+  					success:function(data){
+  						if(data.code == 1){
+  							//成功
+  							$("#popupUndismissible").popup("close");
+  							$("#albumId").val(data.id);
+  							$("#albumTitle").val("");
+  							$("#description").val("");
+  							setTimeout(function(){
+  								$("#flow").click();  								
+  							},500);
+  						}else{
+  							alert("创建相册失败");
+  						}
+  					},
+  				});
+  			}
+  		});
+  		
+  		$("#closeFlow").click(function(){
+  			$("#transitionExample").popup("close");
+  		});
+  		
+  		$("#nowGo").click(function(){
+  			var albumId = $("#albumId").val();
+  			window.location.href="downAlbum?id="+albumId;
+  		});
+  		
+  		$(".aDeleteAlbum").click(function(){
+  			var id = $(this).next().val();
+  			$("#deleteAlbumId").val(id);
+  			$("#aDeleteAlbum").click();
+  		});
+  		
+  		$("#sureDelete").click(function(){
+  			var albumId = $("#deleteAlbumId").val();
+  			$("#deleteAlbum").popup("close");
+  			$.ajax({
+  				url:"deleteAlbum",
+  				data:{"albumId":albumId},
+  				type:"post",
+  				dataType:"json",
+  				beforeSend:function(){
+  					setTimeout(function(){
+  						$("#aCreateAlbumPopup").click();
+  					},500);
+  				},
+  				success:function(data){
+  					if(data.code == 1){
+  						setTimeout(function(){
+  							$("#createAlbumPopup").popup("close");  							
+  						},500);
+  						setTimeout(function(){
+  							$("#successPopup").click();
+  						},1000);
+  						setTimeout(function(){
+  							window.location.reload();
+  						},3000);
+  					}else{
+  						alert("删除失败");
+  					}
+  				}
+  			});
+  		});
+  		
+  		$("#cancelDelete").click(function(){
+  			$("#deleteAlbum").popup("close");
+  		});
+  		
+  	});
+ </script>
+  </body>
+</html>

@@ -1,0 +1,114 @@
+<div class="pop_close">X</div>
+<div class="pop_limit">
+	<div class="pop_title">工资增扣设置</div>
+	<div class="pop_tips">
+		<div class="error">
+			<span class="icons icon_danger hide"></span>
+			<label></label>
+		</div>
+	</div>
+	<form action="add" method="post">
+		<input type="hidden" name="token" value="${token}">
+		<input type="hidden" name="year" value="">
+		<input type="hidden" name="month" value="">
+		<input type="hidden" name="corpId" value="">
+		<input type="hidden" name="userId" value="">
+		<div class="pop_content blank auto_height sm">
+			<table class="form">
+				<tr>
+					<td>工资条年月：</td>
+					<td class="required"></td>
+					<td><input type="text" class="input" id="resultMonth" value="" readonly="readonly"></td>
+				</tr>
+				<tr>
+					<td>所属公司：</td>
+					<td class="required"></td>
+					<td><input type="text" class="input" id="corp" value="" readonly="readonly"></td>
+				</tr>
+				<tr>
+					<td>姓名：</td>
+					<td class="required"></td>
+					<td><input type="text" class="input" id="trueName" value="" readonly="readonly"></td>
+				</tr>
+				<tr>
+					<td>其他增加（<span class="required">元</span>）：</td>
+					<td class="required"></td>
+					<td><input type="text" class="input" name="otherIncrease" value="0"></td>
+				</tr>
+				<tr>
+					<td>其他扣除（<span class="required">元</span>）：</td>
+					<td class="required"></td>
+					<td><input type="text" class="input" name="otherDeduction" value="0"></td>
+				</tr>
+			</table>
+		</div>
+		<div class="pop_btn">
+			<span class="loading hide"><img src="/img/loading.gif" /></span>
+			<button type="submit" class="btn primary xs">确定</button>
+			<button type="button" class="btn default xs" onclick="close_pop()">取消</button>
+		</div>
+	</form>
+</div>
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		var year = $("input[name=year]").val();
+		var month = $("input[name=month]").val();
+		var corpId = $("input[name=corpId]").val();
+		var userId = $("input[name=userId]").val();
+		var corp = "";
+		var trueName = "";
+		
+		$("input[name=year]").val(year);
+		$("input[name=month]").val(month);
+		$("input[name=corpId]").val(corpId);
+		$("input[name=userId]").val(userId);
+
+		if ($("input[name=corpId]").val() != "") {
+			corp = $("#corpId .option").text();
+		}
+		if ($("input[name=userId]").val() != "") {
+			trueName = $("#userId .option").text();
+		}
+		
+		$("#resultMonth").val(year + "年" + month + "月");
+		$("#corp").val(corp);
+		$("#trueName").val(trueName);
+		
+		$("form").ajaxForm({
+			url: "add",
+			type: "post",
+			resetForm: false,
+			dataType: "json",
+			beforeSubmit: function(formData, jqForm, options) {
+				error(0);
+				disabled_on();
+				var form = jqForm[0];
+				try {
+					validate(form.year, [RQ], "年份");
+					validate(form.month, [RQ], "月份");
+					validate(form.corpId, [RQ], "所属公司");
+					validate(form.otherIncrease, [RQ], "其他增加");
+					validate(form.otherDeduction, [RQ], "其他扣除");
+				} catch(err) {
+					error(1, err);
+					disabled_off();
+					return false;
+				}
+			},
+			success: function(data) {
+				if (data.code == 1) {
+					var href = "page";
+					href += "?year=" + $("input[name=year]").val();
+					href += "&month=" + $("input[name=month]").val();
+					href += "&corpId=" + $("input[name=corpId]").val();
+					href += "&userId=" + $("input[name=userId]").val();
+					close_pop();
+					success_callback(data, href);
+				} else {
+					error_callback(data);
+				}
+			}
+		});
+	});
+</script>

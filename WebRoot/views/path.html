@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "views/meta.html" />
+	<title>${pageTitle} :: 路径</title>
+	<link href="${ctx}/css/base.css?${version}" rel="stylesheet">
+	<link href="${ctx}/css/path.css?${version}" rel="stylesheet">
+	<script type="text/javascript" src="${ctx}/js/jquery-1.7.2.min.js"></script>
+	<script type="text/javascript" src="${ctx}/js/common.js"></script>
+<style>
+.rotate{
+	transform: rotate(90deg);
+}
+.icons{
+	line-height:20px;
+	font-size:50px;
+	color:#a1c5e5;
+}
+</style>
+</head>
+
+<body>
+	<div id="components" class="clearfix">
+		<div style="padding: 9px 12px 8px 25px; font-size: 15px;font-weight: bolder;">菜单导航</div>
+		<!-- <a id="refresh" class="left" href=""><span class="icons icon_refresh"></span><span class="icons_text">刷新</span></a> -->
+		<!-- <a id="switch" class="right" href="">消息</a> -->
+	</div>
+	<div id="links" class="auto_height"></div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			var nodes = [
+ 				<#list menuNodes as e>
+ 				{id: ${e.resourceId}, pId: ${e.parentId}, name: "${e.resourceName}", url: "${e.url}"}<#if e_has_next>,</#if>
+ 				</#list>
+ 			];
+			
+ 			$("#links").append(tree(0, nodes));
+ 			$("#links > div").find("div").attr("class", "hide");
+ 			$("span.icons").each(function() {
+ 				var level = $(this).parents().size() - 5;
+ 				$(this).css("margin-left", (level * 12) + "px");
+ 			});
+ 			$("a").click(function() {
+ 				var $children = $(this).parent().next().children();
+ 				if(!($children.children().attr('href')=="javascript:;")){
+ 					
+ 					$children.toggleClass("show").children().children('.icons').removeClass('icon_arrow_right').text('·');
+ 				}
+ 				
+ 				$children.toggleClass("hide");
+ 				$(this).children('.icon_arrow_right').toggleClass('rotate');
+ 				$("#links a").attr("class", "");
+				$(this).attr("class", "active");
+ 			});
+		});
+		
+		function tree(id, nodes){
+			var arr = "";
+			for (var i = 0, j; j = nodes[i++];) {
+				if (j.pId == id) {
+					arr += "<div class=\"show\">";
+					arr += "<a class=\"\" href=\"" + (j.url ? j.url : "javascript:;") + "\" target=\"content\">";
+					arr += "<span class=\"icons icon_arrow_right\"></span><span class=\"icons_text\">" + j.name + "</span>";
+					arr += "</a>";
+					arr += "</div>";
+					var next = tree(j.id, nodes);
+					if (next != "") {
+						arr += "<div >" + next + "</div>";
+					}
+				}
+			}
+			return arr;
+		}
+		
+		window.onload = window.onresize = function() {
+			auto_height();
+		}
+		
+		function auto_height() {
+			var all = $(window).height();
+			var a = $("#components").height();
+			$("#links").css("min-height", all - a - 12 + "px");
+		}
+	</script>
+</body>
+</html>

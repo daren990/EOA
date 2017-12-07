@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 已发事项</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<div id="right" class="right">
+				<form id="search" action="page" method="get">
+					<ul>
+						<li class="text">审批状态</li>
+						<li>
+							<input type="hidden" name="approve" value="${mb.approve}" />
+							<div id="approve" class="select sm">
+								<span class="option text">请选择</span><span class="icon"></span>
+								<ul>
+									<li item="">请选择</li>
+									<li item="1">已批准</li>
+									<li item="-1">未批准</li>
+								</ul>
+							</div>
+						</li>
+						<li><button type="submit" class="btn primary xxs">搜索</button></li>
+					</ul>
+				</form>
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+			<div class="table_head">			
+				<table class="table">
+					<thead>
+						<tr>
+							<th width="40"><input type="checkbox" id="checkedIds"></th>
+							<th width="">标题</th>
+							<th width="15%">申请时间</th>
+							<th width="15%">上级审批</th>
+							<th width="10%">审批状态</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+			<#assign len = 0 />
+			<div class="table_body auto_height">
+				<table class="table">
+					<tbody>
+						<#if leaves?size gt 0>
+							<#assign len = len + leaves?size />
+							<#list leaves as e>
+						<tr>
+							<td width="26"><input type="checkbox" name="checkedIds" item="leave" value="${e.leaveId}"></td>
+							<td width="">请假申请_${e.trueName}于${e.startTime?date}至${e.endTime?date}因${leaveMap[e.typeId?string]}请假${views.day(e.leaveMinute, works)?string("0.#")}天</td>
+							<td width="15%"><#if e.createTime??>${e.createTime?datetime}</#if></td>
+							<td width="15%">${e.operator}</td>
+							<td width="10%">${views.approve(e.approve)}</td>
+						</tr>
+							</#list>
+						</#if>
+						<#if errands?size gt 0>
+							<#assign len = len + errands?size />
+							<#list errands as e>
+						<tr>
+							<td width="26"><input type="checkbox" name="checkedIds" item="errand" value="${e.errandId}"></td>
+							<td width="">出差申请_${e.trueName}于${e.startTime?date}至${e.endTime?date}出差</td>
+							<td width="15%"><#if e.createTime??>${e.createTime?datetime}</#if></td>
+							<td width="15%">${e.operator}</td>
+							<td width="10%">${views.approve(e.approve)}</td>
+						</tr>
+							</#list>
+						</#if>
+						<#if outworks?size gt 0>
+							<#assign len = len + outworks?size />
+							<#list outworks as e>
+						<tr>
+							<td width="26"><input type="checkbox" name="checkedIds" item="errand" value="${e.errandId}"></td>
+							<td width="">外勤申请_${e.trueName}于${e.startTime?date}<#if e.type == 0>上午<#else>下午</#if>外勤</td>
+							<td width="15%"><#if e.createTime??>${e.createTime?datetime}</#if></td>
+							<td width="15%">${e.operator}</td>
+							<td width="10%">${views.approve(e.approve)}</td>
+						</tr>
+							</#list>
+						</#if>
+						<#if overtimes?size gt 0>
+							<#assign len = len + overtimes?size />
+							<#list overtimes as e>
+						<tr>
+							<td width="26"><input type="checkbox" name="checkedIds" item="errand" value="${e.errandId}"></td>
+							<td width="">加班申请_${e.trueName}于${e.startTime?datetime}至${e.endTime?datetime}加班</td>
+							<td width="15%"><#if e.createTime??>${e.createTime?datetime}</#if></td>
+							<td width="15%">${e.operator}</td>
+							<td width="10%">${views.approve(e.approve)}</td>
+						</tr>
+							</#list>
+						</#if>
+					</tbody>
+				</table>
+			</div>
+			<#if len lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<div id="page" class="clearfix">
+				<div class="left">
+					<span>共${len}条记录</span>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#approve").select({ "name": "approve" });
+		});
+		window.onload = window.onresize = function() {
+			auto_width();
+		}
+	</script>
+</body>
+</html>

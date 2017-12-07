@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 分享我的</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/css/Report_share.css">
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+			<div style="width:100%;height:450px;">
+			<div class="dayweekreport">
+				<ul>
+					<li id="dayc" class="liBg">日报</li><li id="weekc">周报</li>
+				</ul>
+				<div class="day" id="day">
+				<#if dayCount == "0" >
+					<div class="noneInfoDiv">还没有人对你分享日报</div>
+				<#else>
+					<#list daypage as e>
+						<div class="listreport" id="${e.reportId}">
+							<a href="page?reportId=${e.reportId}&dayNum=${dayNum}">
+							${e.trueName}&nbsp;${e.startDate}&nbsp;的${e.title}
+							</a>	
+						</div>
+					</#list>
+					<p class="numberP">第<#if dayNum??>${dayNum}<#else>1</#if>页 /共${dayPageCount}页 --- 共${dayCount}条</p>
+					<div class="fenyeDiv">
+					<#if dayPageCount == "1" || dayPageCount == "0">
+						<a href="javascript:;"  style="color: #CCC">上一页</a>
+						<a href="javascript:;"  style="color: #CCC">下一页</a>
+					<#else>
+						<#if dayNum??>
+							<#if dayNum != "" && dayNum != null && dayNum != 1>
+								<a href="page?dayNum=${dayNum-1}&type=2">上一页</a> &nbsp;
+							<#else>
+								<a href="javascript:;" style="color: #CCC">上一页</a>
+							</#if>
+							<#else>
+								<a href="javascript:;" style="color: #CCC">上一页</a>
+							</#if>
+							
+							<#if dayNum != dayPageCount>
+								<#if dayNum??>
+									<a href="page?dayNum=${dayNum+1}&type=2">下一页</a>
+									<#else>
+									<a href="page?dayNum=2&type=2">下一页</a>
+								</#if>
+							<#else>
+								<a href="javascript:;" style="color: #CCC">下一页</a>
+							</#if>
+						</#if>
+						<#if dayPageCount == "1" || dayPageCount == "0">
+							<input type="text" readonly="readonly"/>
+						<#else>
+							<input type="text"/>
+						</#if>
+						<button class="btn primary xxs jump" type="submit" title="2">GO</button>
+					</div>
+				</#if>
+					
+				</div>
+				
+				<div class="week" id="week">
+				<#if weekCount == "0">
+					<div class="noneInfoDiv">还没有人对你分享周报</div>
+				<#else>
+					<#list weekpage as e>
+						<div class="listreport" id="${e.reportId}">
+							<a href="page?reportId=${e.reportId}&weekNum=${weekNum}">
+							${e.trueName}&nbsp;${e.endDate}&nbsp;的${e.title}
+							</a>	
+						</div>
+					</#list>
+					<p class="numberP">第<#if weekNum??>${weekNum}<#else>1</#if>页 /共${weekPageCount}页 --- 共${weekCount}条</p>
+					<div class="fenyeDiv">
+						<#if weekPageCount == "1" || weekPageCount == "0">
+							<a href="javascript:;"  style="color: #CCC">上一页</a>
+							<a href="javascript:;"  style="color: #CCC">下一页</a>
+						<#else>
+							<#if weekNum??>
+							<#if weekNum != "" && weekNum != null && weekNum != 1>
+								<a href="page?weekNum=${weekNum-1}&type=1">上一页</a> &nbsp;
+							<#else>
+								<a href="javascript:;" style="color: #CCC">上一页</a>
+							</#if>
+						<#else>
+							<a href="javascript:;" style="color: #CCC">上一页</a>
+						</#if>
+						<#if weekNum != weekPageCount>
+							<#if weekNum??>
+								<a href="page?weekNum=${weekNum+1}">下一页</a>
+								<#else>
+								<a href="page?weekNum=2&type=1">下一页</a>
+							</#if>
+						<#else>
+							<a href="javascript:;" style="color: #CCC">下一页</a>
+						</#if>
+						</#if>
+						<#if weekPageCount == "1" || weekPageCount == "0">
+							<input type="text" readonly="readonly"/>
+						<#else>
+							<input type="text"/>
+						</#if>
+						<button class="btn primary xxs jump" type="submit" title="1">GO</button>
+					</div>
+				</#if>
+				</div>
+			</div>
+			
+			<#if report.reportId != null>
+			<form action="page" method="post" id="formo">
+	  		<input type="hidden" name="reportId" value=${report.reportId}>
+	  		<input type="hidden" name="token" value="${token}">
+			<div class="detailContent">
+				<div class="contentTitle">
+				${report.trueName}
+				<#if report.type == 2>
+					${report.startDate}
+					<#else>
+					${report.startDate}至${report.endDate}
+				</#if>
+				${report.title}
+				</div>
+				<div class="report">
+					<img src="${ctx}/jw_js_css_img/img/today.png" />本周工作成效
+					<p>${report.content1}</p>
+					
+					<img src="${ctx}/jw_js_css_img/img/tomorrow.png" />下周工作计划
+					<p>${report.content2}</p>
+					
+					<img src="${ctx}/jw_js_css_img/img/summary.png" />总结心得
+					<p>${report.summary}</p>
+				</div>
+				<div class="returnDiv">反馈及评论</div>
+				<textarea name = "reply" class="commomText"></textarea>
+				<div class="submitDiv"><button type="submit" class="btn primary xs">提交</button></div>
+			</div>
+			</form>
+			</#if>
+			</div>
+	</div>	
+	
+	<div id="actors_pop" class="pop bind" style="display: none; width: 278px;">
+		<div class="pop_content" style="padding: 0;">
+			<div class="auto_height xl">
+		   		<table class="table">
+		   		</table>
+			</div>
+		</div>
+	</div>
+	
+	
+	<div class="detailContent2">
+		<#list jobReply as j>
+			<div>
+				<p class="pName">${j.trueName}</p>
+				<p class="pContent">${j.replyContent}</p>
+				<p class="pTime">${j.reportTime}</p>
+				<span class="replaySpan">
+					<#if j.replyTooUser??>
+					来自@ ${j.replyTooUser}&nbsp的回复:&nbsp ${j.replyToo}
+					</#if>
+				</span>
+				<div class="areply"><span class="${j.replyId}"></span>回复(${j.replyCount})</div>
+				<div class="rel" style="display:none;">
+					<form action="add" method="post"  id="formt${j.replyId}">
+						<input type="hidden" class="replyId" name="replyId" value="" />
+						<textarea style="width:60%;height:150px;" name = "contenttoo" id="contenttoo"></textarea>
+						<br />
+					<button type="submit" class="btn primary xs">回复</button>
+					</form>
+				</div>
+			</div>
+			<br />
+		</#list>
+	</div>
+	
+	<div id="jumpPageDiv" class="pop" style="display: none; width: 280px;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<div class="pop_title">提示信息</div>
+			<div class="pop_content blank" id="contentDiv">请输入合法值</div>
+			<div class="pop_btn ">
+				<button type="button" class="btn primary xs" id="sure_delone" onclick="close_pop()">确定</button>
+				<button type="button" class="btn default xs" onclick="close_pop()">取消</button>
+			</div>
+		</div>				
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+		
+		var heigth = $(".detailContent").outerHeight()-400;
+		$(".detailContent2").css("margin-top",heigth);
+		
+		//alert("${report.reportId}");
+		var reportId = "${report.reportId}";
+		$("#"+reportId).addClass("divBg");
+		
+		var typeState = "${type}";
+		if(typeState == ""){
+			type = 0;
+			type=${report.type}+0;
+			if(type==1){
+				$("#weekc").siblings().removeClass("liBg");
+				$("#weekc").addClass("liBg");
+				$("#day").css("display","none");
+				$("#week").css("display","block");
+			}
+			if(type==2){
+				$("#dayc").siblings().removeClass("liBg");
+				$("#dayc").addClass("liBg");
+				$("#day").show();
+				$("#week").hide();
+			}
+			$("div .areply").click(function(){
+				$("div .rel").hide();
+				$(this).next().show();
+				var id = $(this).children("span").attr("class");
+				$(".replyId").val(id);
+			});
+		}else if(typeState == "1"){
+			$("#weekc").siblings().removeClass("liBg");
+			$("#weekc").addClass("liBg");
+			$("#day").css("display","none");
+			$("#week").css("display","block");
+		}else if(typeState == "2"){
+			$("#dayc").siblings().removeClass("liBg");
+			$("#dayc").addClass("liBg");
+			$("#day").show();
+			$("#week").hide();
+		}
+		
+		
+		$("#dayc").click(function(){
+			$(this).siblings().removeClass("liBg");
+			$(this).addClass("liBg");
+			$("#day").show();
+			$("#week").hide();
+		});
+		$("#weekc").click(function(){
+			$(this).siblings().removeClass("liBg");
+			$(this).addClass("liBg");
+			/* $("#day").hide();
+			$("#week").show(); */
+			$("#day").css("display","none");
+			$("#week").css("display","block");
+		});
+	<#list jobReply as j>
+	$("#formt${j.replyId}").ajaxForm({
+		url: "add",
+		type: "post",
+		resetForm: false,
+		dataType: "json",				
+		success: function(data) {
+				
+					if (data.code == 1) {
+ 						success_callback(data, "page?reportId=${report.reportId}");
+					} else {
+						danger_callback(data);
+					}
+			}
+	});
+	</#list>
+	$("#formo").ajaxForm({
+		url: "page",
+		type: "post",
+		resetForm: false,
+		dataType: "json",				
+		success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page?reportId=${report.reportId}");
+					} else {
+						danger_callback(data);
+					}
+			}
+	});	
+	
+	var weekPageCount = "${weekPageCount}";
+	var dayPageCount = "${dayPageCount}";
+	$(".jump").click(function(){
+		var type = $(this).attr("title");
+		if(type == "1"){
+			var weekNum = $(this).prev().val();
+			if(parseInt(weekNum)<=0 || parseInt(weekNum)>parseInt(weekPageCount)){
+				$("#contentDiv").html("请输入1~"+weekPageCount+"之间的合法值");
+				open_pop(null,null,"#jumpPageDiv",true);
+				return;
+			}
+			window.location.href="page?weekNum="+weekNum+"&type="+type;
+		}else if(type == "2"){
+			var dayNum = $(this).prev().val();
+			if(parseInt(dayNum)<=0 || parseInt(dayNum)>parseInt(dayPageCount)){
+				$("#contentDiv").html("请输入1~"+dayPageCount+"之间的合法值");
+				open_pop(null,null,"#jumpPageDiv",true);
+				return;
+			}
+			window.location.href="page?dayNum="+dayNum+"&type="+type;
+		};
+	});
+	
+	});	
+	</script>
+</body>
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 已办事项</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.css" />
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.js"></script>
+	<style type="text/css">
+	.go{display: none}
+	</style>
+</head>
+<#assign isPerform = "false" />
+<#if views.hasAnyRole("perform.manager", roleNames)><#assign isPerform = "true" /></#if>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+			<div class="contentdata">
+			<#assign len = 0 />
+			<#assign i = 0 />
+				<#if leaves?size gt 0>
+					<#assign len = len + leaves?size />
+					<#list leaves as e>
+						<ul data-role="listview" data-inset="true">
+							<li data-role="list-divider"><input type="hidden" name="checkedIds" value="${e.leaveId}">申请时间: <#if e.createTime??>${e.createTime?datetime}</#if></li>
+							<li>
+								<a href="/adm/salary/leave/approve/wxadd?leaveId=${e.leaveId}">
+									<h2>${e.subject}</h2>
+									<p>发起人:${e.trueName}</p>
+									<p><strong>上级审批:${e.operator}</strong></p>
+									<p><strong>审批状态:${views.approve(e.approve)}</strong></p>
+								</a>
+							</li>
+						</ul>
+						<#assign i = i + 1 />
+					</#list>
+				</#if>
+					
+				<#if resign?size gt 0>
+					<#assign len = len + resign?size />
+					<#list resign as e>
+					<ul data-role="listview" data-inset="true">
+							<li data-role="list-divider"><input type="hidden" name="checkedIds" value="${e.leaveId}">申请时间: <#if e.createTime??>${e.createTime?datetime}</#if></li>
+							<li>
+								<a href="/hrm/resign/approve/wxadd?resignId=${e.resignId}">
+									<h2>${e.subject}</h2>
+									<p>发起人:${e.trueName}</p>
+									<p><strong>上级审批:${e.operator}</strong></p>
+									<p><strong>审批状态:${views.approve(e.approve)}</strong></p>
+								</a>
+							</li>
+						</ul>
+						<#assign i = i + 1 />
+					</#list>
+				</#if>	
+				
+				<#if warn?size gt 0>
+					<#assign len = len + warn?size />
+					<#list warn as e>
+						<ul data-role="listview" data-inset="true">
+							<li data-role="list-divider"><input type="hidden" name="checkedIds" value="${e.leaveId}">申请时间: <#if e.createTime??>${e.createTime?datetime}</#if></li>
+							<li>
+								<a href="/res/warn/approve/wxadd?warnId=${e.warnId}">
+									<h2>${e.subject}</h2>
+									<p>发起人:${e.trueName}</p>
+									<p><strong>上级审批:${e.operator}</strong></p>
+									<p><strong>审批状态:${views.approve(e.approve)}</strong></p>
+								</a>
+							</li>
+						</ul>
+						<#assign i = i + 1 />
+					</#list>
+				</#if>
+											
+				<#if change?size gt 0>
+					<#assign len = len + change?size />
+					<#list change as e>
+						<ul data-role="listview" data-inset="true">
+							<li data-role="list-divider"><input type="hidden" name="checkedIds" value="${e.leaveId}">申请时间: <#if e.createTime??>${e.createTime?datetime}</#if></li>
+							<li>
+								<a href="/res/change/approve/wxadd?changeId=${e.changeId}">
+									<h2>${e.subject}</h2>
+									<p>发起人:${e.trueName}</p>
+									<p><strong>上级审批:${e.operator}</strong></p>
+									<p><strong>审批状态:${views.approve(e.approve)}</strong></p>
+								</a>
+							</li>
+						</ul>
+						<#assign i = i + 1 />
+					</#list>
+				</#if>
+						
+				<#if errands?size gt 0>
+					<#assign len = len + errands?size />
+						<#list errands as e>
+						<ul data-role="listview" data-inset="true">
+							<li data-role="list-divider"><input type="hidden" name="checkedIds" value="${e.leaveId}">申请时间: <#if e.createTime??>${e.createTime?datetime}</#if></li>
+							<li>
+								<a href="/adm/salary/errand/approve/wxadd?errandId=${e.errandId}">
+									<h2>${e.subject}</h2>
+									<p>发起人:${e.trueName}</p>
+									<p><strong>上级审批:${e.operator}</strong></p>
+									<p><strong>审批状态:${views.approve(e.approve)}</strong></p>
+								</a>
+							</li>
+						</ul>
+							<#assign i = i + 1 />
+							</#list>
+						</#if>
+						
+						
+						<#if outworks?size gt 0>
+							<#assign len = len + outworks?size />
+							<#list outworks as e>
+						<ul data-role="listview" data-inset="true">
+							<li data-role="list-divider"><input type="hidden" name="checkedIds" value="${e.leaveId}">申请时间: <#if e.createTime??>${e.createTime?datetime}</#if></li>
+							<li>
+								<a href="/adm/salary/outwork/approve/wxadd?outworkId=${e.outworkId}">
+									<h2>${e.subject}</h2>
+									<p>发起人:${e.trueName}</p>
+									<p><strong>上级审批:${e.operator}</strong></p>
+									<p><strong>审批状态:${views.approve(e.approve)}</strong></p>
+								</a>
+							</li>
+						</ul>
+						
+							<#assign i = i + 1 />
+							</#list>
+						</#if>
+						
+						<#if overtimes?size gt 0>
+							<#assign len = len + overtimes?size />
+							<#list overtimes as e>
+						<ul data-role="listview" data-inset="true">
+							<li data-role="list-divider"><input type="hidden" name="checkedIds" value="${e.leaveId}">申请时间: <#if e.createTime??>${e.createTime?datetime}</#if></li>
+							<li>
+								<a href="/adm/salary/overtime/approve/wxadd?overtimeId=${e.overtimeId}">
+									<h2>${e.subject}</h2>
+									<p>发起人:${e.trueName}</p>
+									<p><strong>上级审批:${e.operator}</strong></p>
+									<p><strong>审批状态:${views.approve(e.approve)}</strong></p>
+								</a>
+							</li>
+						</ul>
+							<#assign i = i + 1 />
+							</#list>
+						</#if>
+						
+						<#if performs?size gt 0>
+							<#assign len = len + performs?size />
+							<#list performs as e>
+						<ul data-role="listview" data-inset="true">
+							<li data-role="list-divider"><input type="hidden" name="checkedIds" value="${e.leaveId}">申请时间: <#if e.createTime??>${e.createTime?datetime}</#if></li>
+							<li>
+								<a href="/adm/examine/perform/approve/wxadd?performId=${e.performId}">
+									<h2>${e.subject}</h2>
+									<p>发起人:${e.trueName}</p>
+									<p><strong>上级审批:${e.operator}</strong></p>
+									<p><strong>审批状态:${views.approve(e.approve)}</strong></p>
+								</a>
+							</li>
+						</ul>
+							<#assign i = i + 1 />
+							</#list>
+						</#if>
+						
+						<#if reimburses?size gt 0>
+							<#assign len = len + reimburses?size />
+							<#list reimburses as e>
+						<ul data-role="listview" data-inset="true">
+							<li data-role="list-divider"><input type="hidden" name="checkedIds" value="${e.leaveId}">申请时间: <#if e.createTime??>${e.createTime?datetime}</#if></li>
+							<li>
+								<a href="/adm/expense/reimburse/approve/wxadd?reimburseId=${e.reimburseId}">
+									<h2>${e.subject}</h2>
+									<p>发起人:${e.trueName}</p>
+									<p><strong>上级审批:${e.operator}</strong></p>
+									<p><strong>审批状态:${views.approve(e.approve)}</strong></p>
+								</a>
+							</li>
+						</ul>
+						
+							<#assign i = i + 1 />
+							</#list>
+						</#if>
+						
+						<#if borrows?size gt 0>
+							<#assign len = len + borrows?size />
+							<#list borrows as e>
+						<ul data-role="listview" data-inset="true">
+							<li data-role="list-divider"><input type="hidden" name="checkedIds" value="${e.leaveId}">申请时间: <#if e.createTime??>${e.createTime?datetime}</#if></li>
+							<li>
+								<a href="/adm/expense/borrow/approve/wxadd?borrowId=${e.borrowId}">
+									<h2>${e.subject}</h2>
+									<p>发起人:${e.trueName}</p>
+									<p><strong>上级审批:${e.operator}</strong></p>
+									<p><strong>审批状态:${views.approve(e.approve)}</strong></p>
+								</a>
+							</li>
+						</ul>
+							<#assign i = i + 1 />
+							</#list>
+						</#if>
+						
+						<#if tickets?size gt 0>
+							<#assign len = len + tickets?size />
+							<#list tickets as e>
+						<ul data-role="listview" data-inset="true">
+							<li data-role="list-divider"><input type="hidden" name="checkedIds" value="${e.leaveId}">申请时间: <#if e.createTime??>${e.createTime?datetime}</#if></li>
+							<li>
+								<a href="/res/ticket/approve/wxadd?ticketId=${e.ticketId}">
+									<h2>${e.subject}</h2>
+									<p>发起人:${e.trueName}</p>
+									<p><strong>上级审批:${e.operator}</strong></p>
+									<p><strong>审批状态:${views.approve(e.approve)}</strong></p>
+								</a>
+							</li>
+						</ul>
+							<#assign i = i + 1 />
+							</#list>
+						</#if>
+						
+						<#if works?size gt 0>
+							<#assign len = len + works?size />
+							<#list works as e>
+						<ul data-role="listview" data-inset="true">
+							<li data-role="list-divider"><input type="hidden" name="checkedIds" value="${e.leaveId}">申请时间: <#if e.createTime??>${e.createTime?datetime}</#if></li>
+							<li>
+								<a href="${ctx}/flow/form/all?processId=${e.processId}&orderId=${e.orderId}&type=send">
+									<h2>${e.subject}</h2>
+									<p>发起人:${e.trueName}</p>
+									<p><strong>上级审批:${e.operator}</strong></p>
+									<p><strong>审批状态:${views.approve(e.approve)}</strong></p>
+								</a>
+							</li>
+						</ul>
+							<#assign i = i + 1 />
+							</#list>
+						</#if>
+					
+			</div>
+			<#if len lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<div id="page" class="clearfix">
+				<div class="left">
+					<span>共${len}条记录</span>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#approve").select({ "name": "approve" });
+		});
+	</script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 请假审批查询</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<div id="left" class="left">
+				<a href="javascript:open_able('', '1')"><span class="icons icon_pass"></span><span class="icons_text">批准</span></a>
+				<span class="split">|</span>
+				<a href="javascript:open_able('', '-1')"><span class="icons icon_unpass"></span><span class="icons_text">不批准</span></a>
+			</div>
+		
+			<div id="right" class="right">
+				<form id="search" action="page" method="get">
+					<input type="hidden" name="pageSize" value="${page.pageSize}">
+					<input type="hidden" name="pageNo" value="${page.pageNo}">
+					<ul>
+						<li class="text">申请时间</li>
+						<li>
+							<input type="text" class="input sm Wdate" name="startTime" value="${mb.startTime}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							<span>至</span>
+							<input type="text" class="input sm Wdate" name="endTime" value="${mb.endTime}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+						</li>
+						<li class="text">审批状态</li>
+						<li>
+							<input type="hidden" name="approve" value="${mb.approve}" />
+							<div id="approve" class="select sm">
+								<span class="option text">请选择</span><span class="icon"></span>
+								<ul>
+									<li item="">请选择</li>
+									<li item="0">待审批</li>
+									<li item="1">已批准</li>
+									<li item="-1">未批准</li>
+								</ul>
+							</div>
+						</li>
+						<li><button type="button" class="btn primary xxs" onclick="search()">搜索</button></li>
+					</ul>
+				</form>
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+			<div class="table_head">			
+				<table class="table">
+					<thead>
+						<tr>
+							<th width="40"><input type="checkbox" id="checkedIds"></th>
+							<th width="">标题</th>
+							<th width="15%">申请时间</th>
+							<th width="10%">申请天数</th>
+							<th width="15%">上级审批</th>
+							<th width="10%">审批状态</th>
+							<th width="20%">操作</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+			<div class="table_body auto_height">
+				<table class="table">
+					<tbody>
+						<#if page.result?size gt 0>
+							<#list page.result as e>
+						<tr>
+							<td width="26"><input type="checkbox" name="checkedIds" value="${e.leaveId}"></td>
+							<td width="">${e.subject}</td>
+							<td width="15%"><#if e.createTime??>${e.createTime?datetime}</#if></td>
+							<td width="10%">${e.days}</td>
+							<td width="15%">${e.operator}</td>
+							<td width="10%">${views.approve(e.approve)}</td>
+							<td width="20%">
+								<a href="add?leaveId=${e.leaveId}" title="审批"><span class="icons icon_edit"></span></a>
+							</td>
+						</tr>
+							</#list>
+						</#if>
+					</tbody>
+				</table>
+			</div>
+			<#if page.result?size lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<@fm.page page=page />
+		</div>
+	</div>
+	
+	<div id="footer"></div>
+	
+	<div id="able_approve" class="pop" style="display: none; width: 280px;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<div class="pop_title">请假申请审批</div>
+			<div class="pop_content blank">确定要批准所选请假申请吗？</div>
+			<div class="pop_btn">
+				<input type="hidden" id="approve" value="1" />
+				<button type="button" class="btn primary xs" onclick="able()">确定</button>
+				<button type="button" class="btn default xs" onclick="close_pop()">取消</button>
+			</div>
+		</div>				
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#approve").select({ "name": "approve" });
+		});
+		
+		function open_able(id, approve) {
+			if (id) {
+				get_checked(id);
+			}
+			var before = approve == 1 ? "不批准" : "批准";
+			var after = approve == 1 ? "批准" : "不批准";
+			$(".pop_title").text($(".pop_title").text().replace(before, after));
+			$(".pop_content").text($(".pop_content").text().replace(before, after));
+			$("#approve").val(approve);
+			open_pop(null,null,"#able_approve",true);
+		}
+		function able() {
+			var approve = $("#approve").val();
+			ajax_checked("请选择需要" + (approve == 1 ? "批准" : "不批准") + "的请假申请", "able?&approve=" + approve + "&token=${token}");
+			close_pop();
+		}
+		
+	</script>
+</body>
+</html>

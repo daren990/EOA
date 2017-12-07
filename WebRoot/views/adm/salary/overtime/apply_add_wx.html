@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if overtime.overtimeId??>编辑<#else>新建</#if>加班申请</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/bootstrap-3.3.4/css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/bootstrap-3.3.4/css/bootstrap-theme.min.css" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/bootstrap-3.3.4/css/bootstrap-datetimepicker.min.css" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/css/add_wx.css" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/select2/select2.css" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/iCalendar/css/lCalendar_overtime.css" />
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/bootstrap-3.3.4/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/bootstrap-3.3.4/js/bootstrap-datetimepicker.min.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/bootstrap-3.3.4/js/bootstrap-datetimepicker.fr.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/select2/select2.min.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/select2/select2_locale_zh-CN.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/layer.m/layer.m.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/iCalendar/js/lCalendar_overtime.js"></script>
+</head>
+<body>
+	<div class="headerDiv"><a href="wxpage" class="btn btn-default" id="return"><img src="${ctx}/jw_js_css_img/img/return.png" />返回</a><#if overtime.overtimeId??>编辑<#else>新建</#if>加班申请</div>
+	<div class="contentDiv" id="from">
+		<form action="add" method="post" class="form-horizontal">
+			<input type="hidden" name="token" value="${token}">
+			<input type="hidden" name="overtimeId" value="${overtime.overtimeId}">	
+			<div class="form-group">
+				<label class="col-xs-4 control-label">申请人</label>
+			    <div class="col-xs-7">
+			    	<input type="text" class="form-control" value="${currentUser.trueName}" readonly="readonly" name="titleName" />
+			    </div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-4 control-label">申请时间</label>
+			    <div class="col-xs-7">
+			    	<#assign createTime = now?date />
+					<#if overtime.createTime??><#assign createTime = overtime.createTime?date /></#if>
+					<input type="text" class="form-control" value="${createTime}" readonly="readonly">
+			    </div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-4 control-label">加班类型</label>
+			    <div class="col-xs-7">
+					<input type="hidden" name="typeId" id="typeId" value="${overtime.typeId}">
+					<select class="selectOpetor" id="selectOpetor">
+						<option value="" selected="selected">请选择</option>
+						<#list overtimeMap?keys as e>
+							<option value="${e}">${overtimeMap[e]}</option>
+						</#list>
+					</select>
+			    </div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-4 control-label">加班日期</label>
+				<div class="col-xs-7">
+					<#if overtime.startTime??><#assign work_yyyyMMdd = overtime.startTime?date /></#if>
+					<input type="text" class="form-control" name="work_yyyyMMdd" value="${work_yyyyMMdd?default('')}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-4 control-label">加班时间</label>
+			    <div class="col-xs-7">
+			        <div class="iCalendar_time" style="margin-bottom:10px;">
+						<input id="iCalendar1" class="form-control" readonly="readonly" type="text" name="input_date"  value="<#if overtime.startTime??>${overtime.startTime?string("HH")} : ${overtime.startTime?string("mm")}</#if>"  placeholder="点击选择开始时间"/>
+						<input type="hidden" name="start_HH" />
+						<input type="hidden" name="start_mm" />
+					</div>
+					<div class="iCalendar_time">
+						<input id="iCalendar2" class="form-control" readonly="readonly" type="text" name="input_date" value="<#if overtime.endTime??>${overtime.endTime?string("HH")} : ${overtime.endTime?string("mm")}</#if>"  placeholder="点击选择结束时间"/>
+						<input type="hidden" name="end_HH" />
+						<input type="hidden" name="end_mm" />
+					</div>
+					
+			    	 <!-- <div style="margin-bottom:5px;">
+			    	<#if overtime.startTime??>
+						<#assign start_HH = overtime.startTime?string("HH") />
+						<#assign start_mm = overtime.startTime?string("mm") />
+					</#if>
+					<@fm.time arr=["start_HH", "start_mm"] hour=start_HH?default("") minute=start_mm?default("") /> 
+					<span>至</span>
+					</div>
+					<div>
+					<#if overtime.endTime??>
+						<#assign end_HH = overtime.endTime?string("HH") />
+						<#assign end_mm = overtime.endTime?string("mm") />
+					</#if>
+					<@fm.time arr=["end_HH", "end_mm"] hour=end_HH?default("") minute=end_mm?default("") />
+					</div> -->
+			    </div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-4 control-label">所需项目</label>
+			    <div class="col-xs-7">
+			    	<input type="text" class="form-control" name="project" value="${overtime.project}" style="width: 173px" placeholder="请输入所需项目">
+			    </div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-4 control-label">加班描述</label> 
+			    <div class="col-xs-7">
+			    	<textarea name="content" class="form-control" rows="3" style="resize:none" placeholder="请输入加班描述">${overtime.content}</textarea>
+			    </div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-4 control-label">备注</label>
+			    <div class="col-xs-7">
+			    	<textarea name="remark" rows="3" class="form-contr  ol" style="resize:none" placeholder="请输入备注">${overtime.remark}</textarea>
+			    </div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-4 control-label">上级审批</label>
+			    <div class="col-xs-7">
+			    	<input type="hidden" name="operatorId" id="operatorId" value="${overtime.operatorId?default(currentUser.managerId)}">
+					<select class="opetorSelect" id="opetorSelect">
+						<!-- <option value="" selected="selected">请选择</option> -->
+						<#list operators as e>
+							<option value="${e.userId}">${e.trueName}</option>
+							<!-- <input type="hidden" value="${e.username}" name="${e.userId}" /> -->
+						</#list>	
+					</select>
+						
+			    </div>
+			    <div class="col-xs-3">
+			    </div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-4 control-label"></label>
+				<div class="col-xs-7">
+					<button type="button" class="btn btn-primary" id="submit">提交</button>
+				</div>
+			</div>
+				</form>
+			</div>
+	<div class="popup" style="display:none;position:fixed;width:100%;height:100%;top:0;left:0;background:rgba(0,0,0,0.3)">
+		<p style="position:absolute;z-index:999;width:40%;padding:5% 10%;top:40%;left:50%;transform:translateX(-50%) translateY(-50%);background:#fff;text-align:center;"></p>
+	</div>
+	<script  type="text/javascript">
+ 		var calendar1 = new lCalendar();
+		calendar1.init({
+			'trigger': '#iCalendar1',
+			'type': 'time'
+		});
+		var calendar2 = new lCalendar();
+		calendar2.init({
+			'trigger': '#iCalendar2',
+			'type': 'time'
+		}); 
+		
+	</script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+				
+			
+				$(".selectOpetor").select2({
+					width:"160px",
+					minimumResultsForSearch:-1
+				});
+				$(".opetorSelect").select2({
+					width:"160px",
+					minimumResultsForSearch:-1
+				});
+				$(".selectOpetor").change(function(){
+					var typeIdVal = $(this).val();
+					$("#typeId").val(typeIdVal);
+				});
+				$(".opetorSelect").change(function(){
+					var operatorId = $(this).val();
+					$("#operatorId").val(operatorId);
+				});
+				
+				$(".popup").on("touchend",function(){
+					$(this).hide();
+				})
+				/* var opt = {
+				        preset: 'date', //日期
+				        display: 'modal', //显示方式 
+				        dateFormat: 'yy-mm-dd', // 日期格式
+				        setText: '确定', //确认按钮名称
+				        cancelText: '取消',//取消按钮名籍我
+				        dateOrder: 'yymmdd', //面板中日期排列格式
+				        dayText: '日', monthText: '月', yearText: '年', //面板中年月日文字
+				        endYear:2020 //结束年份
+				    };
+					$('input:jqmData(role="datebox")').mobiscroll().date(opt); */
+					
+					$("#typeId").select({ "name": "typeId" });
+					$("#start_HH").select({ "name": "start_HH" });
+					$("#start_mm").select({ "name": "start_mm" });
+					$("#end_HH").select({ "name": "end_HH" });
+					$("#end_mm").select({ "name": "end_mm" });
+					$("#operatorId").select({ "name": "operatorId" });
+					
+	 				$("#submit").click(function(){
+					
+	 					var date= $("#iCalendar1").val();
+						var HH1=date.slice(0,2);
+						var MM1=date.slice(5);
+	
+						$("#iCalendar1").next().val(HH1);
+						$("#iCalendar1").next().next().val(MM1);
+						var date= $("#iCalendar2").val();
+						var HH2=date.slice(0,2);
+						var MM2=date.slice(5);
+						$("#iCalendar2").next().val(HH2);
+						$("#iCalendar2").next().next().val(MM2);  
+						
+						var param  = $("form").serialize();
+	
+				 		$.post("add",param,function(dataStr){
+/* 				 			alert(dataStr);
+				 			dataStr = "\"" + dataStr + "\"";
+				 			alert(dataStr);    
+				 			dataStr.parse(); */
+ 				 			//data = eval("("+dataStr+")"); 
+				 			data=JSON.parse(dataStr);
+				 			
+							 if (data.code == 1) {
+							 		window.location.href="wxpage";
+/* 		 							layer.open({
+		 								content:data.message,
+		 								time:2,
+		 								shadeClose:false
+		 							});
+		 							setTimeout(function(){
+		 								window.location.href="wxpage";
+		 							},5); */
+								} else {
+									//alert(data.message);
+									//console.log($(".popup > p"))
+									
+									$(".popup > p").html(data.message);
+									$(".popup").show();
+								}
+						}); 
+					
+						
+/*   		 				$("form").ajaxForm({
+							url: "add",
+							type: "post",
+							resetForm: false,
+							dataType: "json",
+							beforeSubmit: function(formData, jqForm, options) {
+								danger(0);
+								disabled_on();
+								var form = jqForm[0];
+								try {
+									validate(form.work_yyyyMMdd, [RQ], "加班日期");
+									validate(form.start_HH, [RQ], "开始时间");
+									validate(form.start_mm, [RQ], "开始时间");
+									validate(form.end_HH, [RQ], "结束时间");
+									validate(form.end_mm, [RQ], "结束时间");
+									validate(form.project, [RANGE, "{1,60}"], "所属项目");
+									validate(form.content, [RQ, RANGE, "{1,200}"], "工作描述");
+									validate(form.remark, [RANGE, "{1,60}"], "备注");
+									validate(form.operatorId, [RQ], "上级审批");
+								} catch(err) {
+									danger(1, err);
+									disabled_off();
+									return false;
+								}
+							},
+							success: function(data) {
+								if (data.code == 1) {
+		 							layer.open({
+		 								content:data.message,
+		 								time:2,
+		 								shadeClose:false
+		 							});
+		 							setTimeout(function(){
+		 								window.location.href="wxpage";
+		 							},5);
+								} else {
+									$("#submit").removeAttr("disabled");
+									layer.open({
+		 								content:data.message
+		 							});
+								}
+							}
+						}); */  
+				 	}); 
+
+			});
+	</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+*{margin: 0;padding: 0}
+.indexpage{width: 100%;max-width: 650px;width:expression_r(document.body.clientWidth > 500? "500px":"auto");margin:50px auto;font-family: "微软雅黑"}
+.ui-body{border-radius:5px}
+.ui-body h3{text-align: center;}
+.ui-body p{text-indent: 2em;}
+.contentpl{margin-top: 50px;padding-top: 15px;border-top: 1px dashed #CCC;}
+.listpl img{display: block;float: left;margin-right: 10px;}
+.infospan{font-size: 12px;display: block;}
+.listpl{border-left: none;border-right: none;border-top: 1px dashed #CCC;border-bottom: none;margin-top: 20px;}
+.hflistpl{border-left: none;border-right: none;border-bottom:none;margin-left: 80px;border-top: 1px dashed #CCC;margin-top: 5px;}
+.listpl .huifup{text-align: right;}
+.listpl .huifunzi{text-align: right;}

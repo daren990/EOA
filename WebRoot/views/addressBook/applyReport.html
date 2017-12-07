@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  	<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/js/jquery-1.9.1.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/ueditor1_4_3/ueditor.config.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/ueditor1_4_3/ueditor.all.min.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/js/applyReport.js"></script>
+	<link type="text/css" rel="stylesheet" href="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.css" />
+	
+	<style type="text/css">
+	.title{width: 85%;margin:0 auto;margin-top: 20px;}
+	.content{width: 95%;margin:0 auto;}
+
+	</style>
+
+    <title>请填写报告</title>
+    <#include "/views/meta.html" />
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+  </head>
+  
+  <body>
+  	<div id="path"></div>
+  	<div data-role="header"><h1>请填写周报</h1></div>
+  	<form action="/addressBook/applyReport/wxadd" method="post">
+  	<input type="hidden" name="reportId" value=${report.reportId}>
+  	<input type="hidden" name="token" value="${token}">
+  	<input type="hidden" name="type" value=${type}>
+	  	<div class="title">
+	  		<table style="width: 100%">
+	  			<tr>
+	  				<td></td>
+	  				<td>
+	  				<div style="width:200px;margin:auto;"><input type="text" name="title" id="title" placeholder="请在此处填写标题" /></div></td>
+	  				<td></td>
+	  			</tr>
+	  		</table>
+	  	</div>
+	  	<div class="content">
+	  		<div style="width:400px;height:150px;margin:auto;">
+		    <script id="container" name="content" type="text/plain">
+    		</script>
+    		</div>
+	  	</div>
+	  	
+	  	<fieldset class="ui-grid-a">
+	  		<div style="margin:auto;width:200px;">
+		    <div class="ui-block-a" style="width:100px;"><input value="提交" data-theme="a" type="submit"></div>
+		    </div>
+		</fieldset>
+  	</form>
+  	<script type="text/javascript">
+  		$(document).ready(function(){
+  			$("form").ajaxForm({
+				url: "/addressBook/applyReport/wxadd",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "/addressBook/report/wxpage");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+  		});
+  	</script>
+  </body>
+</html>

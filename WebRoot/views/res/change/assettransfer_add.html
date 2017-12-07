@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 新建资产移交</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+  
+  <body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit">
+			<div id="form" class="clearfix" style="width: 460px;">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="transferId" value="${assetTransfer.transferId}">
+					<input type="hidden" name="assetId" value="${assetTransfer.assetId}">
+					<table class="table">
+						<tr>
+							<td>移交人：</td>
+							<td class="required">*</td>
+							<td colspan="4">
+								<input type="text" class="input xl" name="transferPerson" value="${assetTransfer.moveTrueName}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>申请移交日期：</td>
+							<td class="required">*</td>
+							<td colspan="4">
+								<#assign createTime = now?date />
+								<#if assetTransfer.createTime??><#assign createTime = assetTransfer.createTime?date /></#if>
+								<input type="text" class="input xl" value="${createTime}" readonly="readonly" >
+							</td>
+						</tr>
+						<tr>
+							<td>资产名称：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input sm" name="assetName" value="${assetTransfer.assetName}" readonly="readonly">
+							</td>
+							<td>资产编号：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input sm" name="assetNumber" value="${assetTransfer.assetNumber}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>资产种类：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input sm" name="type" value="${assetMap[assetTransfer.item?string]}" readonly="readonly">
+							</td>
+							<td>使用地点：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input sm" name="storagePlace" value="${assetTransfer.storagePlace}">
+							</td>
+						</tr>
+						<tr>
+							<td>签收部门(公司)：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input sm" id="corp" value="" readonly="readonly">
+							</td>
+							<td>签收人：</td>
+							<td class="required">*</td>
+							<td>
+							<input type="hidden" name="signId" value="${assetTransfer.signId}">
+							<div id="signName" class="select sm">
+								<span class="option text">请选择</span><span class="icon"></span>
+								<ul class="auto_height sm">
+								<#list operators as o>
+										<input type="hidden" value="${o.corpName}" id="corpName" />
+										<li item="${o.userId}" onclick="ajax_nodes('${o.corpName}')">${o.trueName}</li>
+									</#list>
+								</ul>
+							</div>
+						</td>
+						</tr>
+						<tr>
+							<td>特殊说明：</td>
+							<td class="required">*</td>
+							<td colspan="4">
+								<input type="text" class="input xl" name="remark" value="${assetTransfer.remark}">
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+	$(function (){
+			$("#corp").val($("#corpName").val());
+			$("#signName").select({ "name": "signId" });
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.signId, [RQ], "签收人名称");
+						validate(form.remark, [RQ], "特殊说明");
+						validate(form.storagePlace, [RQ], "使用地点");
+						
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+		
+	function ajax_nodes(corpName){
+	
+			document.getElementById("corp").value = corpName;
+	}
+			
+	</script>		
+  </body>
+</html>

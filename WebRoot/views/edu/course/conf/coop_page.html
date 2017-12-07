@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if flag>机构<#else>部门</#if>查询</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<div id="left" class="left">
+				<a href="add?flag=${flag}"><span class="icons icon_add"></span><span class="icons_text">新建</span></a>
+				<span class="split">|</span>
+				<a href="javascript:open_able(null, '1')"><span class="icons icon_unlock"></span><span class="icons_text">启用</span></a>
+				<span class="split">|</span>
+				<a href="javascript:open_able(null, '0')"><span class="icons icon_lock"></span><span class="icons_text">禁用</span></a>
+				<span class="split">|</span>
+				<#if !flag><a href="cooperation?flag=${flag}" title="合作"><span class="icons icon_add"></span><span class="icons_text">合作配置</span></a></#if>
+			</div>
+			<div id="right" class="right">
+				<form id="search" action="page" method="post">
+					<input type="hidden" name="pageSize" value="${page.pageSize}">
+					<input type="hidden" name="pageNo" value="${page.pageNo}">
+					<ul>
+						<li class="text"><#if flag>机构<#else>部门</#if>名称</li>
+						<li><input type="text" class="input sm" name="name" value="${mb.name}" /></li>
+						<li><button type="button" class="btn primary xxs" onclick="search()">搜索</button></li>
+					</ul>
+					
+				</form>
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+			<div class="table_head">
+				<table class="table">
+					<thead>
+						<tr>
+							<th width="40"><input type="checkbox" id="checkedIds"></th>
+							<th width="20%"><#if flag>机构<#else>部门</#if>名称</th>
+							<th width="20%">类型</th>
+							<th width="10%"><#if flag>联系<#else>负责</#if>人</th>
+							<th width="20%"><#if flag>联系<#else>负责</#if>人电话</th>
+							<th width="10%">状态</th>
+							<th width="">操作</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+			<div class="table_body auto_height">
+				<table class="table">
+					<tbody>
+						<#if page.result?size gt 0>
+							<#list page.result as e>
+						<tr class="flagTr">
+							<td width="26"><input type="checkbox" name="checkedIds" value="${e.orgId}" level="1" ajax="0"></td>
+							<td width="20%"><span class="icons icon_open able" onclick="open_nodes(this)"></span><span class="icons_text">${e.orgName}</span></td>
+							<td width="20%"><center><#if flag>机构<#else>部门</#if></center></td>
+							<td width="10%">${e.contactName}</td>
+							<td width="20%">${e.contactNumber}</td>
+							<td width="10%"><#if e.status == 1>启用<#else>禁用</#if></td>
+							<td>
+								<a href="add?id=${e.orgId}&flag=${flag}" title="编辑"><span class="icons icon_edit"></span></a>
+								<#if flag><a href="cooperation?id=${e.orgId}" title="合作"><span class="icons icon_add"></span><span class="icons_text"></span></a></#if>
+								<#assign able = 1 />
+								<#assign title = "启用" />
+								<#assign check= "icon_unlock" />
+								<#if e.status == 1>
+									<#assign able = 0 />
+									<#assign title = "禁用" />
+									<#assign check = "icon_lock" />
+								</#if>
+								<a href="javascript:open_able('${e.orgId}', '${able}');" title="${title}"><span class="icons ${check}"></span></a>					
+							</td>
+						</tr>
+							</#list>
+						</#if>
+					</tbody>
+				</table>
+			</div>
+			<#if page.result?size lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<@fm.page page=page />
+		</div>
+	</div>
+	
+	<div id="able_authority" class="pop" style="display: none; width: 280px;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<div id="pt" class="pop_title">启用<#if flag>机构<#else>部门</#if></div>
+			<div id="bk" class="pop_content blank">确定要启用所选<#if flag>机构<#else>部门</#if>吗？</div>
+			<div class="pop_btn ">
+				<input type="hidden" id="status" value="1" />
+				<button type="button" class="btn primary xs" onclick="able()">确定</button>
+				<button type="button" class="btn default xs" onclick="close_pop()">取消</button>
+			</div>
+		</div>				
+	</div>	
+	
+	<script type="text/javascript">
+		function open_able(id, status) {
+			if (id) {
+				get_checked(id);
+			}
+			var before = status == 1 ? "禁用" : "启用";
+			var after = status == 1 ? "启用" : "禁用";
+			$("#pt").text($("#pt").text().replace(before, after));
+			$("#bk").text($("#bk").text().replace(before, after));
+			$("#status").val(status);
+			open_pop(null,null,"#able_authority",true);
+		}
+		
+		function able() {
+			var status = $("#status").val();
+			ajax_checked("请选择需要" + (status == 1 ? "启用" : "禁用") + "的机构", "able?&status=" + status + "&token=${token}");
+			close_pop();
+		}
+		
+		function open_nodes(e) {
+			var $tr = $(e).parents('.flagTr');
+			var couSearchName = $("#couSearchNameVal").val();
+			var $check = $tr.find("input[type=checkbox]");
+			var ajax = $check.attr("ajax");
+			if (ajax == "1") {
+				return;
+			}
+			$(e).toggleClass("icon_arrow_right");
+			var id = $check.val();
+			var level = $check.attr("level");
+			nodes($tr, level, "nodes?orgid=" + id + "&token=${token}",couSearchName);
+			$check.attr("ajax", "1");
+		}
+
+		function nodes(e, level, url,couSearchName) {
+			$.ajax({
+				url: url,
+				type: "post",
+				data: {"couSearchName":couSearchName},
+				dataType: "json",
+				success: function(data) {
+					if (data.code == 1) {
+						var left = 18 * int(level);
+						var i = 1;
+						var z = 1;
+						var orgId = data.orgId;
+						$.each(data.nodes, function(idx, obj) {
+							var able = 1;
+							i++;
+							z++;
+							var title = "启用"
+							var check = "icon_unlock";
+							if (obj.status == "1") {
+								able = 0;
+								title = "禁用"
+								check = "icon_lock";
+							}
+							var text = "";
+							var flag = 0;			
+							
+							if(obj.status = 1)
+							{
+								flag = "启用";
+							}	
+							else
+							{
+								flag = "禁用";
+							}	
+							
+							text += "<tr class='flagTr' id=\"tr_" + z + "\">";
+							text += "<td width=\"26\"><input type=\"checkbox\" name=\"checkedIds\" value=\"" + obj.orgId + "\" level=\"" + (int(level) + 1) + "\" ajax=\"0\">  </td>";
+							text += "<td width=\"20%\"><span class=\"icons icon_open able\" onclick=\"open_nodes(this)\" style=\"margin-left: " + left + "px\" \"></span><span class=\"icons_text\">" + obj.orgName + "</span></td>";
+							text += "<td width=\"20%\"><center>部门</center></td>";
+							if(obj.contactName != undefined){
+								text += "<td width=\"10%\">" + obj.contactName + "</td>";
+							}else{
+								text += "<td width=\"10%\">" + "" + "</td>";
+							}
+							if(obj.contactNumber != undefined){
+								text += "<td width=\"20%\">" + obj.contactNumber + "</td>";
+							}else{
+								text += "<td width=\"20%\">" + "" + "</td>";
+							}
+	    					text += "<td width=\"10%\">" + (obj.status == 1 ? "启用" : "禁用") + "</td>";
+	    					text += "<td></td>";
+							text += "</tr>";
+							e.after(text);							
+							
+						});
+						
+						var width = $(".table_body table").width();
+						$(".table_head table").css("width", width + "px");
+					} else {
+						danger(1, data.message);
+					}
+				}
+			});
+		}
+		
+	</script>
+</body>
+</html>

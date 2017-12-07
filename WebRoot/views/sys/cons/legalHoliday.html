@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<#include "/views/meta.html" />
+	<title>法定节假日排班</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	<link rel="stylesheet" type="text/css" href="/jw_js_css_img/css/legalHoliday.css" />
+	<link rel="stylesheet" href="/jw_js_css_img/css/dhtmlxscheduler.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<script src="/jw_js_css_img/js/dhtmlxscheduler.js?v=091201" type="text/javascript" charset="utf-8"></script>
+	<script src="/jw_js_css_img/js/dhtmlxscheduler_agenda_view.js?v=091201" type="text/javascript" charset="utf-8"></script>
+	<script src="/jw_js_css_img/js/dhtmlxscheduler_year_view.js?v=091201" type="text/javascript" charset="utf-8"></script>
+	<script type="text/javascript" src="/jw_js_css_img/js/legalHoliday.js"></script>
+</head>
+<body onload="init();">
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<!-- 正式内容开始 -->
+	<div id="scheduler_here" class="dhx_cal_container">
+		<div class="dhx_cal_navline">
+			<div class="dhx_cal_prev_button">&nbsp;</div>
+			<div class="dhx_cal_next_button">&nbsp;</div>
+			<div class="btnDiv">
+			<form>
+				<input type="hidden" name="year" value="${year}" id="year" />
+				<button type="submit" class="btn primary xs">提交</button>
+				<input type="hidden" name="dataValue" id="dataValue" value="<#list strings as s>${s}</#list>"/>
+			</form>
+			</div>
+			<div class="dhx_cal_date"></div>
+		</div>
+		<div class="dhx_cal_header">
+		</div>
+		<div class="dhx_cal_data">
+		</div>
+	</div>
+	<!-- 正式内容结束 -->
+	
+	<div id="remarks" class="pop" style="display: none; width: 270px;margin: auto;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<div class="pop_title">请输入节假日备注</div>
+			<div class="pop_content blank">
+				<textarea style="width: 100%;height: 100%" id="holidayVal" placeholder="请输入节假日备注...."></textarea>
+			</div>
+			<div class="pop_btn ">
+				<button type="button" class="btn primary xs sure">确定</button>
+				<input type="hidden" id="monthDay" />
+				<button type="button" class="btn default xs" onclick="close_pop()">取消</button>
+			</div>
+		</div>				
+	</div>
+<script type="text/javascript">
+
+		$(document).ready(function() {
+			var nodes = [
+	 			<#list shiftHolidays as e>
+	 			{month: ${e.month}, day: ${e.day}, name:"${e.remarks}"}<#if e_has_next>,</#if>
+	 			</#list>
+	 			];
+	 		
+	 		setTimeout(function(){
+	 			for(var i=0;i<nodes.length;i++){
+		 			/* alert(nodes[i].month+"-"+nodes[i].day); */
+		 			$(".dhx_year_month").each(function(){
+		 				var $month = $.trim($(this).html());
+		 				if($month == nodes[i].month+"月"){
+		 					$(this).siblings(".dhx_year_body").find(".dhx_month_head").each(function(){
+		 						if($.trim($(this).parent().attr("class")).length == 0){
+		 							if($.trim($(this).html()) == nodes[i].day){
+		 								$(this).css("background","#ADE3AD");
+		 								$(this).attr("title",nodes[i].name);
+		 							}
+		 						}
+		 					});
+		 				}
+		 			});
+		 		};
+	 		},1000);
+		});
+
+		$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {					
+					/* var text = "信息正在处理中,请稍候";
+					$("#coll_pop .pop_content").empty();
+					$("#coll_pop .pop_content").prepend(text);
+					$(".loading").show();
+					open_pop(null,null,"#coll_pop",true); */
+				},
+				success: function(data) {
+					//close_pop();
+					if (data.code == 1) {
+ 						success_callback(data, "scheduling?dataValue="+$("#year").val());
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+</script>
+</body>
+</html>

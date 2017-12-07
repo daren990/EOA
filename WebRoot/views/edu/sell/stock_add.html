@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if goods.id??>编辑<#else>新建</#if>商品</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit">
+			<div id="form" class="clearfix" style="width: 500px;">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="id" value="${goods.id}">
+					<input type="hidden" id="flag" name="flag" value="${flag}">
+					<table class="table">
+
+						<tr>
+							<td>产品类型：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="goodsType" value="${goods.type}" />
+								<#if flag>
+								<div id="goodsType" class="select xl" >
+									<center><span class="option text">选择产品类型</span><span class="icon"></span></center>
+									<ul>
+										<li item="课程">课程</li>
+										<li item="其他">其他</li>
+									</ul>
+								</div>	
+								<#else>
+								<input type="text" style=" width : 308px" class="input xl" value="${goods.type}">
+								</#if>						
+							</td>
+						</tr>
+
+                        <tr id="courseTr">
+							<td>原课程：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" id="parentName" name="parentName" class="input xl" value="${courseName?default('')}" readonly="readonly">	
+								<input type="hidden" id="parentId" name="parentId" class="input xl" value="${goods.courseId?default(0)}">					
+							</td>
+						</tr>
+
+						<tr>
+							<td>产品名称：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input xl" id="name" name="name" value="${goods.name}">
+							</td>
+						</tr>
+
+                        <tr id="teacherTr">
+							<td>上课老师：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input xl" id="teacherName" name="teacherName" value="${teacherName}">					
+							</td>
+						</tr>
+
+                        <tr id="cooperationTr">
+							<td>合作机构：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input xl" id="cooperationName" name="cooperationName" value="${cooperationName}">				
+							</td>
+						</tr>
+
+                        <tr>
+							<td>基础价格：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" style="width: 95px" class="input xl" name="price" value="${goods.price}">元
+							</td>
+						</tr>
+						
+						<tr>
+							<td>库存量：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" style="width: 95px" class="input xl" name="max" value="${goods.max}">个
+							</td>
+						</tr>
+															
+						<tr id="gainsharingTr">
+							<td>分成方式：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" id="gainSharingTypeVal" name="gainSharingTypeVal" value="${goods.gainSharingType?default(1)}" />
+								<input type="hidden" name="gainSharingType" value="${goods.gainSharingType?default(1)}" />
+								<#if flag>
+								<div id="gainSharingType" style="width: 157px" class="select">
+									<center><span class="option text">分成方式</span><span class="icon"></span></center>
+									<ul>
+										<li item="1">按学生绝对值分成</li>
+										<li item="2">按学生比例值分成</li>
+										<li item="3">按课时绝对值分成</li>
+										<li item="4">按课时比例值分成</li>
+									</ul>
+								</div>
+								<#else>
+								<#if course.gainSharingType == 1>	
+								    <input type="text" style="width: 150px" class="input" value="按学生绝对值分成">
+								</#if>
+								<#if course.gainSharingType == 2>
+								    <input type="text" style="width: 150px" class="input" value="按学生比例值分成">
+								</#if>
+								<#if course.gainSharingType == 3>
+								    <input type="text" style="width: 150px" class="input" value="按课时绝对值分成">
+								</#if>
+								<#if course.gainSharingType == 4>
+								    <input type="text" style="width: 150px" class="input" value="按课时比例值分成">
+								</#if>
+								</#if>
+								<input type="text" style="width: 148px" class="input" id="gainSharingNum" name="gainSharingNum" value="${goods.gainSharingNum}">
+							</td>
+							<td>
+							<div id = "percent">%</div>
+							<div id = "studentNum">元/个</div>
+							<div id = "lessonNum">元/节</div>
+							</td>
+						</tr>                        
+									
+												
+                        <#if flag>
+						<tr>
+							<td>状态：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="status" value="${goods.status?default(1)}" />
+								<div id="status" class="select xl">
+									<center><span class="option text">启用</span><span class="icon"></span></center>
+									<ul>
+										<li item="0">禁用</li>
+										<li item="1">启用</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						</#if>
+											
+						<tr>
+							<td colspan="2"></td>
+							<td><button id="submitButton" type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+						
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<div id="subject_pop" class="pop bind" style="display: none; width: 318px;">
+		<div class="pop_content">
+			<div class="auto_height sm">
+				<ul id="tree" class="ztree"></ul>
+			</div>
+		</div>
+	</div>
+
+
+	<script type="text/javascript">
+	
+	
+	var nodes = [
+		<#list nodes as e>
+		<#if e.couType != "科目">
+			    {id: "${e.id}", pId: "${e.parentId}", name: "${e.name}",couType:"${e.couType}"}<#if e_has_next>,</#if>
+		</#if>
+	    </#list>
+		];
+		
+		var setting = {
+			data: { simpleData: { enable: true } },
+			view: { showIcon: false },
+			callback: { onClick: getNode }
+		};				
+	
+		function getNode(event, id, node) {
+			$("input[name=parentId]").val(node.id);
+			$("#parentName").val(node.name);
+			if(node.couType != "课程")
+			{
+				danger(1, "只能选择课程!您现在选择的是" + node.couType + "!");
+				disabled_off();
+				$("#submitButton").attr("disabled", true);
+			}
+			else
+			{
+				success();
+				$("#submitButton").attr("disabled", false);
+			}
+			return true;
+		}
+
+		function judgeSharing(t)
+		{
+			if(t == 1)
+			{
+				$("#studentNum").show();
+				$("#percent").hide();
+				$("#lessonNum").hide();
+			}
+			else if(t == 2 || t == 4)
+			{
+				$("#percent").show();
+				$("#studentNum").hide();
+				$("#lessonNum").hide();
+			}
+			else
+			{
+				$("#lessonNum").show();
+				$("#percent").hide();
+				$("#studentNum").hide();
+			}
+		}
+
+		
+	$(document).ready(function(){
+				
+			$("#gainSharingType.select li").click(function() {
+				var t = $(this).attr("item");
+				judgeSharing(t);
+			});
+		
+		    var flag = $("#flag").val();
+		    if(!flag)
+		    {
+			    var form = document.forms[0]; 
+			    for (var i = 0; i < form.length; i++) 
+			    { 
+			    	var element = form.elements[i]; 
+			    	element.disabled = "true"; 
+			    }
+		    	$("#submitButton").hide();
+		    }
+
+		    $.fn.zTree.init($("#tree"), setting, nodes);
+		    $("#parentName").click(function() {
+ 				open_pop(null, "#parentName", "#subject_pop", false);
+ 				return false;
+ 			});
+		    
+		
+			$("#detail").val($("#detailVal").val());
+								
+ 			$("#type").select({ "name": "type" });
+  			$("#status").select({ "name": "status" });
+  			$("#goodsType").select({ "name": "goodsType" });
+ 			$("#gainSharingType").select({ "name": "gainSharingType" });
+			
+			type($("input[name=type]").val());
+ 			
+			$("#gainSharingType.select li").click(function() {
+				var t = $(this).attr("item");
+			});
+			
+ 			$("#type.select li").click(function() {
+				var t = $(this).attr("item");
+			});
+ 				
+ 			$("#goodsType.select li").click(function() {
+				var t = $(this).attr("item");
+			});
+ 			
+            var gflag = $("#gainSharingTypeVal").val();
+			if(gflag == 1)
+			{
+				$("#studentNum").show();
+				$("#percent").hide();
+				$("#lessonNum").hide();
+			}
+			else if(gflag == 2 || gflag == 4)
+			{
+				$("#percent").show();
+				$("#studentNum").hide();
+				$("#lessonNum").hide();
+			}
+			else
+			{
+				$("#lessonNum").show();
+				$("#percent").hide();
+				$("#studentNum").hide();
+			}
+
+ 			
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.name, [RQ, RANGE, "{1,60}"], "商品名称");
+						validate(form.price, [RQ, N], "标准价格");
+						validate(form.status, [RQ, N], "状态");
+						validate(form.remain, [RQ, N], "库存数量");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+				
+		function type(t) {
+			$(".menu").hide();
+			$(".url").hide();
+			$(".action").hide();
+			if (t == "0") {
+				$(".menu").show();
+				$(".url").show();
+				$(".url .required").text("");
+				$("input[name=action]").val("");
+			} else if (t == "1") {
+				$(".url").show();
+				$(".url .required").text("*");
+				$("input[name=position]").val("");
+				$("input[name=action]").val("");
+			} else if (t == "2") {
+				$(".action").show();
+				$("input[name=position]").val("");
+				$("input[name=url]").val("");
+			}
+		}
+				
+	</script>
+</body>
+</html>

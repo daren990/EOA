@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  	<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/js/jquery-1.9.1.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/ueditor1_4_3/ueditor.config.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/ueditor1_4_3/ueditor.all.min.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/js/applyReport.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/js/viewSharDetail.js"></script>
+	<link type="text/css" rel="stylesheet" href="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.css" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/jw_js_css_img/css/viewSharDetail.css">
+    <title>分享</title>
+  </head>
+  
+  <body>
+  	<div data-role="header">
+  		<h1>我分享，我快乐！！！</h1>
+  	</div>
+  	<div class="indexpage">
+  		<div class="ui-body ui-body-a ui-body-all">
+  			<h3>${report.title}</h3>
+  			<#if report.createTime??><#assign createTime = report.createTime?date /></#if>
+  			<p>时间:${createTime} | 作者:${report.trueName}</p><br/>
+  			<p>${report.content}</p>
+  		</div>
+  		
+  		<form action="/addressBook/viewSharDetail/wxComment" method="post">
+	  		<div class="contentpl">
+	  			此处发表评论
+			    <script id="container" name="container" type="text/plain"></script>
+		  	</div>
+		  	<input type="hidden" name="reportId" value="${report.reportId}" id="reportId"/>
+		  	<input type="button" value="立刻发表评论" class="ui-btn ui-btn-inline" id="comment"/>
+	  	</form>
+	  	<#if page.result?size gt 0>
+			<#list page.result as e>
+	  	<div class="ui-body ui-body-a ui-corner-all listpl" id="1">
+	  	
+	  		<img src="${ctx}/jw_js_css_img/img/touxiang.png" /><span class="infospan">${e.trueName} <#if e.createTime??>${e.createTime?datetime}</#if></span><br/>
+	  		<span class="plcontent">${e.content}</span>
+	  		<p class="huifup"><a href="#" class="louhuifu" onclick="commentReply('${e.userId}','${e.trueName}','${e.commentId}')">回复</a><input type="hidden" value="${e.trueName}" /></p>
+	  	<#if page2.result?size gt 0>
+			<#list page2.result as a>
+			<#if a.commentId = e.commentId>
+	  		<div class="ui-body ui-body-a ui-corner-all hflistpl" id="6">
+	  		<p><span class="infospan"><#if a.createTime??>${a.createTime?datetime}</#if></span></p>
+		  		<img src="${ctx}/jw_js_css_img/img/touxiang.png" /><span class="infospan">${a.trueName}对${a.replyedName}说:</span><br/>
+		  		
+		  		<span class="plcontent">${a.content}</span><br/>
+		  		
+		  		<p class="huifunzi"><a href="#" class="huifu">回复</a><input type="hidden" value="${a.trueName}" /></p>
+		  	</div>
+		  	</#if>
+		  	   </#list>
+		</#if>
+	  	</div>
+	  	 </#list>
+	</#if>
+  	</div>
+  	
+  	<!-- 弹出框 -->
+  	<div data-role="popup" id="tanpl" class="ui-content" data-theme="a">
+  		<a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+  		<h3 class="h3clss"></h3>
+  		<form action="" method="post">
+	  		<textarea rows="20" cols="50" id="content"></textarea>
+	  		<input type="hidden" value="" id="commentUserId">
+	  		<input type="hidden" value="" id="commentId">
+	  		<input type="button" value="立刻回复" />
+	  	</form>
+	</div>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			
+			$(".huifu").click(function(){
+				var name = $(this).next().val();
+				$(".huifuname").remove();
+				$(".h3clss").append("<span class='huifuname'>回复 "+name+" 的评论</span>");
+			});
+		
+			$("#comment").click(function(){
+				$.ajax({
+					type:"POST",
+					url:"/addressBook/viewSharDetail/wxComment",
+					data:{reportId:$("#reportId").val(),content:UE.getEditor('container').getContent()},
+					dataType:"json",
+					success:function(date){
+						window.location.reload();
+					}
+				});
+				});
+			});
+			
+			
+			function commentReply(userId,trueName,commentId){
+				
+				$(".huifuname").remove();
+				$(".h3clss").append("<span class='huifuname'>回复 "+trueName+" 的评论</span>");
+				$.ajax({
+					type:"POST",
+					url:"/addressBook/viewSharDetail/commentReply",
+					data:{content:$("#content").val(),userId:userId,commentId:commentId},
+					dataType:"json",
+					success:function(date){
+						window.location.reload();
+					}
+				});
+				
+								
+			}
+	</script>
+  </body>
+</html>

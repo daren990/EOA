@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 补录申请查询</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.css" />
+	<link rel="stylsheet" type="text/css" href="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile.theme-1.4.5.min.css" />
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/layer.m/layer.m.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery-1.7.2.min.js"></script>
+	<style type="text/css">
+		.go{display: none}
+		#popup{
+			display:none;
+			position:fixed;
+			width:50%;
+			top:40%;
+			left:50%;
+			padding:5%;
+			color:#fff;
+			text-align:center;
+			background:#9e9e9e;
+			transform:translateX(-50%) translateY(-50%);
+			border-radius:10px;
+		}
+		#popup button{
+			width:30%;
+			margin:10% 5% 0;
+		}
+	</style>
+</head>
+<body>
+	<div data-role="page">
+		<div data-role="header">
+			<h2>补录查询</h2>
+		</div>
+		<div id="wrapper" class="clearfix" style="margin-top: 0px;padding: 0px;">
+			<div class="form-group">
+				<form id="search" action="wxpage" method="get">
+					<div class="col-xs-7" style="text-align:center;">
+						<span>年份</span>
+						<span>
+							<div id="year" class="select xs">
+								<span class="option text">2017</span><span class="icon"></span>
+								<!-- <ul>
+									<li item="2014">2014</li>
+									<li item="2015">2015</li>
+									<li item="2016">2016</li>
+									<li item="2017">2017</li>
+									<li item="2018">2018</li>
+								</ul> -->
+							</div>
+						</span>
+						<span>月份</span>
+						<span>
+							<div id="month" class="select xs">
+								<span class="option text">10</span><span class="icon"></span>
+								<!-- <ul>
+									<li item="01">01</li>
+									<li item="02">02</li>
+									<li item="03">03</li>
+									<li item="04">04</li>
+									<li item="05">05</li>
+									<li item="06">06</li>
+									<li item="07">07</li>
+									<li item="08">08</li>
+									<li item="09">09</li>
+									<li item="10">10</li>
+									<li item="11">11</li>
+									<li item="12">12</li>
+								</ul> -->
+							</div>
+						</span>
+						<span><button type="submit" class="btn primary xxs" data-role="none" style="width:50px;">搜索</button></span>
+					</div>
+				</form>
+			</div>
+			<div class="content">
+				<div class="contentdata">
+					<ul data-role="listview" data-inset="true" item-index="0">
+						<li data-role="list-divider">管理员</li>
+						<li style="background-color: #f6f6f6;border-color: #ddd;color: #333;text-shadow: 0 1px 0 #f3f3f3;">
+							
+							<p><strong>补录日期: yyyy-MM-dd</strong></p>
+							<p><strong>审批上级: 罗安庭</strong></p>
+							<p><strong>审批状态: <span style="margin:0 1vw;padding:0 2vw;font-size:0.6em;color:#fff;background:#f38b06;border:1px solid #eee;border-radius:2rem;">未审</span></strong></p>
+							<p style="float:left;position:relative;left:50%;transform:translateX(-50%);">
+							   <a href="#" style="display:inline-block;width:60%;margin:0 1vw;padding:1vw 2vw;text-align:center;border:1px solid #eee;font-size:1rem;background:#d8d6d6;border-radius:0.4rem;">补录</a>
+							</p>
+							<span class="delete" style="position:absolute;right:2vw;top:2vw;display:inline-block;width:4vw;height:4vw;background:url(/img/icons/del.png)"><!-- 删除  --></span>
+						</li>
+					</ul>
+					<ul data-role="listview" data-inset="true" item-index="1">
+						<li data-role="list-divider">管理员</li>
+						<li style="background-color: #f6f6f6;border-color: #ddd;color: #333;text-shadow: 0 1px 0 #f3f3f3;">
+							
+							<p><strong>补录日期: yyyy-MM-dd</strong></p>
+							<p><strong>审批上级: 罗安庭</strong></p>
+							<p><strong>审批状态: <span style="margin:0 1vw;padding:0 2vw;font-size:0.6em;color:#fff;background:#f38b06;border:1px solid #eee;border-radius:2rem;">未审</span></strong></p>
+							<p style="float:left;position:relative;left:50%;transform:translateX(-50%);">
+							   <a href="#" style="display:inline-block;width:60%;margin:0 1vw;padding:1vw 2vw;text-align:center;border:1px solid #eee;font-size:1rem;background:#d8d6d6;border-radius:0.4rem;">补录</a>
+							</p>
+							<span class="delete" style="position:absolute;right:2vw;top:2vw;display:inline-block;width:4vw;height:4vw;background:url(/img/icons/del.png)"><!-- 删除  --></span>
+						</li>
+					</ul>
+					
+				</div>
+				<#if !attendances?? || attendances?size lt 1>
+				<div class="empty">没有数据</div>
+				</#if>
+				<div id="page" class="clearfix">
+					<div class="left">
+						<span>共<#if attendances?? && attendances?size gt 0>${attendances?size}<#else>5</#if>条记录</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div id="popup">
+		<p>确定删除？</p>
+		<div>
+			<button class="deleteBtn">删除</button><button class="cancelBtn">取消</button>
+		</div>
+	</div>
+</body>
+<script>
+	$(document).ready(function(){
+		var $this;
+		var $delete_index;
+		$(".delete").on('touchend',function(){
+			$this=$(this);
+			$delete_index=$this.parent().parent().attr("item-index");
+			$("#popup").show();
+		});
+		$(".deleteBtn").on('touchend',function(){
+			$this.parent().parent().hide();
+			$("#popup").hide();
+		});
+		$(".cancelBtn").on('touchend',function(){
+			$("#popup").hide();
+		})
+	})
+</script>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 编辑老师档案</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit auto_height">
+			<div id="form" class="clearfix" style="width: 430px;">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="teacherId" value="${teacher.id}">
+					<input type="hidden" name="status" value="${teacher.status}">
+					<table class="table">
+						<tr>
+							<td>姓名：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" name="truename" value="${teacher.truename}" >
+							</td>
+						</tr>
+						<tr>
+							<td>性别：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="gender" value="${teacher.sex?default(0)}" />
+								<div id="gender" class="select xl">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<li item="0">女</li>
+										<li item="1">男</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>出生年月日：</td>
+							<td class="required">*</td>
+							<td>
+								<#if teacher.birthday??>
+								<#assign birthday_yyyyMMdd = teacher.birthday?date />
+								</#if>
+								<input id="birthday" type="text" class="input xl Wdate" name="birthday_yyyyMMdd" value="${birthday_yyyyMMdd?default('')}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							</td>
+						</tr>
+						<tr>
+							<td>联系电话：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" name="telephone" value="${teacher.telephone}">
+							</td>
+						</tr>
+						<tr>
+							<td>微信号：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" name="weixin" value="${teacher.weixin}">
+							</td>
+						</tr>
+						<tr>
+							<td>联系地址：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" name="address" value="${teacher.address}">
+							</td>
+						</tr>
+						
+						<tr>
+							<td>所属公司：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" value="${teacher.corpName}" readonly="readonly">
+								<input type="hidden" name="corpId" value="${teacher.corpId}" readonly="readonly">
+							</td>
+						</tr>
+						<#if teacher.subjectNames??>
+						<tr>
+							<td>所属学科：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" value="${teacher.subjectNames}" readonly="readonly">
+							</td>
+						</tr>
+						</#if>
+						<tr>
+							<td>合作方式：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="gainSharingType" value="${teacher.coopType?default('自营')}" />
+								<div id="gainSharingType" class="select xl">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<li item="自营">自营</li>
+										<li item="兼职">兼职</li>
+										<#if sameCorp??>
+										<li item="合作">合作</li>
+										</#if>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>授课课程：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" value="${teacher.courseNames}" readonly="readonly">
+							
+							</td>
+						</tr>
+						<#if sameCorp??>
+						<#else>
+						<#if myCorpId??>
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+						</#if>
+						</#if>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#gender").select({ "name": "gender" });
+			$("#gainSharingType").select({ "name": "gainSharingType" });
+			<#if myCorpId??>
+			<#if sameCorp??> <#-- 没有值说明允许修改，有值说明不允许修改 -->
+			$("input").prop("readonly","readonly");
+			<#else>
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.gender, [RQ], "性别");
+						validate(form.birthday_yyyyMMdd, [RQ], "出生年月");
+						validate(form.telephone, [RQ, RANGE, "{1,20}"], "联系电话");
+						
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "/teacher/teacher/page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+			</#if>
+			<#else>
+			$("input").prop("readonly","readonly");
+			</#if>
+		
+		});
+	</script>
+</body>
+</html>

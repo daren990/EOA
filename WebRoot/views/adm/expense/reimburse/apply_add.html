@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if reimburse.reimburseId??>编辑<#else>新建</#if>报销申请</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit">
+			<div id="form" class="clearfix" style="width: 460px; margin-top:60px">
+			
+				<form action="add" method="post">
+				<div style="margin-left: 330px; font-size: 17px; font-weight: bold;">${reimburse.number}</div>
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="reimburseId" value="${reimburse.reimburseId}">
+					<table class="table">
+						<tr>
+							<td>总金额：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" id="amount" name="amount" class="input sm" value="${views.rmb(reimburse.amount)}" readonly="readonly">
+							</td>
+						
+							<td>票据总数：</td>
+							<td class="required">*</td>
+							<td colspan="2">
+								<input type="text" class="input sm" name="sumbill" id="sumbill" value="${reimburse.sumBill}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>报销主题：</td>
+							<td class="required">*</td>
+							<td colspan="5"><input type="text" name="theme" class="input xl" value="${reimburse.theme}"></td>
+						</tr>
+						<tr>
+							<td>申请人：</td>
+							<td></td>
+							<td><input type="text" class="input sm" value="${currentUser.trueName}" readonly="readonly"></td>
+							<td>申请时间：</td>
+							<td></td>
+							<td colspan="2">
+								<#assign createTime = now?date />
+								<#if reimburse.createTime??><#assign createTime = reimburse.createTime?date /></#if>
+								<input type="text" class="input sm" value="${createTime}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>预算项目：</td>
+							<td class="required">*</td>
+							<td colspan="5">
+								<input type="hidden" name="projectId" value="${reimburse.projectId}" />
+								<div id="projectId" class="select xl">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<li item="0">无</li>
+										<#list projects as e>
+										<li item="${e.projectId}">${e.projectName}</li>
+										</#list>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<#assign i = 0 />
+						<#list reimburseItems as e>
+						<tr class="target" item="${i}">
+							<td>报销类别：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="bigType_${i}" value="${e.bigType}" />
+								<div name="bigType"  class="select sm" >
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<#list type as t>
+										<li item="${t.reimburseTypeId}" onclick="ajax_nodes('${t.reimburseTypeId}', '${i}')">${t.bigType}</li>
+										</#list>
+									</ul>
+								</div>
+							</td>
+							<td>报销小类：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="smallType_${i}" value="${e.smallType}" />
+								<div id="smallType_${i}"  name="smallType"  class="select sm">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										
+										<li item="${e.smallType}">${e.smallName}</li>
+										
+									</ul>
+								</div>
+							</td>
+							<td>
+							<#if i == 0>
+								<button type="button" class="btn default xxxs" onclick="add_assetItem()">+</button>
+								<#else>
+								<button type="button" class="btn default xxxs" onclick="del_target(${i})">-</button>
+							</#if>
+						</td>
+						</tr>
+						<tr class="target" item="${i}">
+							<td>报销金额（<span class="required">元</span>）：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input sm" name="money_${i}" value="${views.rmb(e.money)}" onkeypress="billmoney(this.value)" onblur="countMoney()">
+							</td>
+							<td>票据张数：</td>
+							<td class="required">*</td>
+							<td colspan="2">
+								<input type="text" class="input sm" name="bill_${i}" id="bill_${i}" value="${e.bill}" onkeypress="bill()" onblur="countBill()">
+							</td>
+						</tr>
+						<tr class="target" item="${i}">
+							<td>用途：</td>
+							<td class="required">*</td>
+							<td colspan="5"><input type="text" class="input xl" name="purpose_${i}" value="${e.purpose}"></td>
+						</tr>
+						<#assign i = i + 1 />
+						</#list>
+						
+							<tr>
+							<td class="pos">备注：</td>
+							<td class="pos required">*</td>
+							<td colspan="5">
+								<textarea class="xl" name="remark"  rows="2" >${reimburse.remark}</textarea>
+							</td>
+						</tr>
+						<tr>
+							<td>助理审批：</td>
+							<td class="required">*</td>
+							<td colspan="5">
+								<input type="hidden" name="actorId" value="${reimburse.actorId}" />
+								<div id="actorId" class="select xl">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<#list operators as e>
+										<li item="${e.userId}">${e.trueName}</li>
+										</#list>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		var index = '${reimburseItems?size}'-1;
+	
+		$(document).ready(function() {
+			$("div[name='bigType']").each(function(index){
+				$(this).select({ "name": "bigType_"+index });
+			});
+			$("div[name='smallType']").each(function(index){
+				$(this).select({ "name": "smallType_"+index });
+			});
+			
+			
+			$("#projectId").select({ "name": "projectId" });
+			$("#actorId").select({ "name": "actorId" });
+			
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.projectId, [RQ, RANGE, "{1,20}"], "预算项目");
+						validate(form.actorId, [RQ, RANGE, "{1,20}"], "助理审批");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+		
+		
+		function add_assetItem(){
+			index = parseFloat(index) + parseFloat(1);
+			var text="";
+			text += "<tr class=\"target\" item=\"" + index + "\">";
+			text += "<td>报销类别：</td>";
+			text += "<td class=\"required\">*</td>";
+			text += "<td>";
+			text += "<input type=\"hidden\" name=\"bigType_" + index + "\" value=\"\">\n";
+			text +="<div name='bigType' id=\"bigType_" + index +"\"class=\"select sm\">";
+			text +="<span class=\"option text\">请选择</span><span class=\"icon\"></span>";
+			text +="<ul>";
+			text +="<#list type as t>"
+			text +="<li item=\"${t.reimburseTypeId}\" onclick=\"ajax_nodes('${t.reimburseTypeId}', "+ index +")\">${t.bigType}</li>";
+			text +="</#list>";
+			text +="</ul>";
+			text +="</div>";
+			text +="</td>";
+			text += "<td>报销小类：</td>";
+			text += "<td class=\"required\">*</td>";
+			text += "<td>";
+			text += "<input type=\"hidden\" name=\"smallType_" + index + "\" value=\"\">\n";
+			text +="<div name='smallType' id=\"smallType_" + index + "\" class=\"select sm\">";
+			text +="<span class=\"option text\">请选择</span><span class=\"icon\"></span>";
+			text +="<ul>";
+			
+			text +="<li item=\"\"></li>";
+
+			text +="</ul>";
+			text +="</div>";
+			text +="</td>";
+			text +="<td>";
+			text +="<button type=\"button\" class=\"btn default xxxs\" onclick=\"del_target(" + index + ")\">-</button>";
+			text +="</td>";
+			text +="</tr>";
+			text += "<tr class=\"target\" item=\"" + index + "\">";
+			text +="<td>报销金额(<span class=\"required\">元</span>):</td>"
+			text += "<td class=\"required\">*</td>";
+			text +="<td>";
+			text +="<input type=\"text\" class=\"input sm\" name=\"money_" +index+ "\"  onkeypress=\"billmoney(this.value)\" onblur=\"countMoney()\">";
+			text +="</td>";
+			text +="<td>票据张数:</td>"
+			text += "<td class=\"required\">*</td>";
+			text +="<td colspan=\"2\">";
+			text +="<input type=\"text\" class=\"input sm\" name=\"bill_" +index+ "\" onkeypress=\"bill()\" onblur=\"countBill()\">";
+			text +="</td>";
+			text +="</tr>";
+			text += "<tr class=\"target\" item=\"" + index + "\">";
+			text +="<td>用途:</td>"
+			text += "<td class=\"required\">*</td>";
+			text +="<td colspan=\"5\">";
+			text +="<input type=\"text\" class=\"input xl\" name=\"purpose_" +index+ "\" value=\"\">";
+			text +="</td>";
+			text +="</tr>";
+			$(".target").last().after(text);
+			$("#bigType_" + index).select({ "name": "bigType_"+index });
+			auto_height();
+		}
+		
+		
+		function countMoney(){
+			var sum = 0;
+			for(var i=0;i<=index;i++){
+				var amount = parseFloat($("input[name='money_"+i+"']").val());
+				if(amount ==""||amount==null)
+				amount = 0;
+				sum+= amount;
+			}
+			$("#amount").val(sum.toFixed(2));
+		}
+		
+		function countBill(){
+			var b = 0;
+			for(var i=0;i<=index;i++){
+			
+				b = b + parseFloat($("input[name='bill_"+i+"']").val());
+			}
+			$("#sumbill").val(b);
+		}
+		
+		function del_target(i) {
+			$("tr[item=" + i + "]").remove();
+			auto_height();
+			index = parseFloat(index) - parseFloat(1);
+		}
+		
+			function ajax_nodes(id,index) {
+			$("#smallType_" + index).unbind();
+			$.ajax({
+				url: "/adm/expense/reimburse/apply/nodes?reimburseId=" + id + "&token=${token}",
+				type: "post",
+				dataType: "json",
+				success: function(data) {
+					$("#smallType_" +index + " ul").empty();
+					$("#smallType_" +index + " ul").append("<li item=\"\">请选择</li>");
+					if (data.code == 1) {
+						$.each(data.nodes, function(idx, obj) {
+							var text = "<li item=\"" + idx + "\">" + obj + "</li>";
+							$("#smallType_" +index + " ul").append(text);
+						});
+						$("#smallType_" + index).select({ "name": "smallType_"+index });
+					} else {
+						danger(1, data.message);
+					}
+				}
+			});
+			close_pop();
+		}
+		
+		function bill(){
+			var num = event.keyCode;
+			//alert(num);
+			if(num<48||num>57){
+				event.returnValue=false;
+			}
+		}
+		function billmoney(value){
+			var num = event.keyCode;
+			var fpoint = value.indexOf(".");
+			if(fpoint==-1){
+				if((num<48||num>57)&&num!=46){
+					event.returnValue=false;
+				}
+				}else if(num<48||num>57){
+					event.returnValue=false;
+				}else if(value.substring(fpoint).length>2){
+					event.returnValue=false;
+				}	
+
+		}
+	</script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 汇总查询</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<div id="right" class="right">
+				<form id="search" action="page" method="get">
+					<ul>
+						<li class="text">年份</li>
+						<li>
+							<@fm.year name="year" year=mb.year?default(mb.years) arr=(mb.years-3)..(mb.years+1) />
+						</li>
+						<li class="text">月份</li>
+						<li>
+							<@fm.month name="month" month=mb.month?default(mb.months) />
+						</li>
+						<li><button type="submit" class="btn primary xxs">搜索</button></li>
+					</ul>
+				</form>
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrap" style="overflow-x: auto;">
+		<div id="wrapper" class="clearfix" style="width: 1800px;">
+			<div class="content">
+				<div class="table_head">
+					<table class="table">
+						<thead>
+							<tr>
+								<th width="">汇总年月</th>
+								<th width="6%">姓名</th>
+								<th width="6%">工号</th>
+								<th width="6%">应出勤天数</th>
+								<th width="6%">实际出勤天数</th>
+								<th width="5%">迟到/早退</th>
+								<th width="5%">旷工</th>
+								<th width="5%">未打卡</th>
+								<th width="5%">无薪事假</th>
+								<th width="5%">病假</th>
+								<th width="4%">丧假</th>
+								<th width="5%">婚假</th>
+								<th width="5%">年休假</th>
+								<th width="4%">工伤假</th>
+								<th width="5%">加班补休</th>
+								<th width="5%">陪产假</th>
+								<th width="5%">有薪事假</th>
+								<th width="5%">加班</th>
+								<th width="4%">出差</th>
+								<th width="5%">外勤</th>
+							</tr>
+						</thead>
+					</table>
+				</div>
+				<div class="table_body auto_height">
+					<table class="table">
+						<tbody>
+							<#if page.result?? && page.result?size gt 0>
+								<#list page.result as e>
+							<tr>
+								<#assign leaveMinute = e.unpaidLeaveMinute+e.sickLeaveMinute+e.funeralLeaveMinute+e.maritalLeaveMinute+e.annualLeaveMinute+e.injuryLeaveMinute+e.deferredLeaveMinute+e.paternityLeaveMinute+e.paidLeaveMinute />
+								<td width="">${e.resultMonth}</td>
+								<td width="6%">${e.trueName}</td>
+								<td width="6%">${e.jobNumber}</td>
+								<td width="6%">${e.shouldWorkDay}&nbsp;天</td>
+								<td width="6%"><#if e.workMinute==0>0<#else>${views.day(e.shouldWorkDay*e.workMinute-(e.absentAmount*e.workMinute+leaveMinute), e.workMinute)?string("0.#")}</#if>&nbsp;天</td>
+								<td width="5%">${e.lateAmount}&nbsp;次</td>
+								<td width="5%">${e.absentAmount}&nbsp;次</td>
+								<td width="5%">${e.forgetAmount}&nbsp;次</td>
+								<td width="6%">${views.hour(e.unpaidLeaveMinute)?string("0.#")}&nbsp;小时</td>
+								<td width="5%">${views.hour(e.sickLeaveMinute)?string("0.#")}&nbsp;小时</td>
+								<td width="4%">${views.hour(e.funeralLeaveMinute)?string("0.#")}&nbsp;小时</td>
+								<td width="5%"><#if e.workMinute==0>0<#else>${views.day(e.maritalLeaveMinute, e.workMinute)?string("0.#")}</#if>&nbsp;天</td>
+								<td width="5%"><#if e.workMinute==0>0<#else>${views.day(e.annualLeaveMinute, e.workMinute)?string("0.#")}</#if>&nbsp;天</td>
+								<td width="4%">${views.hour(e.injuryLeaveMinute)?string("0.#")}&nbsp;小时</td>
+								<td width="4%">${views.hour(e.deferredLeaveMinute)?string("0.#")}&nbsp;小时</td>
+								<td width="5%">${views.hour(e.paternityLeaveMinute)?string("0.#")}&nbsp;小时</td>
+								<td width="5%">${views.hour(e.paidLeaveMinute)?string("0.#")}&nbsp;小时</td>
+								<td width="5%">${views.hour(e.overtimeMinute)?string("0.#")}&nbsp;小时</td>
+								<td width="4%">${views.hour(e.errandMinute)?string("0.#")}&nbsp;小时</td>
+								<td width="5%">${views.hour(e.outworkMinute)?string("0.#")}&nbsp;小时</td>
+							</tr>
+								</#list>
+							</#if>
+						</tbody>
+					</table>
+				</div>
+				<#if page.result?size lt 1>
+				<div class="empty">没有数据</div>
+				</#if>
+				<@fm.page page=page />
+			</div>
+		</div>
+		<div id="footer"></div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#year").select({ "name": "year" });
+			$("#month").select({ "name": "month" });
+		});
+		
+		window.onload = window.onresize = function() {
+			auto_width();
+			auto_height();
+		}
+		
+		function auto_height() {
+			var all = $(window).height();
+			var a = $("#path").height();
+			var b = $("#header").height();
+			var c = $("#wrapper").height();
+			$(".table_body.auto_height").css("max-height", all - a - b - 102 + "px");
+			if ($(".message span").length > 0) {
+				$("#footer").css("min-height", all - a - b - c - 44);			
+			} else {
+				$("#footer").css("min-height", all - a - b - c - 40);
+			}
+		}
+	</script>
+</body>
+</html>

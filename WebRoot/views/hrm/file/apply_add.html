@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if file.fileId??>编辑<#else>新建</#if>档案文件申请</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit auto_height">
+			<div id="form" class="clearfix" style="width: 430px;">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="fileId" value="${file.fileId}">
+					<table class="table">
+						<tr>
+							<td>申请人：</td>
+							<td></td>
+							<td><input type="text" class="input xl" value="${currentUser.trueName}" readonly="readonly"></td>
+						</tr>
+						<tr>
+							<td>申请时间：</td>
+							<td></td>
+							<td>
+								<#assign createTime = now?date />
+								<#if file.createTime??><#assign createTime = file.createTime?date /></#if>
+								<input type="text" class="input xl" value="${createTime}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>用户：</td>
+							<td class="required">*</td>
+							<td>
+								<#if file.fileId??>
+								<input type="hidden" name="userId" value="${file.userId}">
+								<input type="text" class="input xl" value="${file.orgTrueName}" readonly="readonly">
+								<#else>
+								<input type="hidden" name="userId" value="${file.userId}" />
+								<div id="userId" class="select xl">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul class="auto_height sm">
+										<#list users as e>
+										<li item="${e.userId}">${e.trueName}</li>
+										</#list>
+									</ul>
+								</div>
+								</#if>
+							</td>
+						</tr>
+						<tr>
+							<td>姓名：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input xl" name="trueName" value="${file.trueName}">
+							</td>
+						</tr>
+						<tr>
+							<td>性别：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="gender" value="${file.gender?default(0)}" />
+								<div id="gender" class="select xl">
+									<span class="option text">女</span><span class="icon"></span>
+									<ul>
+										<li item="0">女</li>
+										<li item="1">男</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>身份证：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input xl" name="idcard" value="${file.idcard}">
+							</td>
+						</tr>
+						<tr>
+							<td>出生年月日：</td>
+							<td class="required">*</td>
+							<td>
+								<#if file.birthday??>
+								<#assign birthday_yyyyMMdd = file.birthday?date />
+								</#if>
+								<input type="text" class="input xl Wdate" name="birthday_yyyyMMdd" value="${birthday_yyyyMMdd?default('')}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							</td>
+						</tr>
+						<tr>
+							<td>籍贯：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" name="place" value="${file.place}">
+							</td>
+						</tr>
+						<tr>
+							<td>婚否：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="marry" value="${file.marry?default(0)}" />
+								<div id="marry" class="select xl">
+									<span class="option text">未婚</span><span class="icon"></span>
+									<ul>
+										<li item="0">未婚</li>
+										<li item="1">已婚</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>最高学历：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" name="degree" value="${file.degree}">
+							</td>
+						</tr>
+						<tr>
+							<td>所学专业：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" name="major" value="${file.major}">
+							</td>
+						</tr>
+						<tr>
+							<td>毕业院校：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" name="school" value="${file.school}">
+							</td>
+						</tr>
+						
+						<tr>
+							<td>联系电话：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" name="phone" value="${file.phone}">
+							</td>
+						</tr>
+						<tr>
+							<td>联系地址：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" name="address" value="${file.phone}">
+							</td>
+						</tr>
+						<tr>
+							<td>紧急联系人：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" name="exigencyName" value="${file.phone}">
+							</td>
+						</tr>
+						<tr>
+							<td>紧急联系电话：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" name="exigencyPhone" value="${file.phone}">
+							</td>
+						</tr>
+						<tr>
+							<td>邮箱：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" name="email" value="${file.email}">
+							</td>
+						</tr>
+						<tr>
+							<td>合同开始时间：</td>
+							<td class="required"></td>
+							<td>
+								<#if file.contractStart??>
+								<#assign contractStart_yyyyMMdd = file.contractStart?date />
+								</#if>
+								<input type="text" class="input xl Wdate" name="contractStart_yyyyMMdd" value="${contractStart_yyyyMMdd?default('')}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							</td>
+						</tr>
+						<tr>
+							<td>合同结束时间：</td>
+							<td class="required"></td>
+							<td>
+								<#if file.contractEnd??>
+								<#assign contractEnd_yyyyMMdd = file.contractEnd?date />
+								</#if>
+								<input type="text" class="input xl Wdate" name="contractEnd_yyyyMMdd" value="${contractEnd_yyyyMMdd?default('')}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							</td>
+						</tr>
+						<tr>
+							<td>签约次数：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input xl" name="amount" value="${file.amount}">
+							</td>
+						</tr>
+						<tr>
+							<td>入职日期：</td>
+							<td class="required">*</td>
+							<td>
+								<#if file.entryDate??>
+								<#assign entry_yyyyMMdd = file.entryDate?date />
+								</#if>
+								<input type="text" class="input sm Wdate" name="entry_yyyyMMdd" value="${entry_yyyyMMdd?default('')}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							</td>
+						</tr>
+						<tr>
+							<td>转正日期：</td>
+							<td class="required">*</td>
+							<td>
+								<#if file.fullDate??>
+								<#assign full_yyyyMMdd = file.fullDate?date />
+								</#if>
+								<input type="text" class="input sm Wdate" name="full_yyyyMMdd" value="${full_yyyyMMdd?default('')}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							</td>
+						</tr>
+						<tr>
+							<td>是否在职：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="onPosition" value="${file.onPosition?default(0)}" />
+								<div id="onPosition" class="select xl">
+									<span class="option text">在职</span><span class="icon"></span>
+									<ul>
+										<li item="0">在职</li>
+										<li item="1">离职</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr class="next hide">
+							<td>离职日期：</td>
+							<td class="required"></td>
+							<td>
+								<#if file.quitDate??>
+								<#assign quitDate_yyyyMMdd = file.quitDate?date />
+								</#if>
+								<input type="text" class="input sm Wdate" name="quitDate_yyyyMMdd" value="${quitDate_yyyyMMdd?default('')}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+  			$("#userId").select({ "name": "userId" });
+  			$("#gender").select({ "name": "gender" });
+  			$("#marry").select({ "name": "marry" });
+  			$("#onPosition").select({ "name": "onPosition" });
+  			
+  			$("#onPosition.select li").click(function() {
+				var t = $(this).attr("item");
+				$(".next").hide();
+				if (t == "1") {
+					$(".next").show();
+				}
+			});
+  			
+  			<#if !file.fileId?? && file.userId??>
+  			$("input[name=trueName]").val($("#userId .option").text());
+  			node("${file.userId}");
+  			</#if>
+  			$("#userId li").click(function() {
+  				$("input[name=trueName]").val($("#userId .option").text());
+  				node($(this).attr("item"));
+  			});
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.userId, [RQ], "用户");
+						validate(form.trueName, [RQ, RANGE, "{1,20}"], "姓名");
+						validate(form.gender, [RQ], "性别");
+						validate(form.birthday, [RQ, RANGE, "{1,20}"], "出生年月");
+						validate(form.place, [RQ, RANGE, "{1,20}"], "籍贯");
+						validate(form.nation, [RQ, RANGE, "{1,20}"], "民族");
+						validate(form.health, [RQ, RANGE, "{1,20}"], "健康状况");
+						validate(form.marry, [RQ], "婚否");
+						validate(form.degree, [RQ, RANGE, "{1,20}"], "最高学历");
+						validate(form.major, [RQ, RANGE, "{1,20}"], "所学专业");
+						validate(form.school, [RQ, RANGE, "{1,20}"], "毕业院校");
+						validate(form.idcard, [RQ, RANGE, "{1,20}"], "身份证");
+						validate(form.phone, [RQ, RANGE, "{1,20}"], "联系电话");
+						validate(form.entry_yyyyMMdd, [RQ], "入职日期");
+						validate(form.full_yyyyMMdd, [RQ], "转正日期");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+		
+		<#if !file.fileId??>
+		function node(id) {
+			$.ajax({
+				url: "node?userId=" + id + "&token=${token}",
+				type: "post",
+				dataType: "json",
+				success: function(data) {
+					if (data.code == 1) {
+						var obj = data.archive;
+						$("input[name=gender]").val(obj.gender);
+						option_text($("#gender"), obj.gender);
+						$("input[name=birthday]").val(obj.birthday);
+						$("input[name=place]").val(obj.place);
+						$("input[name=nation]").val(obj.nation);
+						$("input[name=health]").val(obj.health);
+						$("input[name=marry]").val(obj.marry);
+						option_text($("#marry"), obj.marry);
+						$("input[name=degree]").val(obj.degree);
+						$("input[name=major]").val(obj.major);
+						$("input[name=school]").val(obj.school);
+						$("input[name=idcard]").val(obj.idcard);
+						$("input[name=phone]").val(obj.phone);
+						$("input[name=entry_yyyyMMdd]").val(obj.entryDate.substring(0,10));
+						$("input[name=full_yyyyMMdd]").val(obj.fullDate.substring(0,10));
+					} else {
+						danger(1, data.message);
+					}
+				}
+			});
+		}
+		</#if>
+	</script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="zh-cn">
+<head>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+	<title>缴费记录</title>
+    <style>
+		* {
+			margin: 0;
+			padding: 0;
+			-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+			-webkit-text-size-adjust: none;
+		}
+</style>
+    
+    <!--标准mui.css-->
+	<link rel="stylesheet" href="${ctx}/jw_js_css_img/mui/css/mui.min.css">
+    
+</head>
+<body>
+<input type="hidden" value="${org_id}" id="org_id" />
+<header class="mui-bar mui-bar-nav">
+	<form action="javascript:return true;">
+		<div class="mui-input-row mui-search">
+			<input id="seacherKey_text" type="search" class="mui-input-clear" placeholder="关键字搜索" onsearch="search()">
+		</div>
+	</form>
+	<!-- <button id="search_key" class="mui-btn mui-btn-primary" style="display: block;">搜索</button> -->
+</header>
+
+<div class="mui-content">
+	<div id="pullrefresh" class="mui-content mui-scroll-wrapper" >
+	    <div class="mui-scroll">
+	    <br><br>
+	        <ul class="mui-table-view mui-table-view-chevron">
+			</ul>
+	    </div>
+    </div>		
+</div>
+
+
+<!-- jQuery1.7以上 或者 Zepto 二选一，不要同时都引用 -->
+<script src="${ctx}/jw_js_css_img/jquery-1.9.1/jquery.js"></script>
+<script src="${ctx}/jw_js_css_img/mui/js/mui.min.js"></script>
+<script type="text/javascript" charset="utf-8">
+mui.init({
+	swipeBack:true, //启用右滑关闭功能
+	gestureConfig:{
+		doubletap:true
+	},
+	pullRefresh: {
+		container: '#pullrefresh',
+		up: {
+		    contentnomore:'没有更多数据...',//可选，请求完毕若没有更多数据时显示的提醒内容；
+		    contentrefresh : "正在加载...",//可选，正在加载状态时，上拉加载控件上显示的标题内容
+			callback: pullupRefresh,
+		}
+
+	}
+
+});
+
+var pageSize = 5;
+var pageNo = 1;
+var contentWebview = null;
+
+document.querySelector('header').addEventListener('doubletap',function () {
+	if(contentWebview==null){
+		contentWebview = plus.webview.currentWebview().children()[0];
+	}
+	contentWebview.evalJS("mui('#pullrefresh').pullRefresh().scrollTo(0,0,100)");
+});
+
+function search(){
+	//键盘失去焦点，页面焦点回到头部
+	$("#seacherKey_text").blur();
+	// 清空内容
+    $('.mui-table-view').html('');
+    pageNo = 1
+	mui('#pullrefresh').pullRefresh().pullupLoading();
+}
+
+$(function(){
+	$("#search_key").click(function(){
+		search();
+	});
+});
+
+mui.ready(function(){ 
+    mui('#pullrefresh').pullRefresh().pullupLoading(); //使用这个之后，自动会加载[下拉刷新]绑定的函数
+});
+
+var orderinfo = function(id){
+	window.location.href="${ctx}/wx/order/order_payView?org_id="+$("#org_id").val()+"&orderid="+id;
+}
+
+//$("[父元素]").on('[事件]', '[父元素下目标元素]', function (event) {
+$(".mui-scroll").on('tap', '.mui-card', function (event) {
+	this.click();
+});
+
+/**
+ * 上拉加载具体业务实现
+ */
+function pullupRefresh() {
+
+	$.ajax({
+        type: 'POST',
+        url: '${ctx}/wx/order/getData',
+        data:{pageNo : pageNo , pageSize : pageSize , org_id : $("#org_id").val() , seacherKey : $("#seacherKey_text").val()},
+        dataType: 'json',
+        success: function(data){
+        	var text = '';
+        	var flag = true;
+        	pageNo += 1;
+        	var listLength = data.voList.length;
+        	if(data.voList == null || listLength == 0)
+        	{
+        		flag = false;
+        	} 
+        	var table = document.body.querySelector('.mui-table-view');
+			var cells = document.body.querySelectorAll('.mui-table-view-cell');
+        	$.each(data.voList,function(index,vo){
+            	var text = '';
+        		var payStatus = vo.payStatus;
+        		var onclick = "";
+        		if(payStatus == 1){
+        			payStatus = '<span class="mui-pull-right mui-badge mui-badge-warning">已支付</span>';
+        		}else if(payStatus == 0){
+        			payStatus = '<span class="mui-pull-right mui-badge mui-badge-danger">未支付</span>';
+        		}
+        		text +="<div class='mui-card' onclick=\"orderinfo('"+vo.id+"')\">"+
+							"<div class='mui-card-header'>"+vo.shop_product_name+"</div>"+
+	        				"<div class='mui-card-content'>"+
+	        					"<div class='mui-card-content-inner'>"+
+	        						"学生名:"+vo.edu_student_name+
+	        					"</div>"+
+	        				"</div>"+
+	        				"<div class='mui-card-footer'>"+
+	        					"购买时间:"+vo.create_time+
+	        					"<br/>"+
+	        					"金额:￥"+vo.amount+"元"+
+	        					payStatus+
+	        				"</div>"+
+	        			"</div>";
+        		
+           		var li = document.createElement('li');
+    			li.innerHTML = text;
+    			table.appendChild(li);
+    			
+        	})
+        	
+           	setTimeout(function() {
+	    		mui('#pullrefresh').pullRefresh().endPullupToRefresh(!flag); //参数为true代表没有更多数据了。
+        	}, 1500);
+        }
+    });
+}
+
+
+</script>
+</body>
+</html>

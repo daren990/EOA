@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if change.changeId??>编辑<#else>新建</#if>资产申请</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit auto_height">
+			<div id="form" class="clearfix" style="width: 460px;">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="changeId" value="${change.changeId}">
+					<table class="table">
+						<tr>
+							<td>申请人：</td>
+							<td></td>
+							<td><input type="text" class="input xl" value="${currentUser.trueName}" readonly="readonly"></td>
+						</tr>
+						<tr>
+							<td>申请时间：</td>
+							<td></td>
+							<td>
+								<#assign createTime = now?date />
+								<#if change.createTime??><#assign createTime = change.createTime?date /></#if>
+								<input type="text" class="input xl" value="${createTime}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>资产类型：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="typeId" value="${change.typeId}">
+								<div id="typeId" class="select xl">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<#list assetMap?keys as e>
+										<li item="${e}" onclick="ajax_nodes('${e}')">${assetMap[e]}</li>
+										</#list>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>资产名称：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="assetId" value="${change.assetId}">
+								<div id="assetId" class="select xl">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul class="auto_height sm">
+										
+										<li item=""></li>
+										
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">使用原因：</td>
+							<td class="pos required">*</td>
+							<td>
+								<textarea class="xl" name="reason" rows="3">${change.reason}</textarea>
+							</td>
+						</tr>
+						<tr>
+							<td>上级审批：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="actorId" value="${change.actorId?default(currentUser.managerId)}" />
+								<div id="actorId" class="select xl">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<#list operators as e>
+										<li item="${e.userId}">${e.trueName}</li>
+										</#list>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#assetId").select({ "name": "assetId" });
+			$("#typeId").select({ "name": "typeId" });
+			$("#actorId").select({ "name": "actorId" });
+			
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.assetId, [RQ], "资产名称");
+						validate(form.reason, [RQ, RANGE, "{1,60}"], "使用原因");
+						validate(form.actorId, [RQ, RANGE, "{1,20}"], "助理审批");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+		
+			function ajax_nodes(id) {
+			$("#assetId").unbind();
+			$.ajax({
+				url: "/res/change/apply/nodes?typeId=" + id + "&token=${token}",
+				type: "post",
+				dataType: "json",
+				success: function(data) {
+					$("#assetId ul").empty();
+					$("#assetId ul").append("<li item=\"\">请选择</li>");
+					if (data.code == 1) {
+						$.each(data.nodes, function(idx, obj) {
+							var text = "<li item=\"" + obj.assetId + "\">" + obj.assetName + "</li>";
+							$("#assetId ul").append(text);
+						});
+						$("#assetId").select({ "name": "assetId" });
+					} else {
+						danger(1, data.message);
+					}
+				}
+			});
+			close_pop();
+		}
+	</script>
+</body>
+</html>

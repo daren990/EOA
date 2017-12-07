@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: ${process.displayName}</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit auto_height">
+			<div id="form" class="clearfix" style="width: 480px;">
+				<#if order??>
+				<table class="table">
+					<tr>
+						<td width="120">编号：</td>
+						<td class="required"></td>
+						<td><input type="text" class="input xl" value="${order.orderNo}" readonly="readonly"></td>
+					</tr>
+					<tr>
+						<td>派单时间：</td>
+						<td></td>
+						<td>
+							<input type="text" class="input xl" value="${order.createTime}" readonly="readonly">
+						</td>
+					</tr>
+				</table>
+				</#if>
+				<#list works as e>
+					<#if e.form??>
+						<#assign active = false />
+						<#if e.name == current><#assign active = true /></#if>
+						<#include "/views/flow/form/" + e.form />
+					</#if>
+				</#list>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

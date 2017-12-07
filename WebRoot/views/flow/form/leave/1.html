@@ -1,0 +1,60 @@
+<form id="1" action="${ctx}/flow/form/leave/1" method="post">
+	<input type="hidden" name="token" value="${token}">
+	<input type="hidden" name="processId" value="${process.id}">
+	<input type="hidden" name="orderId" value="<#if order??>${order.id}</#if>">
+	<table class="table">
+		<tr>
+			<td width="120">请假人名称：</td>
+			<td></td>
+			<td><input type="text" class="input xl" value="<#if variable_apply??>${operators[variable_apply['apply.operator']?string]}<#else>${operator}</#if>" readonly="readonly"></td>
+		</tr>
+		<tr>
+			<td>请假天数：</td>
+			<td class="required">*</td>
+			<td><input type="text" class="input sm" name="day" value="<#if variable_apply??>${variable_apply['day']}</#if>">&nbsp;天</td>
+		</tr>
+		<tr>
+			<td class="pos">请假理由：</td>
+			<td class="pos required">*</td>
+			<td>
+				<textarea class="xl" name="reason" rows="4"><#if variable_apply??>${variable_apply['reason']}</#if></textarea>
+			</td>
+		</tr>
+		<#if active>
+		<tr>
+			<td colspan="2"></td>
+			<td><button type="submit" class="btn primary xs">提交</button></td>
+		</tr>
+		</#if>
+	</table>
+</form>
+<#if active>
+<script type="text/javascript">
+	$(document).ready(function() {
+		$("#1").ajaxForm({
+			url: "${ctx}/flow/form/leave/1",
+			type: "post",
+			resetForm: false,
+			dataType: "json",
+			beforeSubmit: function(formData, jqForm, options) {
+				danger(0);
+				disabled_on();
+				var form = jqForm[0];
+				try {
+				} catch(err) {
+					danger(1, err);
+					disabled_off();
+					return false;
+				}
+			},
+			success: function(data) {
+				if (data.code == 1) {
+					success_callback(data, "${ctx}/coll/send/page");
+				} else {
+					danger_callback(data);
+				}
+			}
+		});
+	});
+</script>
+</#if>

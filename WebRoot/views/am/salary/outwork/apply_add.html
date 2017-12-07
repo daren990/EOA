@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if outwork.outworkId??>编辑<#else>新建</#if>外勤申请</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit">
+			<div id="form" class="clearfix" style="width: 400px;">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="outworkId" value="${outwork.outworkId}">
+					<table class="flow table">
+						<tr>
+							<td>申请人：</td>
+							<td></td>
+							<td>${currentUser.trueName}</td>
+						</tr>
+						<tr>
+							<td>申请时间：</td>
+							<td></td>
+							<td><#if outwork.createTime??>${outwork.createTime?date}<#else>${now?date}</#if></td>
+						</tr>
+						<tr>
+							<td>外勤时间：</td>
+							<td class="required">*</td>
+							<td>
+								<#if outwork.startTime??><#assign workDate = outwork.startTime?date /></#if>
+								<input type="text" class="input sm Wdate" name="workDate" value="${workDate?default('')}" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+								<input type="hidden" name="type" value="${outwork.type}" />
+								<div id="type" class="select xs">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<li item="">请选择</li>
+										<li item="0">上午</li>
+										<li item="1">下午</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">外勤原因：</td>
+							<td class="pos required">*</td>
+							<td>
+								<textarea class="xl" name="reason" rows="4">${outwork.reason}</textarea>
+							</td>
+						</tr>
+						<tr>
+							<td>上级审批：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="operatorId" value="${outwork.operatorId}" />
+								<div id="operatorId" class="select">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<li item="">请选择</li>
+										<#list operators as e>
+										<li item="${e.userId}">${e.trueName}</li>
+										</#list>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div id="footer"></div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#type").select({ "name": "type" });
+			$("#operatorId").select({ "name": "operatorId" });
+			
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.workDate, [RQ], "外勤日期");
+						validate(form.type, [RQ], "外勤时间");
+						validate(form.reason, [RQ], "外勤原因");
+						validate(form.operatorId, [RQ], "上级审批");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+	</script>
+</body>
+</html>

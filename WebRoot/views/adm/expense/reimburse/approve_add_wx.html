@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if reimburse.reimburseId??>编辑<#else>新建</#if>报销审批</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.css" />
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.js"></script>
+	<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+</head>
+<body>
+
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<!--startprint-->
+	<div id="wrapper" class="clearfix">
+		<div class="edit" style="border: none">
+			<div id="form" class="clearfix" style="width: 500px;">
+				<form action="wxadd" method="post">
+				<div style="font-size: 17px; font-weight: bold;">报销单号: ${reimburse.number}</div>
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="reimburseId" value="${reimburse.reimburseId}">
+					<table class="table">
+					
+						<tr>
+							<td>总金额：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" name="amount" class="input xl" value="${views.rmb(reimburse.amount)}" readonly="readonly" style="width: 160px;">
+							</td>
+						</tr>
+						<tr>
+							<td>票据总数：</td>
+							<td class="required">*</td>
+							<td colspan="2">
+								<input type="text" class="input xl" name="sumbill"  value="${reimburse.sumBill}" readonly="readonly" style="width: 160px;">
+							</td>
+						</tr>
+						<tr>
+							<td>报销主题：</td>
+							<td class="required">*</td>
+							<td colspan="5"><input type="text" name="theme" class="input xl" value="${reimburse.theme}" readonly="readonly" style="width: 160px;"></td>
+						</tr>
+						<tr>
+							<td>申请人：</td>
+							<td></td>
+							<td><input type="text" class="input xl" value="${currentUser.trueName}" readonly="readonly" style="width: 160px;"></td>
+						</tr>
+						<tr>
+							<td>申请时间：</td>
+							<td></td>
+							<td colspan="2">
+								<#assign createTime = now?date />
+								<#if reimburse.createTime??><#assign createTime = reimburse.createTime?date /></#if>
+								<input type="text" class="input xl" value="${createTime}" readonly="readonly" style="width: 160px;">
+							</td>
+						</tr>
+						<tr>
+							<td>预算项目：</td>
+							<td class="required">*</td>
+							<td colspan="5">
+								<input type="text"  class="input xl" name="projectName" value="${projects.projectName}" readonly="readonly" style="width: 160px;"/>
+							</td>
+						</tr>
+						<#assign i = 0 />
+						<#list reimburseItems as e>
+						<tr class="target" item="${i}">
+							<td>报销类别：</td>
+							<td class="required">*</td>
+							<td>
+							<#assign itemName = "" />
+							<#list type as t>
+								<#if "${t.reimburseTypeId}" = "${e.bigType}"><#assign itemName = "${t.bigType}"></#if>
+							</#list>
+								<input type="text" class="input xl" name="bigType_${i}" value="${itemName}" readonly="readonly" style="width: 170px;"/>
+							</td>
+						</tr>
+						<tr>
+							<td>报销小类：</td>
+							<td class="required">*</td>
+							<td colspan="2">
+							
+								<input type="text" class="input xl" name="smallType_${i}" value="${e.smallName}"  readonly="readonly" style="width: 170px;"/>
+							</td>
+						</tr>
+						<tr class="target" item="${i}">
+							<td>报销金额（<span class="required">元</span>）：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input xl" name="money_${i}" value="${views.rmb(e.money)}" readonly="readonly" style="width: 160px;">
+							</td>
+						</tr>
+						<tr>
+							<td>票据张数：</td>
+							<td class="required">*</td>
+							<td colspan="2">
+								<input type="text" class="input xl" name="bill_${i}" id="bill_${i}" value="${e.bill}" readonly="readonly" style="width: 160px;">
+							</td>
+						</tr>
+						<tr class="target" item="${i}">
+							<td>用途：</td>
+							<td class="required">*</td>
+							<td colspan="5"><input type="text" class="input xl" name="purpose_${i}" value="${e.purpose}" readonly="readonly" style="width: 160px;"></td>
+						</tr>
+						<#assign i = i + 1 />
+						</#list>
+						
+							<tr>
+							<td class="pos">备注：</td>
+							<td class="pos required">*</td>
+							<td colspan="5">
+								<textarea class="xl" name="remark"  rows="2" readonly="readonly" style="width: 160px;">${reimburse.remark}</textarea>
+							</td>
+						</tr>
+						<!--endprint-->
+						<#list actors as e>
+						<tr>
+							<td>${views.role(e.variable)}审批：</td>
+							<td class="required"></td>
+							<td colspan="5">
+								<input type="text" class="input" value="${e.actorName}" readonly="readonly" style="width:60px;"/>
+								<#if e.actorId == actor.actorId && e.variable == actor.variable && (!next?? || (e.refererId == next.actorId && next.approve == 0))>
+									<#if ["-1", "1"]?seq_contains(e.approve?string)>
+										<#assign approve = e.approve?string />
+									</#if>
+									<input type="hidden" name="approve" value="${approve?default('')}" />
+									<div id="approve" class="select sm" style="width:80px;">
+										<span class="option text">请选择</span><span class="icon"></span>
+										<ul>
+											<li item="">请选择</li>
+											<li item="1">已批准</li>
+											<li item="-1">未批准</li>
+										</ul>
+									</div>
+								<#else>
+									<input type="text" class="input xl" value="${views.approve(e.approve)}" readonly="readonly" />
+								</#if>
+							</td>
+						</tr>
+						</#list>
+						<#if actor.variable != "cashier.supervisor" && (!next?? || next.approve == 0)>
+							<tr class="next hide">
+								<td>审批人员：</td>
+								<td class="required"></td>
+								<td colspan="5">
+									<input type="hidden" name="refererId" value="${bindId}" />
+									<div id="refererId" class="select xl" style="width: 110px;">
+										<span class="option text">请选择</span><span class="icon"></span>
+										<ul>
+											<#list operators as o>
+											<li item="${o.userId}">${o.trueName}</li>
+											</#list>
+										</ul>
+									</div>
+								</td>
+							</tr>
+						</#if>
+						<tr>
+							<td class="pos">审批意见：</td>
+							<td class="pos required"></td>
+							<td colspan="5">
+								<textarea class="xl" rows="4" name="opinion" id="opinion" style="width:160px;">${actor.opinion}</textarea>
+							</td>
+						</tr>
+						
+						<tr id="submit">
+							<td colspan="2"></td>
+							<td colspan="3"><button type="submit" class="ui-btn">提交</button></td>
+							<td colspan="2"></td>
+							
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#approve").select({ "name": "approve" });
+			$("#refererId").select({ "name": "refererId" });
+			
+			$("#approve.select li").click(function() {
+				var t = $(this).attr("item");
+				$(".next").hide();
+				if (t == "1") {
+					$(".next").show();
+				} else {
+					<#if actor.variable != "ccashier.supervisor" && (!next?? || next.approve == 0)>
+					$("input[name=refererId]").val("");
+					</#if>
+				}
+			});
+			
+			<#if next?? && next.approve != 0>
+			$("tr#submit").remove();
+			</#if>
+			
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.approve, [RQ, RANGE, "{1,20}"], "审批状态");
+						validate(form.opinion, [RQ], "审批意见");
+						<#if actor.variable != "cashier.supervisor" && (!next?? || next.approve == 0)>
+						if ($("input[name=approve]").val() == "1") {
+							validate(form.refererId, [RQ, RANGE, "{1,20}"], "审批人员");							
+						}
+						</#if>
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "wxpage");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+		function preview(){
+   		 bdhtml=window.document.body.innerHTML;
+    	 sprnstr="<!--startprint-->";
+   		 eprnstr="<!--endprint-->";
+         prnhtml=bdhtml.substr(bdhtml.indexOf(sprnstr)+17);
+         prnhtml=prnhtml.substring(0,prnhtml.indexOf(eprnstr));
+         window.document.body.innerHTML=prnhtml;
+         window.print();
+      }
+	</script>
+	
+</body>
+</html>

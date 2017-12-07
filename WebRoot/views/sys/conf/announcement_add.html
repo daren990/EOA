@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if announcement??>编辑<#else>新建</#if>公告</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit">
+			<div id="form" class="clearfix" style="width: 420px;" id="mainform">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" class="input xl" name="noticeId" value="${annuncement.noticeId}">	
+					<table class="table">
+						<tr>
+							<td>公告标题：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input xl" name="title" value="${annuncement.title}">		
+								<input type="hidden" class="input xl" name="versions" value="${annuncement.versions}">							
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">公司绑定：</td>
+							<td class="pos required"></td>
+							<td colspan="4">
+								<textarea class="xl" id="orgNames" rows="4" readonly="readonly">${oList}</textarea>
+								<input type="hidden" name="modelOrgs" value="${annuncement.corpId}">
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">角色绑定：</td>
+							<td class="pos required"></td>
+							<td colspan="4">
+								<textarea class="xl" id="roleNames" rows="4" readonly="readonly">${rList}</textarea>
+								<input type="hidden" name="modelRoles" value="${annuncement.roleId}">
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">用户绑定：</td>
+							<td class="pos required"></td>
+							<td colspan="4">
+								<textarea class="xl" id="trueNames" rows="4" readonly="readonly">${uList}</textarea>
+								<input type="hidden" name="modelUsers" value="${annuncement.userId}">
+							</td>
+						</tr>
+						<tr>
+						
+						<td class="pos">生效时间：</td>
+							<td class="pos required">*</td>
+							<td>
+								<input type="text" id="start_yyyyMMdd" value="<#if annuncement.startTime??>${annuncement.startTime?date}</#if>" class="input sm Wdate" name="start_yyyyMMdd" value="" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+								
+							</td>
+						</tr>
+						<tr>
+						<td class="pos">失效时间：</td>
+							<td class="pos required">*</td>
+							<td>
+								<input type="text" id="end_yyyyMMdd" value="<#if annuncement.endTime??>${annuncement.endTime?date}</#if>" class="input sm Wdate" name="end_yyyyMMdd" value="" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+								
+							</td>
+						</tr>
+						<tr>
+							<td>发布类型：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="type" value="${annuncement.type?default(0)}" />
+								<div id="type" class="select xl">
+									<span class="option text">公告</span><span class="icon"></span>
+									<ul>
+										<li item="0">公告</li>
+										<li item="1">站内信</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">公告内容：</td>
+							<td class="required pos">*</td>
+							<td>
+								<textarea class="xl" name="text" rows="4">${annuncement.content}</textarea>
+							</td>
+						</tr>
+
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<div id="user_pop" class="pop bind" style="display: none; width: 318px;">
+		<div class="pop_content" style="padding: 0;">
+			<div class="auto_height sm">
+		   		<ul class="checked">
+		   			<#assign arruser = annuncement.userId?default("")?split(",") />
+					<#list users as u>
+						<#assign userchecked = arruser?seq_contains(u.userId?html)?string("checked='checked'", "") />
+						<li><input type="checkbox" name="checkedIds" value="${u.userId}" title="${u.trueName}" ${userchecked} ><span>${u.trueName}</span></li>
+					</#list>
+		   		</ul>
+			</div>
+		</div>
+		<div class="pop_btn">
+			<input type="checkbox" id="checkedIds">
+		</div>
+	</div>
+	
+	<div id="role_pop" class="pop bind" style="display: none; width: 318px;">
+		<div class="pop_content" style="padding: 0;">
+			<div class="auto_height sm">
+		   		<ul class="checked">
+		   			<#assign arrrole = annuncement.roleId?default("")?split(",") />
+					<#list roles as r>
+						<#assign rolechecked = arrrole?seq_contains(r.roleId?html)?string("checked='checked'", "") />
+						<li><input type="checkbox" name="roleIds" value="${r.roleId}" title="${r.roleDesc}" ${rolechecked} ><span>${r.roleDesc}</span></li>
+					</#list>
+		   		</ul>
+			</div>
+		</div>
+		<div class="pop_btn">
+			<input type="checkbox" id="roleIds">
+		</div>
+	</div>
+	
+	<div id="org_pop" class="pop bind" style="display: none; width: 318px;">
+		<div class="pop_content" style="padding: 0;">
+			<div class="auto_height sm">
+		   		<ul class="checked">
+		   		<#assign arrorg = annuncement.corpId?default("")?split(",") />
+		   		<#list orgs as o>
+		   			<#assign orgchecked = arrorg?seq_contains(o.orgId?html)?string("checked='checked'", "") />
+					<li><input type="checkbox" name="orgIds" value="${o.orgId}" title="${o.orgName}" ${orgchecked} ><span>${o.orgName}</span></li>
+				</#list>
+				
+		   		</ul>
+			</div>
+		</div>
+		<div class="pop_btn">
+			<input type="checkbox" id="orgIds">
+		</div>
+	</div>
+	<script type="text/javascript">
+		$(document).ready(function() {
+		$("#type").select({ "name": "type" });
+			
+			$("#trueNames").click(function() {
+ 				open_pop(null,"#trueNames","#user_pop",false);
+ 				return false;
+ 			});
+			$("#checkedIds").click(function() { checkedIds(); });
+			/* $("input[name=checkedIds]").click(function() {
+				checkedIds();
+			}); */
+			$("input[name=checkedIds]").live("click",function(){
+				checkedIds();
+			});
+		
+			$("#roleNames").click(function() {
+ 				open_pop(null,"#roleNames","#role_pop",false);
+ 				return false;
+ 			});
+			$("#roleIds").click(function() {
+			if (this.checked) {
+			$("input[name='roleIds']").each(function() {
+				this.checked = true;
+			});
+			} else {
+				$("input[name='roleIds']").each(function() {
+					this.checked = false;
+				});
+			}
+			roleIds();
+			changeuser();
+			});
+			$("input[name=roleIds]").click(function() {
+				roleIds();
+				changeuser();
+			});
+		
+			$("#orgNames").click(function() {
+ 				open_pop(null,"#orgNames","#org_pop",false);
+ 				return false;
+ 			});
+			$("#orgIds").click(function() { 
+				if (this.checked) {
+					$("input[name='orgIds']").each(function() {
+						this.checked = true;
+					});
+					} else {
+					$("input[name='orgIds']").each(function() {
+						this.checked = false;
+					});
+				}
+				orgIds(); 
+				changeuser();
+			});
+			$("input[name=orgIds]").click(function() {
+				orgIds();
+				changeuser();
+			});
+		
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+			/* $("input[name='orgIds']").change(function(){
+				changeuser();
+			});
+			$("input[name='roleIds']").change(function(){
+				changeuser();
+			}); */
+		});
+		function checkedIds() {
+			var ids = "";
+			var names = "";
+			$("input[name='checkedIds']").each(function() {
+				if ($(this).prop("checked") == true) {
+					ids += $(this).val() + ",";
+					names += $(this).attr("title") + ",";
+				}
+			});
+			$("input[name=modelUsers]").val(ids);
+			$("#trueNames").val(names);
+		}
+		function roleIds() {
+			var ids = "";
+			var names = "";
+			$("input[name='roleIds']").each(function() {
+				if ($(this).prop("checked") == true) {
+					ids += $(this).val() + ",";
+					names += $(this).attr("title") + ",";
+				}
+			});
+			$("input[name=modelRoles]").val(ids);
+			$("#roleNames").val(names);
+		}
+		function orgIds() {
+			var ids = "";
+			var names = "";
+			$("input[name='orgIds']").each(function() {
+				if ($(this).prop("checked") == true) {
+					ids += $(this).val() + ",";
+					names += $(this).attr("title") + ",";
+				}
+			});
+			$("input[name=modelOrgs]").val(ids);
+			$("#orgNames").val(names);
+		}
+		function changeuser(){
+				var org = $("input[name='modelOrgs']").val();
+				var role = $("input[name='modelRoles']").val();
+				$.ajax({
+				url: "change?modelOrgs="+org+"&modelRoles="+role,
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+				},
+				success: function(data) {
+					$("#trueNames").val("");
+ 					$("input[name='modelUsers']").val("");
+					if (data.code == 1) { 						
+ 						var user = "";
+						for(var i=0;i<data.users.length;i++){
+
+ 							user += "<li><input type=\"checkbox\" name=\"checkedIds\" value=\""+data.users[i].userId+"\" title=\""+data.users[i].trueName+"\"><span>"+data.users[i].trueName+"</span></li>";
+ 						}
+ 						$("#user_pop ul").html(user);
+ 						$("#user_pop ul").addClass("checked");
+ 						/* $("#user_pop").addClass("pop");
+ 						$("#user_pop").addClass("bind"); */
+					} else {
+						$("#user_pop ul").html("");
+						danger_callback(data);
+					}
+				}
+				});
+		}
+	</script>
+</body>
+</html>

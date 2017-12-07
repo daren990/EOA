@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if month.monthId??>编辑<#else>新建</#if>周排班</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit">
+			<div id="form" class="clearfix" style="width: 480px;">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="monthId" value="${month.monthId}">
+					<table class="table">
+						<tr>
+							<td>月排班名称：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input xl" name="workName" value="${month.workName}">
+							</td>
+						</tr>
+						<tr>
+							<td>年月份：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="year" value="${month.year}" />
+								<div id="year" class="select xs">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<#list (mb.years-3)..(mb.years+1) as e>
+											<li item="${e}">${e}</li>
+										</#list>
+									</ul>
+								</div>
+								<input type="hidden" name="month" value="${month.month}" />
+								<div id="month" class="select xs">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<#list ["01","02","03","04","05","06","07","08","09","10","11","12"] as e>
+											<li item="${e}">${e}</li>
+										</#list>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">工作日：</td>
+							<td class="pos required">*</td>
+							<td>
+								<#assign arr = month.workDays?default("")?split(",") />
+								<#assign i = 0 />
+								<#list 1..31 as e>
+								<#assign i = i + 1 />
+								<#assign checked = arr?seq_contains(i?html)?string("checked='checked'", "") />
+								<input type="checkbox" class="workDays" id="month_${i}" value="${i}" ${checked}>
+								<label for="month_${i}"><#if e lt 10>0</#if>${e}日</label>&nbsp;&nbsp;
+								<#if i % 5 == 0><br></#if>
+								</#list>
+								<input type="hidden" name="workDays" value="${month.workDays}">
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">公司绑定：</td>
+							<td class="pos required"></td>
+							<td>
+								<input type="hidden" name="orgId" value="${month.orgId}" />
+								<div id="orgId" class="select xl">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<#list corps as e>
+										<li item="${e.orgId}">${e.orgName}</li>
+										</#list>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>状态：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="status" value="${month.status?default(1)}" />
+								<div id="status" class="select xl">
+									<span class="option text">启用</span><span class="icon"></span>
+									<ul>
+										<li item="0">禁用</li>
+										<li item="1">启用</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div id="footer"></div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#year").select({ "name": "year" });
+			$("#month").select({ "name": "month" });
+			$("#orgId").select({ "name": "orgId" });
+			$("#status").select({ "name": "status" });
+			
+			$(".workDays").click(function() {
+				var arr = "";
+				$(".workDays").each(function() {
+					if ($(this).prop("checked") == true) { arr += $(this).val() + ","; }
+				});
+				$("input[name=workDays]").val(arr);
+			});
+			
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.workName, [RQ, RANGE, "{1,20}"], "月排班名称");
+						validate(form.year, [RQ], "月排班年份");
+						validate(form.month, [RQ], "月排班月份");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+	</script>
+</body>
+</html>

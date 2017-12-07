@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 通讯录</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.css" />
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/layer.m/layer.m.js"></script>
+	<title>查看联系人</title>
+	<style type="text/css">
+	*{margin: 0;padding: 0}
+	.headerDiv{overflow: hidden;width: 100%;}
+	.headName{position: absolute;top: 10%;left: 0;width: 100%;height: 80px;}
+	.headImg{width: 20%;height: 20%;margin: auto;text-align: center;color: #FFF}
+	.name{width: 80%;height: 20%;margin: 20% auto;text-align: center;color: #FFF}
+	
+	.mDetailDate{overflow: hidden;width: 95%;margin: 20px auto;}
+	.mDetailDate ul li{text-align: center;}
+	.menuLabel{float: left;width: 30%;text-align: right;color: #666}
+	.anwerSpan{margin-left: 15px;color: #999}
+	#moveA{width: 88%;margin-left: auto;margin-right: auto;margin-bottom: 5px;}
+	
+	.popTitleDiv{width: 100%;border-bottom: 1px solid #999;font-size: 12px;background: #CCC;color: #FFF;height: 30px;line-height: 30px;}
+	.popTitleDiv span{margin-left: 5px;}
+	.newAndMoveA{margin-left: 10px;margin-right: 5px;}
+	.groupDiv ul li{list-style-type: none;height: 40px;line-height: 40px;border-bottom: 1px solid #EEE;padding-left: 10%}
+	.groupDiv ul li span{color: #666}
+	</style>
+</head>
+<body>
+<div data-role="page">
+	<div class="headerDiv">
+		<img src="${ctx}/jw_js_css_img/img/mailDivImg.jpg" class="bgImg" width="100%" />
+		<div class="headName">
+			<div class="headImg"><img src="${ctx}/jw_js_css_img/img/touxiang.png" width="100%" /></div>
+			<div class="name">${user.trueName}<br/>${archive.phone}</div>
+		</div>
+	</div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<form action="move" method="post" id="form" enctype="multipart/form-data">
+	<input type="hidden" name="userId" value="${user.userId}" />
+	<input type="hidden" name="userName" value="${user.trueName}" />
+		<div class="mDetailDate">
+			<ul data-role="listview">
+				<li>
+					<label class="menuLabel">公司</label><span class="anwerSpan"><input type="hidden" name="corpName" value="${corpName}" />${corpName}</span>
+				</li>
+				<li>
+					<label class="menuLabel">成员职务</label><span class="anwerSpan"><input type="hidden" name="position" value="${archive.position}" />${archive.position}</span>
+				</li>
+				<li>
+					<label class="menuLabel">QQ</label><span class="anwerSpan"><input type="hidden" name="QQ" value="${archive.QQ}" />${archive.QQ}</span>
+				</li>
+				<li>
+					<label class="menuLabel">E-mail</label><span class="anwerSpan"><input type="hidden" name="email" value="${archive.email}" />${archive.email}</span>
+				</li>
+				<li>
+					<label class="menuLabel">紧急联系人</label><span class="anwerSpan">
+					<input type="hidden" name="exigency_name" value="${archive.exigency_name}" />
+					<input type="hidden" name="exigency_phone" value="${archive.exigency_phone}" />
+					${archive.exigency_name} ${archive.exigency_phone}</span>
+				</li>
+			</ul>
+		</div>
+		<a href="#movePeople" id="moveA" data-transition="flip" class="ui-btn ui-corner-all ui-shadow moveBtn" data-rel="popup" data-position-to="window">移动联系人</a>
+		<div data-role="popup" id="movePeople" class="ui-content" data-theme="a" style="padding: 0px;">
+			<a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+			<div class="popTitleDiv"><span>移动联系人</span></div>
+			<div class="groupDiv">
+				<ul>
+					<#if addressMenu??>
+					<#list addressMenu as e>
+					<li class="groupLi"><input type="radio" data-role="none" name="group" class="group" value="${e.groupid}" /> <span>${e.name}</span></li>
+					</#list>
+					</#if>
+				</ul>
+			</div>
+			<div class="newAndMoveA">
+				<button type="button" class="ui-btn ui-corner-all ui-btn-inline newGroup">新建分组</button>
+				<button type="button" class="ui-btn ui-corner-all ui-btn-inline sureMove">确定移动</button>
+			</div>
+		</div>
+	</form>
+</div>
+</body>
+<script type="text/javascript">
+	$(document).ready(function(){
+		$(".sureMove").addClass("ui-state-disabled");
+	
+		$(".moveBtn").click(function(){
+			$(".groupLi .group").each(function(){
+				if($(this).is(":checked")){
+					$(".sureMove").removeClass("ui-state-disabled");
+					return;
+				}
+			});
+		});
+	
+		$(".groupLi").click(function(){
+			$(this).find(".group").attr("checked","checked");
+			$(".sureMove").removeClass("ui-state-disabled");
+		});
+		
+		$(".sureMove").click(function(){
+		
+			var group = $("input[name='group']:checked").val();					
+			/* $("#form").submit(); */
+			var formData = $("#form").serialize()+"&group="+group;
+			/* alert(formData);	 */		
+			$.ajax({
+				url: "move",
+				type: "post",
+				resetForm: false,
+				dataType: "json",	
+				data : formData,						
+				success: function(data) {
+				if (data.code == 1) {
+ 						/* success_callback(data, "information?userId=${user.userId}&corpName=${corpName}"); */
+ 						layer.open({
+ 							content:"移动成功",
+ 							shadeClose:false,
+ 							btns:1,
+ 							btn:["确定"],
+ 							yes:function(){
+ 								window.location.href="information?userId=${user.userId}&corpName=${corpName}";
+ 							}
+ 						});
+					} else {
+						layer.open({
+							open:data.msg,
+							time:3
+						});
+					}
+				}
+		});			
+		});s
+		
+		$(".newGroup").tap(function(){
+			window.location.href="groupadd?userId=${user.userId}&corpName=${corpName}";
+		});
+	});
+	</script>
+</html>

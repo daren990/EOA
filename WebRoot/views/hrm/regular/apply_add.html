@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if resign.resignId??>编辑<#else>新建</#if>转正申请</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit auto_height">
+			<div id="form" class="clearfix" style="width: 460px;">
+				<form action="add" method="post" enctype="multipart/form-data">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="resignId" value="${resign.resignId}">
+					<table class="table">
+						<tr>
+							<td>申请人：</td>
+							<td></td>
+							<td><input type="text" class="input xl" value="${currentUser.trueName}" readonly="readonly"></td>
+						</tr>
+						<tr>
+							<td>申请时间：</td>
+							<td></td>
+							<td>
+								<#assign createTime = now?date />
+								<#if resign.createTime??><#assign createTime = resign.createTime?date /></#if>
+								<input type="text" class="input xl" value="${createTime}" readonly="readonly">
+							</td>
+						</tr>
+						<tr>
+							<td>转正日期：</td>
+							<td class="required">*</td>
+							<td>
+							<input type="text" class="input xl Wdate" name="resignDate" value="${resign.resignDate}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})" style="width: 95px;">
+								<!-- <input type="text" class="input xl" name="resignDate" value="" /> -->
+							</td>
+						</tr>
+						<tr>
+							<td>附件：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="file" class="hide" name="file" value="" />
+								<input type="text" class="input" id="file" readonly="readonly" />
+								<button type="button" class="btn default xs" onclick="$('input[name=file]').click()">浏览</button>
+								<#if resign.filePath??>
+								<a href="/download?filePath=${resign.filePath}" title="附件"><span class="icons icon_attach" style="margin-top: 4px; float: right; cursor: pointer;"></span></a>
+								</#if>
+							</td>
+						</tr>
+						<tr>
+							<td>上级审批：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="actorId" value="${resign.actorId?default(currentUser.managerId)}" />
+								<div id="actorId" class="select xl">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<#list operators as e>
+										<li item="${e.userId}">${e.trueName}</li>
+										</#list>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#actorId").select({ "name": "actorId" });
+			
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.file, [RANGE, "{1,200}"], "附件");
+						validate(form.actorId, [RQ, RANGE, "{1,20}"], "上级审批");
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+	</script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if model.modelId??>编辑<#else>新建</#if>绩效模板</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	<div id="wrapper" class="clearfix">
+		<div class="edit">
+			<div id="form" class="clearfix" style="width: 700px;">
+				<form action="add" method="post">
+					<input type="hidden" name="token" value="${token}">
+					<input type="hidden" name="modelId" value="${model.modelId}">
+					<table class="table">
+						<tr>
+							<td>模板名称：</td>
+							<td class="required">*</td>
+							<td colspan="4">
+								<input type="text" class="input xl" name="modelName" value="${model.modelName}">
+							</td>
+						</tr>
+						<tr>
+							<td>所属公司：</td>
+							<td class="required">*</td>
+							<td colspan="4">
+								<input type="text" class="input xl" name="orgName" value="${model.orgName}">
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">第一审核人评分比重：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="text" class="input sm" name="firstStep" value="${model.firstStep}">
+							</td>
+							<td>审核人员：</td>
+							<td class="required">*</td>
+							<td>
+								<input type="hidden" name="firstReferer" value="${model.firstReferer}" />
+								<div id="firstReferer" class="select sm">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<#list users as u>
+										<li item="${u.userId}">${u.trueName}</li>
+										</#list>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">第二审核人评分比重：</td>
+							<td class="required"></td>
+							<td>
+								<input type="text" class="input sm" name="secondStep" value="${model.secondStep}">
+							</td>
+							<td>审核人员：</td>
+							<td class="required"></td>
+							<td>
+								<input type="hidden" name="secondReferer" value="${model.secondReferer}" />
+								<div id="secondReferer" class="select sm">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul>
+										<#list users as u>
+										<li item="${u.userId}">${u.trueName}</li>
+										</#list>
+									</ul>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="pos">用户绑定：</td>
+							<td class="pos required"></td>
+							<td colspan="4">
+								<textarea class="xl" id="trueNames" rows="4" readonly="readonly">${model.userNames}</textarea>
+								<input type="hidden" name="modelUsers" value="${model.modelUsers}">
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"></td>
+							<td><button type="submit" class="btn primary xs">提交</button></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<div id="user_pop" class="pop bind" style="display: none; width: 318px;">
+		<div class="pop_content" style="padding: 0;">
+			<div class="auto_height sm">
+		   		<ul class="checked">
+		   			<#assign arr = model.modelUsers?default("")?split(",") />
+				<#list users as e>
+					<#assign checked = arr?seq_contains(e.userId?html)?string("checked='checked'", "") />
+					<li><input type="checkbox" name="checkedIds" value="${e.userId}" title="${e.trueName}" ${checked}><span>${e.trueName}</span></li>
+		   		</#list>
+		   		</ul>
+			</div>
+		</div>
+		<div class="pop_btn">
+			<input type="checkbox" id="checkedIds">
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#status").select({ "name": "status" });
+			$("#firstReferer").select({ "name": "firstReferer" });
+			$("#secondReferer").select({ "name": "secondReferer" });
+			$("#thirdReferer").select({ "name": "thirdReferer" });
+			
+			$("#trueNames").click(function() {
+ 				open_pop(null,"#trueNames","#user_pop",false);
+ 				return false;
+ 			});
+			$("#checkedIds").click(function() { checkedIds(); });
+			$("input[name=checkedIds]").click(function() {
+				checkedIds();
+			});
+			
+			$("form").ajaxForm({
+				url: "add",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				beforeSubmit: function(formData, jqForm, options) {
+					danger(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.modelName, [RQ, RANGE, "{1,60}"], "绩效模板名称");
+						validate(form.firstStep, [RQ], "第一审批人评分比重");
+						validate(form.modelUsers, [RQ], "用户绑定");
+						
+						
+					} catch(err) {
+						danger(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+		});
+		function checkedIds() {
+			var ids = "";
+			var names = "";
+			$("input[name='checkedIds']").each(function() {
+				if ($(this).prop("checked") == true) {
+					ids += $(this).val() + ",";
+					names += $(this).attr("title") + ",";
+				}
+			});
+			$("input[name=modelUsers]").val(ids);
+			$("#trueNames").val(names);
+		}
+	</script>
+</body>
+</html>

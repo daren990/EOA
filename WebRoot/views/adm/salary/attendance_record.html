@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 补录审批</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	<style type="text/css">
+	li{list-style-type: none;height: 50px;line-height: 30px;}
+	.reasonDiv{width:380px;margin:30px auto auto;height: 275px;}
+	.submitDiv{width: 370px;margin: auto;text-align: right;}
+	.operator{width: 55px;float: left;}
+	.reasonLi{height: 25px;line-height: 25px;}
+	</style>
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div class="message"></div>
+	</div>
+	<form action="recordSubmit" method="post" id="form">
+		<div class="reasonDiv">
+			<ul>
+				<li>
+					申请类型:
+					<#if type=="1">
+						<input type="hidden" name="typeId" value="1">
+					<#else>
+						<#if type=="2">
+							<input type="hidden" name="typeId" value="2">
+						<#else>
+							<input type="hidden" name="typeId" value="">
+						</#if>
+					</#if>
+					<div id="approve" class="select xl">
+						<span class="option text">
+							<#if type=="1">
+								机器故障
+							<#else>
+								<#if type=="2">
+									忘记打卡
+								<#else>
+									请选择
+								</#if>
+							</#if>
+						</span>
+						<span class="icon"></span>
+						<ul>
+							<li class="reasonLi">请选择</li>
+							<li class="reasonLi" item="1">机器故障</li>
+							<li class="reasonLi" item="2">忘记打卡</li>
+						</ul>
+					</div>
+				</li>
+				<li>
+					申请日期: <input class="input xl" type="text" name="nowTime" readonly="readonly" value="${needYearDay}"/>
+					<input type="hidden" name="needYearDay" value="${needYearDay}" />
+				</li>
+				<li>
+					时间段:&nbsp;&nbsp;&nbsp;&nbsp; <input class="input xl" type="text" readonly="readonly" value="${quantumString}"/>
+					<input type="hidden" name="quantum" value="${quantum}" />
+				</li>
+				<li>
+					上级审批: 
+					<!-- <input class="input xl" type="text" name="" readonly="readonly" value="${operatorTrueName}"/> -->
+					<input type="hidden" name="operatorId" >
+					<div id="operatorId" class="select xl">
+						<span class="option text">请选择</span><span class="icon"></span>
+						<ul class="auto_height sm">
+							<#list operators as e>
+							<li item="${e.userId}" style="height: 25px;">${e.trueName}</li>
+							<input type="hidden" value="${e.username}" name="${e.userId}" />
+							</#list>
+						</ul>
+					</div>
+				</li>
+				<li>
+					<div class="operator">
+						申请原因:
+					</div>
+					<div class="operatorTextarea">
+						<textarea class="xl" rows="4" name="reason" class="reason">${reason}</textarea>
+					</div>
+				</li>
+			</ul>
+		</div>
+	<#if type??><#else><div class="submitDiv"><button class="btn primary xs" type="submit">提交</button></div></#if>
+	</form>
+	<script type="text/javascript">
+	$(document).ready(function(){
+		$("#approve").select({ "name": "typeId" });
+		$("#operatorId").select({ "name": "operatorId" });
+		
+		$("#form").ajaxForm({
+			url: "recordSubmit",
+			type: "post",
+			resetForm: false,
+			dataType: "json",
+			success: function(data) {
+				if (data.code == 1) {
+						success_callback(data, "page");
+				} else {
+					danger_callback(data);
+				}
+			}
+		});
+		
+		
+		
+	});
+	</script>
+</body>
+</html>

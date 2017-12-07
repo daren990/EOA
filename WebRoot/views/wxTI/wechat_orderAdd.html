@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>报读课程</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" type="text/css"
+	href="${ctx}/jw_js_css_img/css/jquery.mobile-1.4.3.min.css" />
+<link rel="stylesheet" type="text/css"
+	href="${ctx}/jw_js_css_img/css/mobiscroll.custom-2.5.0.min.css" />
+<script type="text/javascript"
+	src="${ctx}/jw_js_css_img/js/jquery-1.9.1.js"></script>
+<script type="text/javascript"
+	src="${ctx}/jw_js_css_img/js/jquery.mobile-1.4.3.min.js"></script>
+<script type="text/javascript"
+	src="${ctx}/jw_js_css_img/js/mobiscroll.custom-2.5.2.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style type="text/css">
+body {
+	margin: 0px;
+	padding: 0px;
+}
+
+body p {
+	font-family: Verdana, Geneva, sans-serif;
+}
+</style>
+</head>
+
+<body>
+	<div data-role="page" id="pageone">
+		<input type="hidden" id="shopProduct_id" value="${spvo.id}"/>
+		<input type="hidden" id="org_id" value="${org_id}"/>
+		<#if sm != null>
+			<input type="hidden" id="member_id" value="${sm.id}"/>
+			<input type="hidden" id="member_level" value="${sm.level}"/>              	
+		</#if>
+		<div align="center" id="content" data-role="content">
+			<table style="width: 100%">
+				<tr>
+					<td>
+						<section style="padding:10px 12px; margin:3px; border:solid 2px #ccc; border-radius:4px; position: relative;">
+							<section>
+							    <section style="background-image: url(&quot;http://bj.96weixin.com/&quot;);">
+							        <section style="margin: 10px;">
+							            <section style=" margin-left: 1em; color: inherit;">
+							                <span style="font-size:24px">
+							                	<strong style="color:inherit">
+							                		<span style="color:inherit; font-family:微软雅黑">${spvo.name}</span>
+							                	</strong>
+							                </span>
+							                <span style="color:#f00;">￥${spvo.price}元</span>
+							                <br/>
+								            <#if sm != null && sm.level == 3>
+								            	<span style="font-size:14px">
+									            	<span style="color:inherit; font-family:微软雅黑">您是三级会员，享受9折优惠</span>
+									            </span>
+								            <#elseif sm != null && sm.level == 2>
+												<span style="font-size:14px">
+									               	<span style="color:inherit; font-family:微软雅黑">您是二级会员，享受8折优惠</span>
+									            </span>
+											<#elseif sm != null && sm.level == 1>
+												<span style="font-size:14px">
+									               	<span style="color:inherit; font-family:微软雅黑">您是一级会员，享受7折优惠</span>
+									            </span>
+								            </#if>
+							            </section>
+							            <section style="border-radius: 100%; box-sizing: border-box; text-decoration: inherit; border-color: rgb(225, 195, 168); display: inline-block; height: 8px; width: 8px; margin-left: -2px; color: rgb(103, 67, 35); background-color: rgb(225, 195, 168);"></section>
+							            <section style="margin-top: -10px; text-align: left; line-height: 1.75em; color: inherit;">
+							                <section data-style="color: rgb(0, 0, 0); font-size: 14px;" style="display: inline-block;box-sizing:border-box; padding: 10px; border-top-width: 1px; border-top-style: solid; border-top-color: rgb(225, 195, 168); border-right-width: 1px; border-right-style: solid; border-right-color: rgb(225, 195, 168); border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: rgb(225, 195, 168); width: 100%; color: inherit;">
+							                    <p style="color: inherit;">
+							                        <span style="color:inherit;">
+							                        	<strong>包含课程:</strong>
+							                        		<#if spvo.childList?size gt 0>
+																<#list spvo.childList as child>
+																	${child.sgvo.name}(${child.sgvo.teacher_name})
+																	<#if child_has_next>、</#if>
+																</#list>
+																<#else>
+																	${spvo.sgvo.name}(${spvo.sgvo.teacher_name})
+															</#if>
+							                        </span>
+							                    </p>
+							                </section>
+							            </section>
+							            <section style="text-align: left; line-height: 1.75em; color: inherit;">
+							                <section data-style="color: rgb(0, 0, 0); font-size: 14px;" style="display: inline-block; box-sizing:border-box;padding: 10px; border-top-width: 1px; border-top-style: solid; border-top-color: rgb(225, 195, 168); border-left-width: 1px; border-left-style: solid; border-left-color: rgb(225, 195, 168); border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: rgb(225, 195, 168); width: 100%; color: inherit;">
+							                    <p style="color: inherit;">
+							                        <span style="color:inherit"><strong>课程简介:</strong>${spvo.detail}</span>
+							                    </p>
+							                </section>
+							            </section>
+							            <section style="color: inherit;">
+							                <section style="margin-top: -5px; float: right; border-radius: 100%; line-height: 1; box-sizing: border-box; text-decoration: inherit; border-color: rgb(225, 195, 168); display: inline-block; height: 8px; width: 8px; color: rgb(103, 67, 35); background-color: rgb(225, 195, 168);"></section>
+							            </section>
+							        </section>
+							    </section>
+							</section>
+						</section>
+					</td>
+				</tr>
+				<tr>
+					<td>
+			        	<input type="text" id="stu_Name" class="input xl" placeholder="您的小朋友名字"/>
+					</td>
+				</tr>
+				<!-- <tr>
+					<td>
+						<div class="ui-grid-a">
+			                <div class="ui-block-a" style="width: 10%;margin: 0px 3px;">
+			                	<a onclick="qrCode();" class="ui-btn ui-corner-all ui-icon-camera ui-btn-icon-notext" style="vertical-align:middle;"></a>
+			                </div>
+			                <div class="ui-block-b" style="width:85%;margin: 0px 4px;">
+			                	<input type="text" id="clientName" class="input xl" placeholder="扫描二维码获取推荐人"/>
+								<input type="hidden" id="clientId"/>
+								<input type="hidden" id="memberId"/>
+			                </div>
+			            </div>
+					</td>
+				</tr> -->
+				<tr>
+					<td colspan="2">
+						<a data-role="button" data-theme="b" id="submit" data-icon="check">报名</a>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+</body>
+
+<script src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript">
+$(function(){
+	config();
+	$("#submit").click(function(){
+		var stu_Name = $("#stu_Name").val();
+		if(stu_Name == null || stu_Name == ''){
+			alert("请输入您的小朋友的名字");
+			return false;
+		}else{
+			var shopProduct_id = $("#shopProduct_id").val();
+			var isOne = $("input[name='isOne']").is(':checked') ? 1 : 0;
+			var isBookPrice = $("input[name='isBookPrice']").is(':checked') ? 1 : 0;
+			var org_id = $("#org_id").val();
+			
+
+			var member_id = $("#member_id").val();
+			var member_level = $("#member_level").val();
+			
+			var par = {};
+			par['shopProduct_id'] = shopProduct_id;
+			par['stu_Name'] = stu_Name;
+			par['org_id'] = org_id;
+			par['member_id'] = member_id;
+			par['member_level'] = member_level;
+			
+			
+			$.ajax({
+                type: 'POST',
+                url: '${ctx}/wx/order/order_add',
+                data:par,
+                dataType: 'json',
+                success: function(data){
+                	alert(data.message)
+                	if(data.code == 1){
+                		window.location.href="${ctx}/wx/order/order_payView?org_id="+$("#org_id").val()+"&orderid="+data.ShopOrderId;
+	            		//window.history.go(-1);
+	            	}
+                },
+                error: function(xhr, type){
+                    alert("内部服务器错误")
+                }
+            });
+			
+			
+		}
+	});
+})
+
+function config() {
+	wx.config({
+		debug : false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+		appId : '${appId}',
+		timestamp : '${timestamp}',
+		nonceStr : '${nonceStr}',
+		signature : '${signature}',
+		// 所有要调用的 API 都要加到这个列表中
+		jsApiList : ["scanQRCode","closeWindow"]
+	});
+	wx.ready(function() {
+	});
+	wx.error(function(res){
+		console.log(res);
+	    // config信息验证失败会执行error函数，如签名过期导致验证失败，具体错误信息可以打开config的debug模式查看，也可以在返回的res参数中查看，对于SPA可以在这里更新签名。
+	});
+}
+
+	function qrCode(){
+		//扫描二维码、条形码   
+	    wx.scanQRCode({
+		    needResult: 1, // 默认为0，扫描结果由微信处理，1则直接返回扫描结果，
+		    scanType: ["qrCode","barCode"], // 可以指定扫二维码还是一维码，默认二者都有
+		    success: function (res) {
+				var result = res.resultStr; // 当needResult 为 1 时，扫码返回的结果           
+				var json = eval('(' + result + ')');
+				$("#clientName").val(json.clientName);
+				$("#clientId").val(json.clientId);
+				$("#memberId").val(json.memberId);
+			}
+	    });
+	}
+
+
+</script>
+</html>

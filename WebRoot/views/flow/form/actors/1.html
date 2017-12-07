@@ -1,0 +1,52 @@
+<#assign url = "${ctx}/flow/form/actors/1" />
+<form id="1" action="${url}" method="post">
+	<input type="hidden" name="token" value="${token}">
+	<input type="hidden" name="processId" value="${process.id}">
+	<input type="hidden" name="orderId" value="<#if order??>${order.id}</#if>">
+	<table class="table">
+		<tr>
+			<td width="120">任务2处理者：</td>
+			<td class="required"></td>
+			<td>
+				<input type="checkbox" id="3" name="actorIds" value="3"><label for="3">总裁1</label>&nbsp;&nbsp;
+				<input type="checkbox" id="5" name="actorIds" value="5"><label for="5">经理1</label>
+			</td>
+		</tr>
+		<#if active>
+		<tr>
+			<td colspan="2"></td>
+			<td><button type="submit" class="btn primary xs">提交</button></td>
+		</tr>
+		</#if>
+	</table>
+</form>
+<#if active>
+<script type="text/javascript">
+	$(document).ready(function() {
+		$("#1").ajaxForm({
+			url: "${url}",
+			type: "post",
+			resetForm: false,
+			dataType: "json",
+			beforeSubmit: function(formData, jqForm, options) {
+				danger(0);
+				disabled_on();
+				var form = jqForm[0];
+				try {
+				} catch(err) {
+					danger(1, err);
+					disabled_off();
+					return false;
+				}
+			},
+			success: function(data) {
+				if (data.code == 1) {
+					success_callback(data, "${ctx}/coll/send/page");
+				} else {
+					danger_callback(data);
+				}
+			}
+		});
+	});
+</script>
+</#if>

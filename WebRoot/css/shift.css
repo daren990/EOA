@@ -1,0 +1,23 @@
+.shift li.on {
+  color: #7CCC4F;
+  border-color: #7CCC4F;
+}
+
+.shift li {
+  list-style: none;
+  display: inline-block;
+  border: #E7E7E7 3px solid;
+  position: relative;
+  float: right;
+  width: 25px;
+  height: 25px;
+  border-radius: 100%;
+  text-align: center;
+  line-height: 25px;
+  color: #CACACA;
+  font-weight: bold;
+  margin: 10px;
+  /* margin-right: 20px;
+  margin-top: 10px; */
+}
+

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 排班查询</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	<link type="text/css" rel="stylesheet" href="${ctx}/jw_js_css_img/css/day_page.css">
+ 	<link type="text/css" rel="stylesheet" href="${ctx}/jw_js_css_img/css/personal_page.css">
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/js/personal_page.js"></script>
+	<style type="text/css">
+		.week li{border-top: 1px solid #b4d6da;}
+		.borderTD{border:solid 1px #ddd;}
+		
+		.content .table tr {
+		  height: 45px;
+		}
+		
+		.content .table td {
+		  padding: 0;
+		  width: 45px;
+		}
+		
+	</style>
+</head>
+<body>
+ 	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	
+<div id="header">
+	<div id="components" class="clearfix">
+	<div id="left" class="left">
+		<h3 class="timeH3" title="${monthStr}">本月 ( <span class="startSpan" style="color:#3E74AE;">${startStr}</span> 至 <span class="endSpan" style="color:#3E74AE;">${endStr}</span> ) 排班表</h3>
+	</div>
+	<div id="right" class="right">
+			<span class="timeH3" title="${monthStr}"></span>
+				<form id="search" action="monthPage" method="get">				
+					<input type="hidden" name="pageSize" value="${page.pageSize}">
+					<input type="hidden" name="pageNo" value="${page.pageNo}">
+					<ul>
+					<li><a href="javascript:download()"><span class="icons icon_upload"></span><span class="icons_text">导出</span></a></li>
+					<li><div style="margin-top:-3px;padding-right:10px;cursor:hand;">
+				<span style="padding:0px 5px 0px 5px">
+				<img id="lweek" src="${ctx}/img/lweek.png" style="cursor:pointer;" title="上一个月" />
+				</span>
+				<span style="padding:0px 5px 0px 5px">
+				<img id="rweek" src="${ctx}/img/rweek.png" style="cursor:pointer;" title="下一个月" />
+				</span>
+				</div>
+				</li>	
+				<li><input value="${monthStr}" type="text" class="input xl Wdate" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM'})" style="width: 95px;" placeholder="选择时间" id="startDate" name="startTime"></li>
+						<li class="text orgIds">所属公司</li>
+						<li>
+							<input id="corpId2" type="hidden" name="corpId" value="${mb.corpId}" />
+							<div id="corpId" class="select sm" style="width: 200px">
+								<span class="option text">请选择</span><span class="icon"></span>
+								<ul class="auto_height sm">
+									<li item="">请选择</li>
+									<#list corps as e>
+									<li item="${e.orgId}">${e.orgName}</li>
+									</#list>
+								</ul>
+							</div>
+						</li>
+
+						<li class="text">姓名</li>
+						<li><input id="trueName" type="text" class="input sm" name="trueName" value="${mb.trueName}"></li>
+						<li><button type="button" class="btn primary xxs" onclick="search()">搜索</button></li>
+					</ul>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+			<div class="table_head">
+
+			</div>
+			<div class="">
+				<table class="table shift">
+					<tr height="40px"><th style="width: 50px;">工号</th>
+						<th style="width: 60px;">姓名</th>
+						<#list weekDays as wd>
+						<th <#if wd.weekStr == '六'||wd.weekStr == '日'>style='background-color: #2A7FB7; color:#fff;'</#if>>${wd.day}<br />${wd.weekStr}</th>
+						</#list>
+					</tr>
+					<tbody>
+						<#if page.result?size gt 0>
+							<#assign i = 0 /><#assign n = 1 />
+							<#list page.result as e>
+						<tr>
+							<td>${e.jobNumber}</td>
+							<td>${e.trueName}</td>
+							<#list dayList as dl>
+							<td class="borderTD">
+								<!-- <li <#list shifts as sh><#if sh.userId == e.userId && sh.day == dl>style="border-color: ${sh.color}"  title="${sh.firstMorning}~${sh.firstNight}<#if sh.second == 1>,${sh.secondMorning}~${sh.secondNight}</#if>" </#if></#list>>
+								</li> -->
+								<#list shifts as sh>
+									<#if sh.userId == e.userId && sh.day == dl>
+										<li class="on" style="border-color: ${sh.color}; background-color: ${sh.color};"  title="${sh.firstMorning}~${sh.firstNight}<#if sh.second == 1>,${sh.secondMorning}~${sh.secondNight}</#if>"></li>
+									<!-- <#elseif sh.userId == e.userId && !dayList?seq_contains(sh.day)>
+										<li class="on" style="border-color: ${sh.color};"  title="休息">休</li> -->
+									</#if>
+								</#list>
+								
+								<!-- <#assign key = e.userId + "" + dl />
+								<#if shiftMap?? && shiftMap?size gt 0>
+									<#list shiftMap?keys as testKey>
+										<#if key == testKey>
+											${shiftMap[key].userId}
+										</#if>
+									</#list>
+								</#if> -->
+							</td>
+							</#list>
+						</tr>
+							<#assign i = i + 1 />
+							<#assign n = n + 1 />
+							</#list>
+						</#if>
+					</tbody>
+				</table>
+			</div>
+			<#if page.result?size lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<@fm.page page=page />
+		</div>
+		
+		<div style="width:100%;">
+			<#list classes as cs>
+			<div style="float:left;padding:5px;border:1px solid #ccc; background-color:#fff;margin:10px 20px 10px 10px;">
+				<span style="background-color:${cs.color}">囗</span>
+				<span><#if cs.night == 1>日班</#if><#if cs.night == 0>夜班</#if></span>
+				${cs.firstMorning}~${cs.firstNight}
+				<#if cs.second == 1>,
+						${cs.secondMorning}~${cs.secondNight}
+				</#if>
+			</div>
+
+							
+		</#list>
+		</div>
+	</div>
+	
+<script type="text/javascript">
+$(document).ready(function() {
+			$("#corpId").select({ "name": "corpId" });
+		});
+		$("#lweek").click(function(){
+			var corpId = $("#corpId2").val();			
+			var trueName = $("#trueName").val();
+			var startTime = $(".timeH3").attr("title");		
+			var url = "monthPage?startTime="+startTime+"&corpId="+corpId+"&trueName="+trueName+"&shortcut=0";
+			location.href=url;
+		});
+		$("#rweek").click(function(){
+			var corpId = $("#corpId2").val();			
+			var trueName = $("#trueName").val();
+			var startTime = $(".timeH3").attr("title");		
+			var url = "monthPage?startTime="+startTime+"&corpId="+corpId+"&trueName="+trueName+"&shortcut=1";
+			location.href=url;
+		});
+function download() {
+			var start = $("input[name=startTime]").val();
+			
+			var corp = "";
+			var trueName = "";
+			
+			if ($("input[name=corpId]").val() != "") {
+				corp = $("#corpId .option").text();
+			}
+			if ($("input[name=userId]").val() != "") {
+				trueName = $("#userId .option").text();
+			}
+			if (!start) {
+				danger(1, "请选择考勤开始日期");
+				return;
+			}
+
+			if (!corp) {
+				danger(1, "请选择所属公司");
+				return;
+			}
+			
+			var param = "";
+			param += "corpId=" + $("input[name=corpId]").val();
+			param += "&trueName=" + $("input[name=trueName]").val();
+			param += "&startTime=" + start;
+			location.assign("monthExcel?" + param);
+		}
+</script>
+</body>
+</html>

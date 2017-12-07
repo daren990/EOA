@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 商品查询</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<div id="left" class="left">
+			<#if flag2 != 0>
+			    <#if flag3>
+				<a href="add"><span class="icons icon_add"></span><span class="icons_text">新建</span></a>
+			    </#if>
+			</#if>
+			</div>
+			<div id="right" class="right">
+				<form id="searchForm" action="page" method="post">
+  				    <ul>
+  				    <#if !flag>
+					<li class="text">机构名称</li>
+						<li>
+							<input type="hidden" id="coopSearchIdVal" name="coopSearchId" value="${coopSearchId}" />
+							<div id="coopSearchId" class="select sm" style="width: 200px">
+								<span class="option text">请选择</span><span class="icon"></span>
+								<ul class="auto_height sm">
+								    <li item="">全部</li>
+									<#list allNodes as e>
+									<li item="${e.orgId}">${e.orgName}</li>
+									</#list>
+								</ul>
+							</div>
+						</li>
+					</#if>
+						<li class="text">名称</li>
+						<li><input type="hidden" id="couSearchNameVal" name="couSearchNameVal" value="${couSearchName}" /></li>
+						<li><input type="text" class="input sm" id="couSearchName" name="couSearchName" value="${couSearchName}" /></li>
+						<li><button type="submit" class="btn primary xxs" >搜索</button>
+					</li>
+					</ul>
+				</form>
+			</div>
+			
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<input type="hidden" id="flag" name="flag" value="${flag}" />
+    <input type="hidden" id="flag2" name="flag2" value="${flag2}" />
+	<input type="hidden" id="flag3" name="flag3" value="${flag3}" />
+	<input type="hidden" id="flagOrg" name="flagOrg" value="${flagOrg}" />
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+			<div class="table_head">
+				<table class="table">
+					<thead>
+						<tr>
+							<th width="40"><input type="checkbox" id="checkedIds"></th>
+							<th width="40%">名称</th>
+							<th width="15%">类型</th>
+							<th width="10%">上架情况</th>
+							<th width="10%">状态</th>
+							<th width="">操作</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+			
+			<#if flag>
+			<div class="table_body auto_height">
+				<table class="table">
+					<tbody>
+						<#if nodes.result?size gt 0>
+							<#list nodes.result as e>
+						<tr>
+							<td width="26"><input type="checkbox" name="checkedIds" value="${e.id}" level="1" ajax="0"></td>
+							<td width="40%"><center>${e.name}</center></td>
+							<td width="15%">
+							<center>商品</center>
+							</td>
+							<td width="10%">
+							<center><#if e.onSale == 1>上架<#else>未上架</#if></center>
+							</td>
+							<td width="10%"><#if e.status == 1>启用<#else>禁用</#if></td>
+							<td>
+							<a href="add?id=${e.id}" title="编辑"><span class="icons icon_edit"></span></a>
+								<a href="javascript: void(0)" id="${i}" class="actors" item="${e.id}" title="详细描述"><span id="actors_${i}" class="icons icon_log"></span></a>
+								<#if flag3>
+								<#assign able = 1 />
+								<#assign title = "启用" />
+								<#assign check = "icon_unlock" />
+								<#if e.status == 1>
+									<#assign able = 0 />
+									<#assign title = "禁用" />
+									<#assign check = "icon_lock" />
+								</#if>
+								<a href="javascript:open_able('${e.id}', '${able}');" title="${title}"><span class="icons ${check}"></span></a>
+								<a href="onSale?id=${e.id}&flag=${flag2}"><span class="icons icon_coll" title="上下架"></span></a>
+								<a href="/edu/sell/shopProductSettlement/addView?id=${e.id}"><span class="icons icon_wf_design" title="结算"></span></a>
+								    <a href="javascript:deleteProduct('${e.id}');" title="删除"><span class="icons icon_del"></span></a>
+								</#if>
+							</td>
+						</tr>
+							</#list>
+						</#if>
+					</tbody>
+				</table>
+			</div>
+			<#if nodes.result?size lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<div id="page" class="clearfix">
+				<div class="left">
+				</div>
+			</div>
+			<@fm.page page=nodes />
+			</#if>
+			
+			<#if !flag>
+			<div class="table_body auto_height">
+				<table class="table">
+					<tbody>
+						<#if nodes?size gt 0>
+							<#list nodes as e>
+						<tr>
+							<td width="26"><input type="checkbox" name="checkedIds" value="${e.orgId}" level="1" ajax="0"></td>
+							<td width="40%"><span class="icons icon_open able" onclick="open_nodes(this)"></span><span class="icons_text">${e.orgName}</span></td>
+							<td width="15%">
+							<center>机构</center>
+							</td>
+							<td width="10%"></td>
+							<td width="10%"></td>
+							<td>
+							</td>
+						</tr>
+							</#list>
+						</#if>
+					</tbody>
+				</table>
+			</div>
+			<#if nodes?size lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<div id="page" class="clearfix">
+				<div class="left">
+					<span>共${nodes?size}条记录</span>
+				</div>
+			</div>
+			</#if>
+			
+		</div>
+	</div>
+	
+	<div id="able_authority" class="pop" style="display: none; width: 280px;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<div id="pt" class="pop_title">启用商品</div>
+			<div id="bk" class="pop_content blank">确定要启用所选商品吗？</div>
+			<div class="pop_btn ">
+				<input type="hidden" id="status" value="1" />
+				<button type="button" class="btn primary xs" onclick="able()">确定</button>
+				<button type="button" class="btn default xs" onclick="close_pop()">取消</button>
+			</div>
+		</div>				
+	</div>
+	
+	<div id="actors_pop" class="pop bind" style="display: none; width: 278px;">
+		<div class="pop_content" style="padding: 0;">
+			<div class="auto_height xl">
+		   		<table class="table">
+		   		</table>
+			</div>
+		</div>
+	</div>
+	
+	<div id="waiting" class="pop" style="display: none; width: 280px;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<div id="wt" class="pop_title">启/禁用商品</div>
+			<div id="wk" class="pop_content blank">操作中...操作完成后弹窗自动关闭...</div>
+		</div>				
+	</div>	
+	
+	
+	<script type="text/javascript">
+	
+	    var flag = $("#flag").val();
+	    var flag2 = $("#flag2").val();
+	    var flag3 = $("#flag3").val();
+	    var flagOrg = $("#flagOrg").val();
+
+	    var couSearchName = $("#couSearchName").val(); 
+	    
+		function deleteProduct(id) {
+			
+			$.ajax({
+				url: "deleteProduct?id=" + id,
+				type: "post",
+				dataType: "json",
+				success: function(data) {
+					if (data.code == 1) {
+						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				}
+			});
+
+		}
+
+		function deleteProduct2(id,z) {
+			$.ajax({
+				url: "deleteProduct?id=" + id,
+				type: "post",
+				dataType: "json",
+				success: function(data) {
+	               $("#tr_" + z).hide();
+				}
+			});
+		}
+
+	    
+		function open_nodes(e) {
+			var $tr = $(e).parent().parent();
+			var $check = $tr.find("input[type=checkbox]");
+			var ajax = $check.attr("ajax");
+			if (ajax == "1") {
+				return;
+			}
+			$(e).toggleClass("icon_arrow_right");
+			var id = $check.val();
+			var level = $check.attr("level");
+			nodes($tr, level, "nodesOrg?orgid=" + id + "&token=${token}",couSearchName);
+			$check.attr("ajax", "1");
+		}
+		
+		function nodes(e, level, url,couSearchName) {
+			$.ajax({
+				url: url,
+				type: "post",
+				dataType: "json",
+				data:{"couSearchNameVal":couSearchName},
+				success: function(data) {
+					if (data.code == 1) {
+						var left = 18 * int(level);
+						var i = 1;
+						var z = 1;
+						$.each(data.nodes, function(idx, obj) {
+							type = obj.type;
+							i++;
+							z++;
+							var able = 1;
+							var title = "启用"
+							var check = "icon_unlock";
+							if (obj.status == "1") {
+								able = 0;
+								title = "禁用"
+								check = "icon_lock";
+							}
+							var type = "";
+							var text = "";
+							text += "<tr id=\"tr_" + z + "\">";
+							text += "<td width=\"16\"><input type=\"checkbox\" name=\"checkedIds\" value=\"" + obj.id + "\" level=\"" + (int(level) + 1) + "\" ajax=\"0\">  </td>";
+							text += "<td width=\"40%\"><center><span class=\"icons icon_open able\" style=\"margin-left: " + left + "px\" onclick=\"open_nodes(this)\"></span><span class=\"icons_text\">" + obj.name + "</span></center></td>";
+							text += "<td width=\"15%\"><center>" + obj.type + "</center></td>";
+							if(obj.onSale == 1)
+							{
+								text += "<td width=\"10%\"><center>上架</center></td>";
+							}
+							else
+							{
+								text += "<td width=\"10%\"><center>未上架</center></td>";
+							}
+							text += "<td id=\"td_" + z + "_" + obj.id + "\" width=\"10%\">" + (obj.status == 1 ? "启用" : "禁用") + "</td>";
+							text += "<td>";
+    						text += "<a href=\"add?id=" + obj.id + "&flag=" + flag + "\" title=\"编辑\"><span class=\"icons icon_edit\"></span></a>";
+    						if(data.flag3 && data.flag2 != 0)
+    						{
+	    						text += "<input type=\"hidden\" value=\"" + able + "\" id=\"status_" + z + "_" + obj.id + "\" />";
+	    						text += "<span onclick=\"open_able2('" + obj.id + "', '" + able + "',this,'" + z + "'," + obj.id + ");\" class=\"icons " + check + "\" title=\"" + title + "\"></span>";
+	    						text += "<a href=\"javascript:deleteProduct2('" + obj.id + "','" + z + "');\" title=\"删除\"><span class=\"icons icon_del\"></span></a>";
+    						}
+							text += "<a href=\"javascript: void(0)\" id=\"" + i + "\" class=\"actors\" item=\""+ obj.id + "\" title=\"详细描述\"><span id=\"actors_" + i + "\" class=\"icons icon_log\"></span></a>";
+							text += "<a href=\"onSale?id="+ obj.id + "&flag=" + data.flag2 + "\"><span class=\"icons icon_coll\" title=\"上下架\"></span></a>";
+							text += "<a  href=\"/edu/sell/shopProductSettlement/addView?id="+obj.id+"\"><span class=\"icons icon_wf_design\" title=\"结算\"></span></a>";
+							text += "</td>";
+							text += "</tr>";
+							e.after(text);
+						});
+						
+						var width = $(".table_body table").width();
+						$(".table_head table").css("width", width + "px");
+					} else {
+
+					}
+				}
+			});
+		}
+		
+		function open_able(id, status) {
+			if (id) {
+				get_checked(id);
+			}
+			var before = status == 1 ? "禁用" : "启用";
+			var after = status == 1 ? "启用" : "禁用";
+			$("#pt").text($("#pt").text().replace(before, after));
+			$("#bk").text($("#bk").text().replace(before, after));
+			$("#status").val(status);
+			open_pop(null,null,"#able_authority",true);
+		}
+		
+		function able() {
+			var status = $("#status").val();
+			ajax_checked("请选择需要" + (status == 1 ? "启用" : "禁用") + "的商品", "able?&status=" + status + "&token=${token}");
+			close_pop();
+		}
+		
+		function open_able2(id, status,t,z,objId) {
+			if (id) {
+				get_checked(id);
+			}
+			if($(t).attr("class") == "icons icon_lock")
+			{
+				$(t).toggleClass("icons icon_lock");
+	            $(t).toggleClass("icons icon_unlock");
+			}
+			else
+			{
+				$(t).toggleClass("icons icon_lock");
+	            $(t).toggleClass("icons icon_unlock");
+			}
+
+			open_pop(null,null,"#waiting",true);
+			
+			var before = status == 1 ? "禁用" : "启用";
+			var after = status == 1 ? "启用" : "禁用";
+			status = $("#status_" + z + "_" + objId).val();
+			ajax_checkedAsh("请选择需要" + (status == 1 ? "启用" : "禁用") + "的商品", "able?&status=" + status + "&token=${token}",t,z,objId,status);
+			if(status == 1)
+			{
+				$("#status_" + z + "_" + objId).val(0);
+				$("#td_" + z + "_" + objId).text("启用");
+			}
+			else
+			{
+				$("#status_" + z + "_" + objId).val(1);
+				$("#td_" + z + "_" + objId).text("禁用");
+			}	
+
+		}
+				
+		function ajax_checkedAsh(text, url, redirect,t,z,objId,status) {
+			var arr = "";
+			$("input[name='checkedIds']").each(function() {
+				if ($(this).prop("checked") == true) {
+					arr += $(this).val() + ",";
+				}
+			});
+			if (arr == "") {
+			} else {
+				if (url.indexOf("?") != -1) {
+					url = url + "&checkedIds=" + arr;
+				} else {
+					url = url + "?checkedIds=" + arr;
+				}
+				
+				$.ajax({
+					url: url,
+					type: "post",
+					dataType: "json",
+					success: function(data) {
+						if (data == "404") {
+							danger(1, "没有操作权限");
+							return false;
+						}
+						if (data.code == 1) {
+							close_pop();
+						} else {
+							danger(1, data.message);
+						}
+					}
+				});
+
+				
+			}
+			
+			auto_width();
+			auto_height();
+			
+			return false;
+		}
+
+		
+		$(document).ready(function() {
+			$('body').on('click','a.actors',function() {
+				close_pop();
+				var id = $(this).attr("item");
+				var _id = "#actors_"+$(this).attr("id");
+				actors(id);
+				open_pop(null,_id,"#actors_pop",false);
+				return false;
+ 			});
+			
+			$("#coopSearchId").select({ "name": "coopSearchId" });
+			
+		});
+		
+		function actors(id) {
+			$.ajax({
+				url: "/edu/sell/product/actors?id=" + id + "&token=${token}",
+				type: "post",
+				dataType: "json",
+				success: function(data) {
+					if (data.code == 1) {
+						$("#actors_pop .table").empty();
+						var text = "";
+						text += "<tr>";
+						text += "<th>具体描述</th>";
+						text += "</tr>";
+						if (data.actors.length == 0) {
+							text += "<tr>";
+							text += "<td colspan=\"3\">-</td>";
+							text += "</tr>";
+						} else {
+							$.each(data.actors, function(idx, obj) {
+								text += "<tr>";
+								text += "<td>" + obj.detail + "</td>";
+								text += "</tr>";
+							});
+						}
+						$("#actors_pop .table").append(text);
+					} else {
+						danger(1, data.message);
+					}
+				}
+			});
+		}
+		
+		function settlement(id) {
+			$.ajax({
+				url: "/edu/sell/shopProductSettlement/addView?id=" + id,
+				type: "post",
+				dataType: "json",
+				success: function(data) {
+					if (data.code == 1) {
+						success_callback(data, "page");
+					} else {
+						danger(1,data.message);
+					}
+				}
+			});
+		}
+
+		
+	</script>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 教师查询</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<#if myCorpId??>
+			<div id="left" class="left">
+				<a href="${ctx}/teacher/teacher/add"><span class="icons icon_add"></span><span class="icons_text">新建</span></a>
+				<span class="split">|</span>
+				<a href="javascript:open_able('', '1')"><span class="icons icon_unlock"></span><span class="icons_text">启用</span></a>
+				<span class="split">|</span>
+				<a href="javascript:open_able('', '0')"><span class="icons icon_lock"></span><span class="icons_text">禁用</span></a>
+			</div>
+			</#if>
+			<div id="right" class="right">
+				<form id="search" action="page" method="post">
+					<input type="hidden" name="pageSize" value="${page.pageSize}">
+					<input type="hidden" name="pageNo" value="${page.pageNo}">
+					<ul>
+						<li class="text orgIds">所属公司</li>
+						<li>
+							<input type="hidden" name="corpId" value="${mb.corpId}" />
+							<div id="corpId" class="select sm" style="width: 200px">
+								<span class="option text">请选择</span><span class="icon"></span>
+								<ul class="auto_height sm">
+									<li item="">请选择</li>
+									<#list corps as e>
+									<li item="${e.orgId}">${e.orgName}</li>
+									</#list>
+								</ul>
+							</div>
+						</li>
+						<li class="text orgIds">上课时间</li>
+						<li>
+							<input value="${mb.startStr}"  class="input xl Wdate" style="width:100px;" type="text" id="startDate" onClick="WdatePicker({onpicked:function(dp){chooseDate();}})" name="start_yyyyMMdd" /> &nbsp;至&nbsp; 
+							<input value="${mb.endStr}"  type="text" style="width:100px;" class="input xl Wdate" onClick="WdatePicker({onpicked:function(dp){chooseDate();}})" id="endDate" name="end_yyyyMMdd" />
+						</li>
+						<li class="text orgIds">学科</li>
+						<li>
+							<input type="hidden" name="subjectId" value="${mb.subjectId}" />
+							<div id="subjectId" class="select sm" style="width: 200px">
+								<span class="option text">请选择</span><span class="icon"></span>
+								<ul class="auto_height sm">
+									<li item="">请选择</li>
+									<#list subjects as e>
+									<li item="${e.id}">${e.name}</li>
+									</#list>
+								</ul>
+							</div>
+						</li>
+						<li class="text">姓名</li>
+						<li><input type="text" class="input sm" name="trueName" value="${mb.trueName}"></li>
+						<li><button type="button" class="btn primary xxs" onclick="search()">搜索</button></li>
+					</li>
+					</ul>
+				</form>
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+			<div class="table_head">
+				<table class="table">
+					<thead>
+						<tr>
+							<th width="40"><input type="checkbox" id="checkedIds"></th>
+							<th width="15%">教师名称</th>
+							
+							<th width="5%">性别</th>
+							<th width="15%">联系电话</th>
+							<th width="20%">地址</th>
+							<th width="20%">所属学科</th>
+							<th width="10%">合作方式</th>
+							<th width="5%">状态</th>
+							<th width="">操作</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+			<div class="table_body auto_height">
+				<table class="table">
+					<tbody>
+						<#if page.result?size gt 0>
+							<#list page.result as e>
+						<tr>
+							<td width="26"><input type="checkbox" name="checkedIds" value="${e.id}"></td>
+							<td width="15%">${e.truename}</td>
+							
+							<td width="5%"><#if e.sex == 1>男</#if><#if e.sex == 0>女</#if></td>
+							<td width="15%">${e.telephone}</td>
+					
+							<td width="20%">${e.address}</td>
+							<td width="20%">${e.subjectNames}</td>
+							<td width="10%">${e.coopType}</td>
+							<td width="5%"><#if e.status == 1>启用<#else>禁用</#if></td>
+
+							<td>			
+								<a href="add?teacherId=${e.id}" title="编辑"><span class="icons icon_edit"></span></a>
+	
+								<#assign able = 1 />
+								<#assign title = "启用" />
+								<#assign check = "icon_unlock" />
+								<#if e.status == 1>
+									<#assign able = 0 />
+									<#assign title = "禁用" />
+									<#assign check = "icon_lock" />
+								</#if>
+								<#if myCorpId??>
+								<a href="javascript:open_able('${e.id}', '${able}');" title="${title}"><span class="icons ${check}"></span></a>
+								</#if>
+								<a href="schedulepage?teacherId=${e.id}" title="排课"><span class="icons icon_view"></span></a>
+							</td>
+						</tr>
+							</#list>
+						</#if>
+					</tbody>
+				</table>
+			</div>
+			<#if page.result?size lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<@fm.page page=page />
+		</div>
+	</div>
+	
+	<div id="able_user" class="pop" style="display: none; width: 280px;">
+		<div class="pop_close">X</div>
+		<div class="pop_limit">
+			<div class="pop_title">启用用户</div>
+			<div class="pop_content blank">确定要启用所选用户吗？</div>
+			<div class="pop_btn">
+				<input type="hidden" id="status" value="1" />
+				<button type="button" class="btn primary xs" onclick="able()">确定</button>
+				<button type="button" class="btn default xs" onclick="close_pop()">取消</button>
+			</div>
+		</div>				
+	</div>
+	
+	<script type="text/javascript">
+	$(document).ready(function() {
+			$("#corpId").select({ "name": "corpId" });
+			$("#subjectId").select({ "name": "subjectId" });
+		});
+		
+		<#if myCorpId??>
+		function open_able(id, status) {
+			if (id) {
+				get_checked(id);
+			}
+			var before = status == 1 ? "禁用" : "启用";
+			var after = status == 1 ? "启用" : "禁用";
+			$(".pop_title").text($(".pop_title").text().replace(before, after));
+			$(".pop_content").text($(".pop_content").text().replace(before, after));
+			$("#status").val(status);
+			open_pop(null,null,"#able_user",true);
+		}
+		
+		function able() {
+			var status = $("#status").val();
+			ajax_checked("请选择需要" + (status == 1 ? "启用" : "禁用") + "的用户", "able?&status=" + status + "&token=${token}");
+			close_pop();
+		}
+		</#if>
+		
+	</script>
+</body>
+</html>

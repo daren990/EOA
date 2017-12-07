@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 考勤记录</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.css" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/css/mobiscroll.custom-2.5.0.min.css">
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/js/mobiscroll.custom-2.5.0.min.js"></script>
+	<style type="text/css">
+	.ui-input-text{width: 105px;}
+	</style>
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<div id="left" class="left">
+				<form id="search" action="wxpage2" method="get">
+					<table>
+						<tr>
+							<td>日期</td>
+							<td><input type="text" data-role="datebox" name="startTime" value="${mb.startTime}" readonly="readonly" placeholder="请选择开始时间" class="datainput" placeholder="请输入开始时间" /></td>
+							<td><input type="text" data-role="datebox" name="endTime" value="${mb.endTime?default('')}" readonly="readonly" placeholder="请选择结束时间" class="datainput" placeholder="请输入结束时间" /></td>
+						</tr>
+						<tr>
+							<td style="text-align: right;">姓名:<input type="hidden" name="userId" value="${mb.userId}" /></td>
+							<td colspan="2">
+								<input type="hidden" name="userId" value="${mb.userId}" />
+								<div id="userId" class="select sm" style="width: 80px">
+									<span class="option text">请选择</span><span class="icon"></span>
+									<ul class="auto_height sm">
+									<#list users as e>
+										<li item="${e.userId}">${e.trueName}</li>
+										</#list>
+									</ul>
+								</div>
+								<button type="submit" class="ui-btn ui-btn-inline">搜索</button>
+							</td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+			<#if attendances?? && attendances?size gt 0>
+			<#list attendances as e>
+				<div class="contentdata">
+					<ul data-role="listview" data-inset="true">
+						<li data-role="list-divider">${views.fmt(e.workDate, "yyyy-MM-dd（E）")}</li>
+						<li>
+							<a href="javascript:open_pop('add?userId=${e.userId}&workDate=${e.workDate?date}',null,'#atendance_pop',true)">
+								<h2>姓名:${e.trueName}</h2>
+								<p><strong>上午打卡时间:${e.checkedIn} | 下午打卡时间:${e.checkedOut}</strong></p>
+								<p><strong>上午状态:${e.remarkedIn?default(e.remarkIn)} | 下午状态:${e.remarkedOut?default(e.remarkOut)}</strong></p>
+								<p><strong>时长:<#if e.minute gt 0>${views.hour(e.minute)}&nbsp;小时<#else>-</#if></strong></p>
+							</a>
+						</li>
+					</ul>
+				</div>
+			</#list>
+			</#if>
+			<#if !attendances?? || attendances?size lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<div id="page" class="clearfix">
+				<div class="left">
+					<span>共<#if attendances?? && attendances?size gt 0>${attendances?size}<#else>0</#if>条记录</span>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div id="atendance_pop" class="pop" style="display: none; width: 318px;"></div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			jQuery.mobile.ajaxEnabled = false;
+			var opt = {
+		        preset: 'date', //日期
+		        display: 'modal', //显示方式 
+		        dateFormat: 'yy-mm-dd', // 日期格式
+		        setText: '确定', //确认按钮名称
+		        cancelText: '取消',//取消按钮名籍我
+		        dateOrder: 'yymmdd', //面板中日期排列格式
+		        dayText: '日', monthText: '月', yearText: '年', //面板中年月日文字
+		        endYear:2020 //结束年份
+		    };
+			$('input:jqmData(role="datebox")').mobiscroll().date(opt);
+			
+			$("#userId").select({ "name": "userId" });
+			
+		});
+	</script>
+</body>
+</html>

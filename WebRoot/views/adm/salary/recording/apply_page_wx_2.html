@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 补录申请查询</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.css" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile.theme-1.4.5.min.css" />
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/layer.m/layer.m.js"></script>
+	<style type="text/css">
+	#technolog-popup{border: none}
+	.table{width: 250px;}
+	.go{display: none;}
+	</style>
+</head>
+<body>
+	<div data-role="header">
+		<a href="wxpage" data-ajax="false" data-role="button" data-icon="recycle">刷新</a>
+		<h1>补录申请查询</h1>
+		<a href="wxadd" data-ajax="false" data-role="button" data-icon="plus" data-iconpos="right">申请</a>
+	</div>
+	<div class="content">
+		<div class="contentData" >
+			<#if page.result?size gt 0>
+				<#list page.result as e>
+					<ul data-role="listview" data-inset="true">
+						<li data-role="list-divider"><input type="hidden" name="checkedIds" value="${e.recordingId}">申请时间: <#if e.createTime??>${e.createTime?datetime}</#if><p class="ui-li-aside"><strong><a href="javascript:open_del('${e.recordingId}');" title="删除"><span class="icons icon_del"></span></a></strong></p></li>
+					    <li>
+						    <a href="wxadd?recordingId=${e.recordingId}" class="applya"><h2>${e.subject}</h2></a>
+						    <a href="#technolog" data-transition="slidedown" data-rel="popup" id="${i}" class="actors" item="${e.recordingId}" title="流程日志"><span id="actors_${i}" class="icons icon_log"></span></a>
+						    <input type="hidden" class="outworkVal" value="${e.recordingId}" />
+					    </li>
+					</ul>
+				</#list>
+			</#if>
+		</div>
+		<#if page.result?size lt 1>
+		<div class="empty">没有数据</div>
+		</#if>
+		<@fm.page page=page />
+	</div>
+	
+	<div data-role="popup" id="technolog" class="ui-content">
+		<a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+		<table class="table">
+		</table>
+	</div>
+	
+	<div id="actors_pop" class="pop bind" style="display: none; width: 278px;">
+		<div class="pop_content" style="padding: 0;">
+			<div class="auto_height xl">
+		   		<table class="table">
+		   		</table>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#approve").select({ "name": "approve" });
+			$("a.actors").click(function() {
+				close_pop();
+				var id = $(this).attr("item");
+				var _id = "#actors_"+$(this).attr("id");
+				actors(id);
+				open_pop(null,_id,"#actors_pop",false);
+				return false;
+ 			});
+ 			
+ 			$(".apply").click(function(){
+ 				window.location.href="wxadd";
+ 			});
+ 			
+ 			$(".applya").click(function(){
+ 				var outworkId = $(this).siblings(".outworkVal").val();
+ 				window.location.href="wxadd?recordingId="+outworkId;
+ 			});
+		});
+		function open_del(id) {
+			if (id) {
+				get_checked(id);
+			}
+			layer.open({
+				content:"确定删除吗？",
+				btns:2,
+				btn:["确定","取消"],
+				yes:function(){
+					$.ajax({
+						url:"del",
+						type:"post",
+						data:{"token":"${token}","checkedIds":id},
+						dataType:"json",
+						success:function(data){
+							if(data.code == 0){
+								layer.open({
+									content:data.message
+								});
+							}else if(data.code == 1){
+								layer.open({
+									content:data.message,
+									time:5
+								});
+								setTimeout(function(){
+									window.location.reload();
+								},6);
+							}
+						}
+					});
+				}
+			});
+		}
+		function del() {
+			ajax_checked("请选择需要删除的s外勤申请", "del?token=${token}","wxpage");
+			close_pop();
+		}
+		function actors(id) {
+			$.ajax({
+				url: "/adm/salary/recording/approve/actors?recordingId=" + id + "&token=${token}",
+				type: "post",
+				dataType: "json",
+				success: function(data) {
+					if (data.code == 1) {
+						$("#actors_pop .table").empty();
+						$(".add").remove();
+						var text = "";
+						text += "<tr>";
+						text += "<th>操作人</th><th>操作内容</th><th>审批意见</th><th>操作时间</th>";
+						text += "</tr>";
+						$.each(data.actors, function(idx, obj) {
+							var approve = "";
+							var modifyTime = obj.modifyTime.substring(0, 16);
+							if (obj.approve == 1) {
+								approve = "已批准";
+							} else if (obj.approve == -1) {
+								approve = "未批准";
+							} else {
+								approve = "待批准";
+								modifyTime = "-";
+							}
+							
+							text += "<tr>";
+							text += "<td>" + obj.actorName + "</td>";
+							text += "<td>" + approve + "</td>";
+							text += "<td>" + obj.opinion + "</td>";
+							text += "<td>" + modifyTime + "</td>";
+							text += "</tr>";
+							var tableData = "<tr class='add'><td>操作人:" + obj.actorName + "</td><td>操作内容:" + approve + "</td></tr><tr class='add'><td colspan='2' style='border-bottom:1px solid #CCC'>"+obj.actorName+"审批意见:" + obj.opinion + "</td></tr>";
+							$(".table").append(tableData);
+						});
+						$("#actors_pop .table").append(text);
+					} else {
+						danger(1, data.message);
+					}
+				}
+			});
+		}
+	</script>
+</body>
+</html>

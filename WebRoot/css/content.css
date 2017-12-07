@@ -1,0 +1,354 @@
+body,a {
+	color: #716b7a;
+}
+
+input[type="checkbox"] {
+	vertical-align: middle;
+	margin: 4px 2px 4px 0;
+}
+
+.common_history_btn{
+	padding:3px;
+	border-radius: 2px;
+	border: 2px solid #ddd;
+}
+
+/******************** header ********************/
+#path {
+	font-size: 15px;
+	border-top: 2px solid #5081B6;
+	padding: 6.5px 12px 5.5px 12px;
+	border-bottom: 2px solid #8ebe00;
+	background-color: #eeeeee;
+	font-weight: bolder;
+}
+
+#header.blank {
+	padding-top: 6px;
+}
+
+#header #components {
+	padding: 6px 12px 8px 12px;
+	height: 20px;
+}
+
+#header #left .split,#header #right .split {
+	padding-top: 4px;
+	float: left;
+	color: #a9b2b8;
+}
+
+#header #components a {
+	margin: 0 4px;
+	padding: 4px 6px;
+	border: 1px solid #eeeeee;
+	color: #005588;
+	float: left;
+}
+
+#header #right li {
+	list-style-type: none;
+	height: 26px;
+	line-height: 24px;
+	float: left;
+}
+
+#header #right .select li {
+	float: none;
+}
+
+#header #right li.text {
+	margin-left: 6px;
+	padding: 0 6px;
+	border: 1px solid #c5cfd7;
+	border-right: 0;
+	background-color: #f5f5f5;
+	height: 24px;
+}
+
+#header #right li input[type="text"],#header #right li .select {
+	border-left: 0;
+}
+
+#header #right li input[type="text"].Wdate {
+	border-left: 1px solid #c5cfd7;
+}
+
+#header #right li button {
+	margin-left: 6px;
+}
+
+#header #components a:hover {
+	border: 1px solid #dddddd;
+	background-color: white;
+}
+
+#header #sub_link {
+	padding: 16px 12px 0 12px;
+	height: 17px;
+}
+
+#header #sub_link li {
+	list-style: none;
+	float: left;
+}
+
+#header #sub_link a {
+	padding: 6px 18px;
+	border: 1px solid #c5cfd7;
+	border-top-width: 1px;
+	border-bottom-width: 1px;
+	background-color: #dddddd;
+	font-size: 12px;
+}
+
+#header #sub_link a.active,#header #sub_link a:hover,#header #sub_link a.active:hover
+	{
+	border: 1px solid #c5cfd7;
+	background-color: white;
+	color: #004080;
+}
+
+/******************** wrapper ********************/
+#wrapper {
+	margin-top: 4px;
+	padding: 0 12px;
+}
+
+#wrapper .content {
+	border: 1px solid #c5cfd7;
+	background-color: white;
+}
+
+.content .table {
+	width: 100%;
+	line-height: 26px;
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+.content .table_head {
+	background-color: #ddd;
+}
+
+.content .table th {
+	line-height: 28px;
+}
+
+.content .table tr.tr_hover {
+	background-color: #d9edf7;
+}
+
+.content .table th,.content .table td {
+	overflow: hidden;
+	white-space: nowrap;
+}
+
+.content .table th {
+	text-align: center;
+	border: 1px solid white;
+}
+
+.content .table td {
+	padding: 0 0 0 14px;
+	text-align: left;
+}
+
+.content .table th {
+	background-color: #dddddd;
+}
+
+.content .table td {
+	border-bottom: 1px solid #dddddd;
+}
+
+.content .empty {
+	border-bottom: 1px solid #dddddd;
+	padding: 38px 0;
+	border-top: 0;
+	text-align: center;
+}
+
+.content #page {
+	height: 34px;
+	background-color: #eee;
+	font-size:1em;
+}
+
+.content .left,.content .right {
+	margin: 4px 0 0 4px;
+	height: 26px;
+	line-height: 26px;
+}
+
+.content .right li {
+	margin: 0 4px;
+	float: left;
+	list-style: none;
+	height: 26px;
+	line-height: 26px;
+ 	/* border:2px solid #9e9e9e;
+	border-radius:5px;
+	background:#fff;
+	padding:0 1vw;
+	font-size:0.8em; */ 
+}
+
+.content .right li a:hover {
+	color: #005588;
+}
+
+.content .right li.go {
+	line-height: 14px;
+}
+
+#wrapper .edit {
+	border: 1px solid #c5cfd7;
+}
+
+#wrapper .blank {
+	margin-top: 42px;
+}
+
+.edit #form {
+	margin: 24px auto;
+}
+
+#form tr {
+	height: 36px;
+}
+
+#form td.required {
+	width: 8px;
+}
+
+.required {
+	color: red;
+}
+
+#form td.pos {
+	vertical-align: top;
+	padding-top: 12px;
+}
+
+/******************** pop ********************/
+.pop {
+	position: absolute;
+	border: 1px solid #3e74ae;
+	background-color: #fff;
+	z-index: 2;
+}
+
+.pop .pop_title {
+	padding: 0 10px;
+	border: 1px solid #3e74ae;
+	border-bottom: 0;
+	height: 28px;
+	line-height: 26px;
+	font-weight: bolder;
+	color: #fff;
+	background-color: #3e74ae;
+	cursor: move;
+}
+
+.pop .pop_tips {
+	padding: 8px 0 0 14px;
+	background-color: #ebebe4;
+	min-height: 18px;
+}
+
+.pop .pop_close {
+	position: absolute;
+	right: 6px;
+	top: 5px;
+	height: 16px;
+	width: 14px;
+	text-align: center;
+	cursor: pointer;
+	font-size: 14px;
+	font-weight: bolder;
+	color: #cdbfe3;
+}
+
+.pop .pop_close:hover {
+	color: #a1c5e5;
+}
+
+.pop .pop_content.blank {
+	padding: 14px;
+}
+
+.pop .pop_btn {
+	padding: 2px;
+	background-color: #efefef;
+	text-align: right;
+}
+
+.pop .table {
+	width: 100%;
+	line-height: 24px;
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+.pop .table th {
+	line-height: 24px;
+}
+
+.pop .table tr.tr_hover {
+	background-color: #d9edf7;
+}
+
+.pop .table th,.pop .table td {
+	overflow: hidden;
+	white-space: nowrap;
+	height: 24px;
+}
+
+.pop .table th {
+	text-align: center;
+	border: 1px solid white;
+}
+
+.pop .table td {
+	padding: 0 0 0 2px;
+	text-align: center;
+}
+
+.pop .table th {
+	background-color: #dddddd;
+}
+
+.pop .table td {
+	border-bottom: 1px solid #dddddd;
+}
+
+.pop .form tr {
+	height: 36px;
+}
+
+.pop td.required {
+	width: 8px;
+}
+
+.pop td.pos {
+	vertical-align: top;
+	padding-top: 12px;
+}
+
+.pop ul.checked {
+	margin: 4px 0;
+}
+
+.pop .checked li {
+	padding: 2px 12px;
+	list-style: none;
+}
+
+.pop .checked li:hover {
+	background-color: #d9edf7;
+}
+
+.pop .checked li span {
+	padding-left: 4px;
+}

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: <#if process.id??>编辑<#else>新建</#if>流程定义设计</title>
+	<#include "/views/css.html" />
+	<link href="${ctx}/css/workflow.css" rel="stylesheet">
+	<script type="text/javascript" src="${ctx}/js/raphael-min.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery-1.7.2.min.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery-ui-1.8.4.custom.min.js"></script>
+	<script type="text/javascript" src="${ctx}/js/workflow/snaker.designer.js"></script>
+	<script type="text/javascript" src="${ctx}/js/workflow/snaker.model.js"></script>
+	<script type="text/javascript" src="${ctx}/js/workflow/snaker.editors.js"></script>
+	<script type="text/javascript" src="${ctx}/js/common.js?${version}"></script>
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header" class="blank">
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div class="edit auto_height" style="background-color: white;">
+			<div id="tools">
+				<div id="title">工具集</div>
+				<ul>
+					<li class="node" id="save"><img src="${ctx}/img/workflow/save.png"><span>保存</span></li>
+					<li class="line"></li>
+					<li class="node select_able" id="pointer"><img src="${ctx}/img/workflow/select.png"><span>选定</span></li>
+					<li class="node select_able" id="sequence"><img src="${ctx}/img/workflow/16/sequence.png"><span>transition</span></li>
+					<li class="line"></li>
+					<li class="node state" id="start" type="start"><img src="${ctx}/img/workflow/16/start.png"><span>start</span></li>
+					<li class="node state" id="end" type="end"><img src="${ctx}/img/workflow/16/end.png"><span>end</span></li>
+					<li class="node state" id="task" type="task"><img src="${ctx}/img/workflow/16/task.png"><span>task</span></li>
+					<li class="node state" id="custom" type="custom"><img src="${ctx}/img/workflow/16/task.png"><span>custom</span></li>
+					<li class="node state" id="subprocess" type="subprocess"><img src="${ctx}/img/workflow/16/task.png"><span>subprocess</span></li>
+					<li class="node state" id="decision" type="decision"><img src="${ctx}/img/workflow/16/exclusive.png"><span>decision</span></li>
+					<li class="node state" id="fork" type="fork"><img src="${ctx}/img/workflow/16/parallel.png"><span>fork</span></li>
+					<li class="node state" id="join" type="join"><img src="${ctx}/img/workflow/16/parallel.png"><span>join</span></li>
+				</ul>
+			</div>
+			<div id="props">
+				<div id="title">属性</div>
+				<table id="table"></table>
+			</div>
+			<div id="content" style="margin: -64px 0 0 0;"></div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(function() {
+			var json = "${content}";
+			var model;
+			if (json) {
+				model = eval("(" + json + ")");
+			} else {
+				model = "";
+			}
+			$('#content').snakerflow({
+				basePath: "${ctx}/",
+				restore: model,
+				tools: {
+					save: {
+						onclick: function(data) {
+							saveModel(data);
+						}
+					}
+				}
+			});
+		});
+		
+		function saveModel(data) {
+			$.ajax({
+				url: "design",
+				data: "processId=${process.id}&model=" + data + "&token=${token}",
+				type: "POST",
+				dataType: "json",
+				success: function(data) {
+					if (data.code == 1) {
+ 						success_callback(data, "page");
+					} else {
+						danger_callback(data);
+					}
+				},
+				error: function() {
+					danger(1, "流程定义设计失败");
+					disabled_off();
+					return false;
+				}
+			});
+		}
+	</script>
+</body>
+</html>

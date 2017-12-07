@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 工资查询</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+</head>
+<body>
+	<div id="path"></div>
+	<div id="header">
+		<div id="components" class="clearfix">
+			<div id="right" class="right">
+				<form id="search" action="page" method="get">
+					<input type="hidden" name="pageSize" value="${page.pageSize}">
+					<input type="hidden" name="pageNo" value="${page.pageNo}">
+					<ul>
+						<li class="text">姓名</li>
+						<li><input type="text" class="input sm" name="trueName" value="${mb.trueName}" /></li>
+						<li><button type="button" class="btn primary xxs" onclick="search()">搜索</button></li>
+					</ul>
+				</form>
+			</div>
+		</div>
+		<div class="message"></div>
+	</div>
+	
+	<div id="wrapper" class="clearfix">
+		<div class="content">
+			<div class="table_head">
+				<table class="table">
+					<thead>
+						<tr>
+							<th width="120" rowspan="2">姓名</th>
+							<th width="6%">标准工资</th>
+							<th width="6%">岗位工资</th>
+							<th width="6%">绩效工资</th>
+							<th width="5%">奖励工资</th>
+							<th width="5%">工龄奖</th>
+							<th width="5%">通信补贴</th>
+							<th width="5%">油费补贴</th>
+							<th width="5%">高温补贴</th>
+							<th width="5%">伙食补贴</th>
+							<th width="5%">加班补贴</th>
+							<th width="5%">生育险</th>
+							<th width="6%">住房补贴</th>
+							<th width="5%">个人所得税</th>
+							<th width="5%">社保补贴</th>
+							<th width="5%">社保扣除</th>
+							<th width="5%">状态</th>
+							<th width="10%">生效时间</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+			<div class="table_body auto_height">
+				<table class="table">
+					<tbody>
+						<#if page.result?size gt 0>
+							<#list page.result as e>
+						<tr>
+							<td width="106">${e.trueName}</td>
+							<td width="6%">${views.rmb(e.standardSalary)?string("0.##")}</td>
+							<td width="6%">${views.rmb(e.postSalary)?string("0.##")}</td>
+							<td width="6%">${views.rmb(e.performSalary)?string("0.##")}</td>
+							<td width="5%">${views.rmb(e.rewardSalary)?string("0.##")}</td>
+							<td width="5%">${views.rmb(e.serviceAward)?string("0.##")}</td>
+							<td width="5%">${views.rmb(e.communicationAllowance)?string("0.##")}</td>
+							<td width="5%">${views.rmb(e.oilAllowance)?string("0.##")}</td>
+							<td width="5%">${views.rmb(e.heatingAllowance)?string("0.##")}</td>
+							<td width="5%">${views.rmb(e.mealAllowance)?string("0.##")}</td>
+							<td width="5%">${views.rmb(e.overtimeAllowance)?string("0.##")}</td>
+							<td width="5%">${views.rmb(e.maternityInsurance)?string("0.##")}</td>
+							<td width="6%">${views.rmb(e.housingSubsidies)?string("0.##")}</td>
+							<td width="5%">${views.rmb(e.tax)?string("0.##")}</td>
+							<td width="5%">${views.rmb(e.socialSecurity)?string("0.##")}</td>
+							<td width="5%">${views.rmb(e.socialSecurityDeduction)?string("0.##")}</td>
+							<#assign status="禁用"/>
+							<#if e.status = 2>
+							<#assign status="过渡工资"/>
+							</#if>
+							<td width="5%">${status}</td>
+							<td>
+								${views.fmt(e.effectTime, "yyyy-MM-dd（E）")}
+							</td>
+						</tr>
+							</#list>
+						</#if>
+					</tbody>
+				</table>
+			</div>
+			<#if page.result?size lt 1>
+			<div class="empty">没有数据</div>
+			</#if>
+			<@fm.page page=page />
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		window.onload = window.onresize = function() {
+			var all = $(window).height();
+			var a = $("#path").height();
+			var b = $("#header").height();
+			$(".table_body.auto_height").css("max-height", all - a - b - 132 + "px");
+		}
+	</script>
+</body>
+</html>

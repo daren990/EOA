@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<#include "/views/meta.html" />
+	<title>${pageTitle} :: 考勤查询</title>
+	<#include "/views/css.html" />
+	<#include "/views/js.html" />
+	
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.css" />
+	<link rel="stylsheet" type="text/css" href="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile.theme-1.4.5.min.css" />
+	<link rel="stylesheet" type="text/css" href="${ctx}/jw_js_css_img/iCalendar/css/lCalendar.css" />
+	
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/jqm/jQueryMobile/jquery.mobile-1.4.5.min.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/layer.m/layer.m.js"></script>
+	<script type="text/javascript" src="${ctx}/jw_js_css_img/iCalendar/js/lCalendar.js"></script>
+	<style type="text/css">
+	.go{display: none}
+		
+	#iCalendar {
+		display:inline-block;
+		width: 100%;
+		height: 30px;
+		font-size: 12px;
+		border: 1px solid #19b5ee;
+		border-radius: 5px;
+	} 
+	</style>
+</head>
+<body>
+	<div data-role="page">
+		<div data-role="header">
+			<h2>考勤查询</h2>
+		</div>
+		
+		<div style="text-align:center;vertical-align:middle;">
+			<input value="${mb.year}-${mb.month}" id="iCalendar" type="text" readonly="" name="input_date" placeholder="点击选择日期" data-lcalendar="2011-01-1,2025-12-31" />
+			<a href="#" id="dateBtn" style="display:inline-block;color:#fff;height:27px;line-height:25px;border:1px #eee solid;background:#72b0e2;padding:1px 10px;border-radius:5px;">搜索</a>
+		</div>
+		
+		<div id="wrapper" class="clearfix" style="margin-top: 0px;padding: 0px;">
+			<div class="form-group">
+				
+				<!-- <form id="search" action="wxpage" method="get">
+					<div class="col-xs-7" style="text-align:center;">
+						<span>年份</span>
+						<span><@fm.year name="year" year=mb.year?default(mb.years) arr=(mb.years-3)..(mb.years+1) /></span>
+						<span>月份</span>
+						<span><@fm.month name="month" month=mb.month?default(mb.months) /></span>
+						<span><button type="submit" class="btn primary xxs" data-role="none" style="width:50px;">搜索</button></span>
+					</div>
+				</form> --> 
+			</div>
+			<div class="content">
+				<div class="contentdata">
+					<#if attendances?? && attendances?size gt 0>
+						<#list attendances as e>
+							<ul data-role="listview" data-inset="true">
+								<li data-role="list-divider">${e.trueName}</li>
+								<li style="background-color: #f6f6f6;border-color: #ddd;color: #333;text-shadow: 0 1px 0 #f3f3f3;">
+									
+									<p><strong>打卡日期:${views.fmt(e.workDate, "yyyy-MM-dd（E）")}</strong></p>
+									<p><strong>上午打卡时间:${e.checkedIn}</strong></p>
+									
+									<p><strong>上午状态:<!-- ${e.remarkedIn?default(e.remarkIn)} -->
+										<#if e.remarkIn == '' || e.remarkIn == '正常' || e.remarkOut == '公休'>${e.remarkedIn?default(e.remarkIn)}<#else><span style="margin:0 1vw;padding:0 2vw;font-size:0.6em;color:#fff;background:#f38b06;border:1px solid #eee;border-radius:2rem;">${e.remarkedIn?default(e.remarkIn)}</span></#if>
+									</strong></p>
+									<p><strong>下午打卡时间:${e.checkedOut}</strong></p>
+									<p><strong>下午状态:<!-- ${e.remarkedOut?default(e.remarkOut)} -->
+										<#if e.remarkOut == '' || e.remarkOut == '正常' || e.remarkOut == '公休'>${e.remarkedOut?default(e.remarkOut)}<#else><span style="margin:0 1vw;padding:0 2vw;font-size:0.6em;color:#fff;background:#f38b06;border:1px solid #eee;border-radius:2rem;">${e.remarkedOut?default(e.remarkOut)}</span></#if>
+									</strong></p>
+									<#if (e.remarkIn != '' && e.remarkIn != '正常' && e.remarkIn != '公休' ) || (e.remarkOut != '' && e.remarkOut != '正常' && e.remarkOut != '公休') || (e.checkedIn == '' && e.remarkIn != '公休' ) || (e.checkedOut == '' && e.remarkOut != '公休')>
+									<p style="float:left;position:relative;left:50%;transform:translateX(-50%);">
+									   <a href="${ctx}/adm/salary/recording/apply/wxadd" style="display:inline-block;width:15%;margin:0 1vw;padding:1vw 1vw;text-align:center;border:1px solid #eee;font-size:1rem;background:#d8d6d6;border-radius:0.4rem;">补卡</a>
+									   <a href="${ctx}/adm/salary/leave/apply/wxadd" style="display:inline-block;width:15%;margin:0 1vw;padding:1vw 1vw;text-align:center;border:1px solid #eee;font-size:1rem;background:#d8d6d6;border-radius:0.4rem;">请假</a>
+									   <a href="${ctx}/adm/salary/outwork/apply/wxadd" style="display:inline-block;width:15%;margin:0 1vw;padding:1vw 1vw;text-align:center;border:1px solid #eee;font-size:1rem;background:#d8d6d6;border-radius:0.4rem;">外勤</a>
+									   <a href="${ctx}/adm/salary/errand/apply/wxadd" style="display:inline-block;width:15%;margin:0 1vw;padding:1vw 1vw;text-align:center;border:1px solid #eee;font-size:1rem;background:#d8d6d6;border-radius:0.4rem;">出差</a>
+									</p>
+									</#if>
+																		
+								</li>
+							</ul>
+						</#list>
+					</#if>
+				</div>
+				<#if !attendances?? || attendances?size lt 1>
+				<div class="empty">没有数据</div>
+				</#if>
+				<div id="page" class="clearfix">
+					<div class="left">
+						<span>共<#if attendances?? && attendances?size gt 0>${attendances?size}<#else>0</#if>条记录</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+		var calendar = new lCalendar();
+		calendar.init({
+			'trigger': '#iCalendar',
+			'type': 'date'
+		});
+		$(document).ready(function(){
+			$("#iCalendar").parent().css("display","inline-block");
+			
+			var year;
+			var month;
+			$("#dateBtn").on("touchend",function(){
+				var date= $("#iCalendar").val();
+				year=date.slice(0,4);
+				month=date.slice(5);
+				location.href = location.pathname+"?"+"year="+year+"&"+"month="+month;
+			});
+			
+			jQuery.mobile.ajaxEnabled = false;
+			$("#year").select({ "name": "year" });
+			$("#month").select({ "name": "month" });
+		})
+/* 		 $(document).ready(function() {
+			jQuery.mobile.ajaxEnabled = false;
+			$("#year").select({ "name": "year" });
+			$("#month").select({ "name": "month" });
+		}); */
+		
+		function download() {
+			var year = $("input[name=year]").val();
+			var month = $("input[name=month]").val();
+			if (!year) {
+				danger(1, "请选择年份");
+				return;
+			}
+			if (!month) {
+				danger(1, "请选择月份");
+				return;
+			}
+			var param = "";
+			param += "year=" + year;
+			param += "&month=" + month;
+			location.assign("download?" + param);
+		} 
+	</script>
+</body>
+</html>

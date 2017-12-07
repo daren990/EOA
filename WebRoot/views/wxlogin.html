@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>欢迎登录</title>
+    <script type="text/javascript" src="${ctx}/js/jquery-1.7.2.min.js"></script>
+	<script type="text/javascript" src="${ctx}/js/jquery.form-3.17.js"></script>
+	<script type="text/javascript" src="${ctx}/js/common.js?${version}"></script>
+	<script type="text/javascript" src="${ctx}/js/validator.js?${version}"></script>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+    <meta http-equiv="description" content="this is my page">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <style type="text/css">
+    body{background: url(../img/microBg.png) no-repeat;}
+    h1{font-size: 28px;width: 290px;margin-left: auto;margin-right: auto;margin-top: 40px;color: white;}
+    .ren{width: 300px;height: 271px;background: url(../img/ren.png);margin-left: auto;margin-right: auto;}
+    .contentUP{margin-left: 30px;width: 200px;float: left;margin-top: 30px;}
+    .username{background: url(../img/username.png) no-repeat; width: 200px;height: 29px;}
+    .pwd{background: url(../img/psw.png) no-repeat;width: 200px;height: 26px;margin-top: 20px;}
+    #name{margin-left: 35px;margin-top: 4px;border: none; background: none transparent scroll repeat 0% 0%; }
+    #password{margin-left: 35px;margin-top: 4px;border: none; background: none transparent scroll repeat 0% 0%; }
+    .checkMe{width: 200px;margin-left: 30px;margin-top: 15px;float: left;font-family: "微软雅黑"}
+    .login{background: url(../img/login.png) no-repeat;width: 90px;height: 24px;border: none;margin-left: 15px;}
+    </style>
+  </head>
+  <body>
+  	<h1>和德集团移动办公系统</h1>
+  	<form action="${ctx}/wxlogin" method="post">
+  	<input type="hidden" name="token" value="${token}">
+	  	<div class="ren">
+	  		<div class="contentUP">
+	  			<div class="error">
+						<span class="icons icon_danger hide"></span>
+						<label></label>
+				</div>
+		  		<div class="username"><input type="text" name="username" id="name" value="${uid}"/></div>
+		  		<div class="pwd"><input type="password" name="password" id="password" /></div>
+		  	</div>
+	  		<div class="checkMe">
+	  			<#if remember_me?? && remember_me>
+							<#assign checked = "checked='checked'" />
+				</#if>
+	  			<input type="checkbox" name="remember_me" id="check" value="true" ${checked?default("")}/>记住我
+	  			<input type="submit" value="" class="login" />
+	  		</div>
+	  	</div>
+  	</form>
+  	
+  		<script type="text/javascript">
+		$(document).ready(function() {
+			$("form").ajaxForm({
+				url: "/wxlogin",
+				type: "post",
+				resetForm: false,
+				dataType: "json",
+				timeout: 15000,
+				beforeSubmit: function(formData, jqForm, options) {
+					error(0);
+					disabled_on();
+					var form = jqForm[0];
+					try {
+						validate(form.username, [RQ, RANGE, "{2,60}"], "用户名");
+						validate(form.password, [RQ, RANGE, "{4,32}"], "密码");
+					} catch(err) {
+						error(1, err);
+						disabled_off();
+						return false;
+					}
+				},
+				success: function(data) {
+					if (data.code == 1) {
+						location.assign("${url}");
+					} else {
+						error_callback(data);
+					}
+				},
+				error: function() {
+					error(1, "登录超时");
+					disabled_off();
+				}
+			});
+		});
+	</script>
+  	
+  </body>
+</html>
